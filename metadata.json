@@ -1,0 +1,6 @@
+{
+  "name": "Library Management SaaS",
+  "description": "Multi-tenant library management workspace focusing on secure authentication and branch scope access.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
