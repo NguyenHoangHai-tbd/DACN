@@ -1,11 +1,13 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 
 import { useAuthStore } from './features/auth/store/authStore';
 import { LoginForm } from './features/auth/components/LoginForm';
 import { AdminDashboard } from './features/admin/pages/AdminDashboard';
+import { LandingPage } from './features/landing/pages/LandingPage';
+import { GlobalRealtimeProvider } from './shared/signalr/components/GlobalRealtimeProvider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +31,7 @@ function MainApp() {
 
   return (
     <Routes>
+      <Route path="/landing" element={<LandingPage />} />
       <Route 
         path="/login" 
         element={
@@ -38,24 +41,26 @@ function MainApp() {
       <Route 
         path="/" 
         element={
-          <ProtectedRoute>
-            <AdminDashboard />
-          </ProtectedRoute>
+          isAuthenticated ? (
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          ) : (
+            <LandingPage />
+          )
         } 
       />
     </Routes>
   );
 }
 
-import { GlobalRealtimeProvider } from './shared/signalr/components/GlobalRealtimeProvider';
-
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <GlobalRealtimeProvider>
-           <Toaster position="top-center" richColors />
-           <MainApp />
+          <Toaster position="top-center" richColors />
+          <MainApp />
         </GlobalRealtimeProvider>
       </BrowserRouter>
     </QueryClientProvider>

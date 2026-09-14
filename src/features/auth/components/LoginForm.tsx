@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { BookMarked, Eye, EyeOff, Loader2, Building, User, Lock, Zap } from 'lucide-react';
+import { BookMarked, Eye, EyeOff, Loader2, Building, User, Lock, Zap, ArrowLeft } from 'lucide-react';
 
 import { loginSchema, LoginFormData } from '../schemas';
 import { authService } from '../services/authService';
@@ -27,6 +28,7 @@ const normalizeUiRole = (apiRole?: string): string => {
 };
 
 export const LoginForm: React.FC = () => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const setAuth = useAuthStore(state => state.setAuth);
   const [showPassword, setShowPassword] = useState(false);
@@ -95,6 +97,15 @@ export const LoginForm: React.FC = () => {
       <div className="w-full max-w-[960px] bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden grid grid-cols-1 lg:grid-cols-2">
         {/* Left Column: Login Form */}
         <div className="p-6 lg:p-8 space-y-6">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600 transition-colors group cursor-pointer"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+            <span>Về trang chủ Thư viện TBD</span>
+          </button>
+
           <header className="space-y-1">
             <h1 className="text-2xl font-extrabold text-slate-900">Hệ thống quản lý thư viện</h1>
             <p className="text-slate-500">Đăng nhập để sử dụng hệ thống demo</p>
