@@ -125,25 +125,27 @@
   }
   body {
     @apply bg-background text-foreground;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
+    min-height: 100vh;
     margin: 0;
     padding: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
   html {
     @apply font-sans;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
+    min-height: 100vh;
     margin: 0;
     padding: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
   #root {
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
+    min-height: 100vh;
   }
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none;
 }
 
 /* Custom scrollbars for Webkit browsers */
