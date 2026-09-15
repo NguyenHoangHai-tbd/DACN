@@ -61,11 +61,13 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
 
   // Filter options based on query
   const filteredOptions = searchQuery
-    ? options.filter(opt =>
-        opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        opt.value.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (opt.description && opt.description.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
+    ? options.filter(opt => {
+        const query = (searchQuery || '').toLowerCase();
+        const label = String(opt?.label || '').toLowerCase();
+        const val = String(opt?.value || '').toLowerCase();
+        const desc = opt?.description ? String(opt.description).toLowerCase() : '';
+        return label.includes(query) || val.includes(query) || desc.includes(query);
+      })
     : options;
 
   const handleSelect = (val: string) => {

@@ -259,7 +259,7 @@
   "auth": {
     "login": {
       "title": "Hệ thống quản lý thư viện",
-      "subtitle": "Đăng nhập để sử dụng hệ thống demo",
+      "subtitle": "Cổng thông tin & học liệu số Trường Đại học Thái Bình Dương (TBD)",
       "username_placeholder": "Nhập tên đăng nhập hoặc mã thẻ",
       "password_placeholder": "Mật khẩu",
       "tenant_placeholder": "Chọn thư viện / chi nhánh",
@@ -289,10 +289,10 @@
     "member": "Member - Độc giả",
     "ai_suggestion": "AI gợi ý phân quyền",
     "four_role_model": "Mô hình 4 vai trò",
-    "demo_flow": "Luồng demo phân quyền",
-    "login_as": "Vai trò demo",
+    "demo_flow": "Phân quyền hệ thống",
+    "login_as": "Vai trò hiện tại",
     "unauthorized": "Bạn không có quyền truy cập",
-    "unauthorized_message": "Tài khoản hiện tại không có quyền xem chức năng này. Hãy chọn vai trò demo phù hợp ở thanh trên.",
+    "unauthorized_message": "Tài khoản của bạn không có đủ quyền hạn để truy cập mục này. Vui lòng liên hệ quản trị viên nếu bạn cần cấp thêm quyền.",
     "sidebar": {
       "my_loans": "Sách đang mượn",
       "my_holds": "Đặt giữ của tôi",

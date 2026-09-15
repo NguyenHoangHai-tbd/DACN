@@ -1,7 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { BookOpen, Clock, Calendar, CheckCircle2, AlertCircle, RefreshCw, Sparkles, User, ShieldCheck, Mail, Phone, IdCard, CheckSquare, CreditCard, Wallet, Landmark, DollarSign } from 'lucide-react';
+import { 
+  BookOpen, 
+  Clock, 
+  Calendar, 
+  CheckCircle2, 
+  AlertCircle, 
+  RefreshCw, 
+  Sparkles, 
+  User, 
+  ShieldCheck, 
+  Mail, 
+  Phone, 
+  IdCard, 
+  CheckSquare, 
+  CreditCard, 
+  Wallet, 
+  Landmark, 
+  DollarSign,
+  Library,
+  Bookmark,
+  XCircle,
+  Info,
+  Layers,
+  ArrowRight
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { axiosInstance } from '../../../shared/api/axiosInstance';
@@ -9,12 +33,15 @@ import { parseFriendlyError } from '../../../shared/utils/errorParser';
 import { BookCoverImage } from '../../books/components/BookCoverImage';
 import { QRCodeSVG } from 'qrcode.react';
 
-// 1. MEMBER LOANS COMPONENT
+// ============================================================================
+// 1. MEMBER LOANS COMPONENT (Sách đang mượn & Lịch sử lưu hành)
+// ============================================================================
 export const MemberLoansView: React.FC = () => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [loans, setLoans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [renewingId, setRenewingId] = useState<string | null>(null);
 
   // Fine payment state variables
@@ -26,12 +53,16 @@ export const MemberLoansView: React.FC = () => {
   const fetchLoans = async () => {
     try {
       setLoading(true);
+      setError(null);
       const res = await axiosInstance.get('/member/loans');
       if (res.data && res.data.success) {
-        setLoans(res.data.data);
+        setLoans(res.data.data || []);
+      } else {
+        setError(res.data?.message || 'Không thể tải danh sách mượn sách');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching member loans:', err);
+      setError(parseFriendlyError(err, 'Lỗi kết nối khi tải danh sách mượn trả'));
     } finally {
       setLoading(false);
     }
@@ -88,32 +119,59 @@ export const MemberLoansView: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
-      </div>
-    );
-  }
-
   const activeLoans = loans.filter((l: any) => l.status === 'Active' || l.status === 'Overdue');
   const historyLoans = loans.filter((l: any) => l.status === 'Returned');
   const unpaidFineLoans = loans.filter((l: any) => l.fineAmount > 0 && !l.finePaid);
   const totalUnpaidFine = unpaidFineLoans.reduce((acc, current) => acc + (current.fineAmount || 0), 0);
 
   return (
-    <div className="space-y-8 pb-16">
-      {/* ALERT BOX PHẠT QUÁ HẠN NẾU CÓ */}
+    <div className="space-y-6 pb-16">
+      {/* 1. VIEW HEADER */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-teal-50 border border-teal-200/80 flex items-center justify-center text-teal-600 shrink-0">
+            <BookOpen size={22} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+                Sách đang mượn &amp; Lịch sử lưu hành
+              </h2>
+              <span className="hidden sm:inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
+                Độc giả
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Theo dõi hạn trả, gia hạn thời gian mượn trực tuyến và thanh toán phí phạt quá hạn.
+            </p>
+          </div>
+        </div>
+
+        <Button
+          onClick={fetchLoans}
+          disabled={loading}
+          variant="outline"
+          size="sm"
+          className="self-start sm:self-auto border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl text-xs h-9 px-3 shrink-0 gap-1.5 cursor-pointer"
+        >
+          <RefreshCw size={13} className={loading ? 'animate-spin text-teal-600' : 'text-slate-500'} />
+          <span>Làm mới</span>
+        </Button>
+      </div>
+
+      {/* 2. OVERDUE FINE NOTIFICATION BANNER */}
       {unpaidFineLoans.length > 0 && (
-        <div className="bg-rose-50 border border-rose-200 p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
-          <div className="flex gap-3 items-start md:items-center">
-            <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 shrink-0">
+        <div className="bg-rose-50 border border-rose-200 p-4 sm:p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in duration-300">
+          <div className="flex gap-3 items-start">
+            <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-600 shrink-0 mt-0.5">
               <AlertCircle size={20} />
             </div>
-            <div className="space-y-1">
-              <h4 className="text-sm font-extrabold text-rose-800">Bạn có khoản phạt quá hạn chưa thanh toán!</h4>
-              <p className="text-xs text-rose-600">
-                Tổng số tiền phạt: <span className="font-extrabold">{totalUnpaidFine.toLocaleString('vi-VN')}đ</span> cho <span className="font-bold">{unpaidFineLoans.length}</span> cuốn sách quá hạn. Vui lòng hoàn tất biểu phí.
+            <div className="space-y-0.5">
+              <h4 className="text-sm font-bold text-rose-900">
+                Bạn có khoản phạt quá hạn chưa thanh toán!
+              </h4>
+              <p className="text-xs text-rose-700 leading-relaxed">
+                Tổng tiền phạt: <span className="font-extrabold text-rose-900">{totalUnpaidFine.toLocaleString('vi-VN')}đ</span> cho <span className="font-bold text-rose-900">{unpaidFineLoans.length}</span> cuốn sách quá hạn. Vui lòng thanh toán để tiếp tục mượn sách.
               </p>
             </div>
           </div>
@@ -123,304 +181,357 @@ export const MemberLoansView: React.FC = () => {
               setPaymentMethod('demo');
               setPayFineOpen(true);
             }}
-            className="bg-rose-600 hover:bg-rose-700 text-white shrink-0 gap-1 rounded-xl text-xs"
+            className="bg-rose-600 hover:bg-rose-700 text-white font-bold shrink-0 gap-1.5 rounded-xl text-xs h-9 px-4 shadow-sm shadow-rose-600/20 cursor-pointer self-start md:self-auto"
           >
-            <DollarSign size={14} /> Thanh toán khoản đầu tiên
+            <DollarSign size={14} />
+            <span>Thanh toán ngay</span>
           </Button>
         </div>
       )}
 
-      <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-100 p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
-        <div className="space-y-1.5">
-          <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-            <Sparkles className="text-orange-500 w-5 h-5 animate-pulse" />
-            Cổng tự phục vụ độc giả
-          </h3>
-          <p className="text-xs text-slate-500 max-w-xl">
-            Bạn có thể trực tiếp gia hạn sách đang mượn trực tuyến tối đa 1 lần nếu sách không có ai đặt chờ trong hàng đợi và thanh toán phạt quá hạn.
-          </p>
-        </div>
-        <Button onClick={fetchLoans} variant="outline" size="sm" className="bg-white hover:bg-slate-50 shrink-0 gap-1 rounded-xl">
-          <RefreshCw size={14} /> Làm mới
-        </Button>
-      </div>
-
-      {/* KHỐI 1: SÁCH ĐANG MƯỢN */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
-          <BookOpen className="text-orange-600 w-5 h-5" />
-          <h3 className="text-base font-bold text-slate-800">Sách đang mượn ({activeLoans.length})</h3>
-        </div>
-
-        {activeLoans.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center text-slate-400 space-y-3">
-            <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
-              <BookOpen size={20} />
-            </div>
-            <div className="space-y-1">
-              <p className="font-semibold text-slate-500 text-sm">Bạn chưa mượn sách nào</p>
-              <p className="text-xs text-slate-400">Hãy tìm sách trong danh mục và đến quầy thư viện để mượn sách.</p>
-            </div>
+      {/* 3. LOADING STATE */}
+      {loading && (
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center shadow-xs flex flex-col items-center justify-center">
+          <div className="w-10 h-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mb-3 border border-teal-100">
+            <RefreshCw className="animate-spin text-teal-600" size={20} />
           </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-            {activeLoans.map((loan) => {
-              const isOverdue = loan.status === 'Overdue';
-              return (
-                <div
-                  key={loan.id}
-                  className="bg-white border border-slate-200 p-5 rounded-2xl hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4"
-                >
-                  <div className="flex gap-4">
-                    <BookCoverImage src={loan.coverUrl} title={loan.bookTitle} className="w-14 h-20 rounded-lg shadow-sm border border-slate-100 shrink-0" />
-                    <div className="space-y-1 min-w-0 flex-1">
-                      <div className="flex flex-wrap gap-1.5 items-center mb-1">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                          isOverdue 
-                            ? 'bg-rose-50 text-rose-600 border border-rose-100' 
-                            : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                        }`}>
-                          {isOverdue ? (
+          <p className="text-sm font-bold text-slate-800">Đang tải danh sách sách mượn...</p>
+          <p className="text-xs text-slate-500 mt-1">Hệ thống đang truy xuất thông tin phiếu mượn của bạn.</p>
+        </div>
+      )}
+
+      {/* 4. ERROR STATE */}
+      {!loading && error && (
+        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center shadow-xs flex flex-col items-center justify-center">
+          <XCircle className="text-rose-500 mb-2" size={28} />
+          <h3 className="text-sm font-bold text-rose-900">Không thể tải dữ liệu mượn sách</h3>
+          <p className="text-xs text-rose-700 mt-1 max-w-md">{error}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchLoans}
+            className="mt-3 border-rose-300 text-rose-700 hover:bg-rose-100 font-semibold rounded-xl text-xs h-8 px-3"
+          >
+            <RefreshCw size={12} className="mr-1.5" /> Thử lại
+          </Button>
+        </div>
+      )}
+
+      {/* 5. ACTIVE LOANS SECTION */}
+      {!loading && !error && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between pb-1">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-teal-500" />
+              <h3 className="text-base font-bold text-slate-900">
+                Sách đang mượn ({activeLoans.length})
+              </h3>
+            </div>
+            <span className="text-xs text-slate-500">
+              Giới hạn gia hạn 1 lần / sách
+            </span>
+          </div>
+
+          {activeLoans.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-slate-200/80 border-dashed p-8 sm:p-12 text-center text-slate-500 space-y-3 shadow-xs">
+              <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto text-slate-400">
+                <BookOpen size={24} />
+              </div>
+              <div className="space-y-1">
+                <p className="font-bold text-slate-800 text-sm">Hiện tại bạn chưa mượn sách nào</p>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Hãy tra cứu đầu sách bạn yêu thích trong mục Tra cứu học liệu và đến quầy thư viện để hoàn tất thủ tục mượn.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+              {activeLoans.map((loan) => {
+                const isOverdue = loan.status === 'Overdue';
+                const hasUnpaidFine = loan.fineAmount > 0 && !loan.finePaid;
+
+                return (
+                  <div
+                    key={loan.id}
+                    className={`bg-white border rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-4 ${
+                      isOverdue ? 'border-rose-200/90' : 'border-slate-200/80 hover:border-teal-300'
+                    }`}
+                  >
+                    <div className="flex gap-3.5">
+                      <BookCoverImage 
+                        src={loan.coverUrl} 
+                        title={loan.bookTitle} 
+                        className="w-16 h-22 sm:w-20 sm:h-28 rounded-xl shadow-xs border border-slate-100 shrink-0" 
+                      />
+                      <div className="space-y-1.5 min-w-0 flex-1">
+                        {/* Status Pills */}
+                        <div className="flex flex-wrap gap-1.5 items-center">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                            isOverdue 
+                              ? 'bg-rose-50 text-rose-700 border-rose-200' 
+                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${isOverdue ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+                            {isOverdue ? 'Quá hạn trả' : 'Đang mượn'}
+                          </span>
+
+                          {loan.fineAmount > 0 && (
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                              loan.finePaid 
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                                : 'bg-rose-100 text-rose-800 border-rose-200'
+                            }`}>
+                              {loan.finePaid ? 'Đã trả phạt' : 'Chưa đóng phạt'}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Title & Author */}
+                        <h4 className="font-bold text-slate-900 text-sm sm:text-base leading-snug truncate" title={loan.bookTitle}>
+                          {loan.bookTitle}
+                        </h4>
+                        <p className="text-xs font-medium text-slate-500 truncate">
+                          Tác giả: {loan.author || 'Đang cập nhật'}
+                        </p>
+                        <p className="text-[11px] text-slate-400 font-mono">
+                          ISBN: {loan.isbn || 'N/A'}
+                        </p>
+                        
+                        {/* Dates grid */}
+                        <div className="grid grid-cols-2 gap-x-2 gap-y-1 mt-2 text-xs text-slate-600 font-medium pt-2 border-t border-slate-100">
+                          <div className="flex items-center gap-1 text-slate-400">
+                            <Calendar size={12} /> Ngày mượn:
+                          </div>
+                          <div className="text-slate-800 font-medium">
+                            {new Date(loan.checkoutDate).toLocaleDateString('vi-VN')}
+                          </div>
+                          <div className="flex items-center gap-1 text-slate-400">
+                            <Clock size={12} /> Hạn trả:
+                          </div>
+                          <div className={`font-bold ${isOverdue ? 'text-rose-600' : 'text-teal-700'}`}>
+                            {new Date(loan.dueDate).toLocaleDateString('vi-VN')}
+                          </div>
+
+                          {loan.fineAmount > 0 && (
                             <>
-                              <AlertCircle size={10} /> Quá hạn
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle2 size={10} /> Đang mượn
+                              {loan.overdueDays > 0 && (
+                                <>
+                                  <div className="flex items-center gap-1 text-rose-500 col-span-1 pt-1">
+                                    <AlertCircle size={12} /> Trễ hạn:
+                                  </div>
+                                  <div className="text-rose-600 font-bold pt-1">{loan.overdueDays} ngày</div>
+                                </>
+                              )}
+                              <div className="flex items-center gap-1 text-rose-500 col-span-1">
+                                <DollarSign size={12} /> Tiền phạt:
+                              </div>
+                              <div className="text-rose-600 font-extrabold">
+                                {(loan.fineAmount || 0).toLocaleString('vi-VN')}đ
+                              </div>
                             </>
                           )}
-                        </span>
-                        {loan.fineAmount > 0 && (
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                            loan.finePaid 
-                              ? 'bg-emerald-100 text-emerald-800' 
-                              : 'bg-rose-100 text-rose-800 animate-pulse'
-                          }`}>
-                            {loan.finePaid ? 'Đã trả phạt' : 'Chưa đóng phạt'}
-                          </span>
-                        )}
+                        </div>
                       </div>
-                      <h4 className="font-bold text-slate-800 text-sm md:text-base leading-tight truncate">
+                    </div>
+
+                    {/* Actions bar */}
+                    <div className="flex flex-wrap items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                      {hasUnpaidFine && (
+                        <Button
+                          onClick={() => {
+                            setSelectedLoanForFine(loan);
+                            setPaymentMethod('demo');
+                            setPayFineOpen(true);
+                          }}
+                          className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl gap-1.5 text-xs h-8 px-3 font-bold cursor-pointer"
+                        >
+                          <DollarSign size={13} />
+                          <span>Thanh toán phạt</span>
+                        </Button>
+                      )}
+                      
+                      <Button
+                        onClick={() => handleRenew(loan.id)}
+                        disabled={renewingId === loan.id || isOverdue}
+                        variant="outline"
+                        className={`border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl gap-1.5 text-xs h-8 px-3 font-semibold cursor-pointer ${
+                          isOverdue ? 'opacity-60 cursor-not-allowed' : ''
+                        }`}
+                        title={isOverdue ? 'Sách đã quá hạn, vui lòng đến quầy trả sách' : 'Gia hạn thêm hạn mượn trực tuyến'}
+                      >
+                        <RefreshCw size={13} className={renewingId === loan.id ? 'animate-spin text-teal-600' : 'text-slate-500'} />
+                        <span>{renewingId === loan.id ? 'Đang xử lý...' : 'Gia hạn trực tiếp'}</span>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 6. HISTORY LOANS SECTION */}
+      {!loading && !error && (
+        <div className="space-y-4 pt-4 border-t border-slate-200/80">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
+            <h3 className="text-base font-bold text-slate-900">
+              Lịch sử mượn &amp; trả ({historyLoans.length})
+            </h3>
+          </div>
+
+          {historyLoans.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-slate-200/80 border-dashed p-8 text-center text-slate-400 space-y-2 shadow-xs">
+              <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center mx-auto text-slate-400">
+                <CheckSquare size={18} />
+              </div>
+              <p className="font-semibold text-slate-600 text-xs">Chưa có lịch sử mượn trả</p>
+              <p className="text-[11px] text-slate-400">Các cuốn sách bạn đã hoàn tất trả thư viện sẽ được lưu vết tại đây.</p>
+            </div>
+          ) : (
+            <div className="grid gap-3.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {historyLoans.map((loan) => (
+                <div
+                  key={loan.id}
+                  className="bg-white border border-slate-200/80 p-4 rounded-2xl flex flex-col justify-between gap-3 shadow-xs hover:border-slate-300 transition-colors"
+                >
+                  <div className="flex gap-3">
+                    <BookCoverImage 
+                      src={loan.coverUrl} 
+                      title={loan.bookTitle} 
+                      className="w-14 h-20 rounded-lg shadow-xs border border-slate-100 shrink-0" 
+                    />
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <CheckCircle2 size={10} /> Đã trả sách
+                      </span>
+                      <h4 className="font-bold text-slate-800 text-xs sm:text-sm leading-snug truncate" title={loan.bookTitle}>
                         {loan.bookTitle}
                       </h4>
-                      <p className="text-xs text-slate-500">Tác giả: {loan.author || 'Đang cập nhật'}</p>
-                      <p className="text-xs text-slate-400 font-mono">ISBN: {loan.isbn || 'Đang cập nhật'}</p>
+                      <p className="text-[11px] text-slate-500 truncate">Tác giả: {loan.author || 'N/A'}</p>
                       
-                      <div className="grid grid-cols-2 gap-x-2 gap-y-1 mt-2.5 text-xs text-slate-500 font-medium pt-2 border-t border-slate-50">
-                        <div className="flex items-center gap-1 text-slate-400">
-                          <Calendar size={12} /> Ngày mượn:
+                      <div className="pt-2 mt-1 border-t border-slate-100 text-[11px] text-slate-500 space-y-0.5">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Mượn:</span>
+                          <span className="font-medium text-slate-700">{new Date(loan.checkoutDate).toLocaleDateString('vi-VN')}</span>
                         </div>
-                        <div className="text-slate-700">{new Date(loan.checkoutDate).toLocaleDateString('vi-VN')}</div>
-                        <div className="flex items-center gap-1 text-slate-400">
-                          <Clock size={12} /> Hạn trả:
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Đã trả:</span>
+                          <span className="font-bold text-emerald-700">
+                            {loan.returnDate ? new Date(loan.returnDate).toLocaleDateString('vi-VN') : 'Đã ghi nhận'}
+                          </span>
                         </div>
-                        <div className={`font-semibold ${isOverdue ? 'text-rose-600' : 'text-slate-700'}`}>
-                          {new Date(loan.dueDate).toLocaleDateString('vi-VN')}
-                        </div>
-                        {loan.fineAmount > 0 && (
-                          <>
-                            {loan.overdueDays > 0 && (
-                              <>
-                                <div className="flex items-center gap-1 text-rose-500 col-span-1 pt-1">
-                                  <AlertCircle size={12} /> Số ngày trễ:
-                                </div>
-                                <div className="text-rose-600 font-bold pt-1">{loan.overdueDays} ngày</div>
-                              </>
-                            )}
-                            <div className="flex items-center gap-1 text-rose-500 col-span-1">
-                              <AlertCircle size={12} /> Tiền phạt:
-                            </div>
-                            <div className="text-rose-600 font-extrabold">{(loan.fineAmount || 0).toLocaleString('vi-VN')}đ</div>
-                            <div className="flex items-center gap-1 text-slate-400 col-span-1">
-                              <ShieldCheck size={12} /> Phạt quá hạn:
-                            </div>
-                            <div className={`font-bold ${loan.finePaid ? 'text-emerald-600' : 'text-rose-600'}`}>
-                              {loan.finePaid ? `Đã thanh toán (${loan.paymentMethod})` : 'Chưa thanh toán'}
-                            </div>
-                          </>
-                        )}
                       </div>
                     </div>
                   </div>
-
-                  <div className="flex items-center justify-end gap-2 border-t border-slate-50 pt-3">
-                    {loan.fineAmount > 0 && !loan.finePaid && (
-                      <Button
-                        onClick={() => {
-                          setSelectedLoanForFine(loan);
-                          setPaymentMethod('demo');
-                          setPayFineOpen(true);
-                        }}
-                        className="bg-rose-600 hover:bg-rose-700 text-white rounded-lg gap-1.5 text-xs h-9 font-bold animate-pulse hover:animate-none"
-                      >
-                        <DollarSign size={13} />
-                        Thanh toán phạt
-                      </Button>
-                    )}
-                    
-                    <Button
-                      onClick={() => handleRenew(loan.id)}
-                      disabled={renewingId === loan.id || isOverdue}
-                      variant="outline"
-                      className="border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg gap-1.5 text-xs h-9"
-                    >
-                      <RefreshCw size={13} className={renewingId === loan.id ? 'animate-spin' : ''} />
-                      {renewingId === loan.id ? 'Đang gia hạn...' : 'Gia hạn trực tiếp'}
-                    </Button>
-                  </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* KHỐI 2: LỊCH SỬ MƯỢN TRẢ */}
-      <div className="space-y-4 pt-4 border-t border-slate-100">
-        <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
-          <CheckSquare className="text-emerald-600 w-5 h-5" />
-          <h3 className="text-base font-bold text-slate-800">Lịch sử mượn/trả ({historyLoans.length})</h3>
+              ))}
+            </div>
+          )}
         </div>
+      )}
 
-        {historyLoans.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center text-slate-400 space-y-3">
-            <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
-              <CheckSquare size={20} />
-            </div>
-            <div className="space-y-1">
-              <p className="font-semibold text-slate-500 text-sm">Chưa có lịch sử mượn trả</p>
-              <p className="text-xs text-slate-400">Các cuốn sách bạn đã hoàn tất trả thư viện sẽ xuất hiện tại đây.</p>
-            </div>
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-            {historyLoans.map((loan) => (
-              <div
-                key={loan.id}
-                className="bg-slate-50/50 border border-slate-100 p-5 rounded-2xl flex flex-col justify-between gap-4"
-              >
-                <div className="flex gap-4">
-                  <BookCoverImage src={loan.coverUrl} title={loan.bookTitle} className="w-14 h-20 rounded-lg shadow-sm border border-slate-100 shrink-0" />
-                  <div className="space-y-1 min-w-0 flex-1">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                      <CheckSquare size={10} /> Đã trả
-                    </span>
-                    <h4 className="font-bold text-slate-700 text-sm md:text-base leading-tight truncate">
-                      {loan.bookTitle}
-                    </h4>
-                    <p className="text-xs text-slate-500 font-medium">Tác giả: {loan.author || 'Đang cập nhật'}</p>
-                    
-                    <div className="grid grid-cols-2 gap-x-2 gap-y-1 mt-2.5 text-xs text-slate-500 font-medium pt-2 border-t border-slate-50">
-                      <div className="flex items-center gap-1 text-slate-400">
-                        <Calendar size={12} /> Ngày mượn:
-                      </div>
-                      <div className="text-slate-600">{new Date(loan.checkoutDate).toLocaleDateString('vi-VN')}</div>
-                      <div className="flex items-center gap-1 text-slate-400">
-                        <CheckSquare size={12} /> Ngày trả:
-                      </div>
-                      <div className="text-emerald-600 font-semibold">
-                        {loan.returnDate ? new Date(loan.returnDate).toLocaleDateString('vi-VN') : 'Đang cập nhật'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* DIALOG XÁC NHẬN THANH TOÁN PHẠT */}
+      {/* 7. FINE PAYMENT MODAL (Slate/Teal styling) */}
       {payFineOpen && selectedLoanForFine && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="bg-gradient-to-r from-rose-500 to-orange-500 p-6 text-slate-800 bg-rose-50 border-b border-rose-100">
-              <h3 className="text-lg font-extrabold text-rose-800">Xác nhận thanh toán phạt</h3>
-              <p className="text-xs text-rose-600 mt-1">Vui lòng chọn một phương thức thanh toán để tiếp tục demo.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-5 text-white flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-extrabold text-white flex items-center gap-2">
+                  <DollarSign size={18} className="text-teal-400" />
+                  Xác nhận thanh toán phí phạt
+                </h3>
+                <p className="text-xs text-slate-300 mt-0.5">Hoàn tất biểu phí để khôi phục quyền mượn sách.</p>
+              </div>
             </div>
             
-            <div className="p-6 space-y-4">
-              <p className="text-sm text-slate-600">
-                Bạn muốn thanh toán khoản phạt <span className="font-bold text-rose-600">{(selectedLoanForFine.fineAmount || 0).toLocaleString('vi-VN')}đ</span> cho sách <span className="font-bold text-slate-800">[{selectedLoanForFine.bookTitle}]</span>?
-              </p>
-
-              <div className="bg-slate-50 p-4 rounded-xl space-y-2 text-xs text-slate-600">
-                <div className="flex justify-between">
-                  <span>Sách:</span>
-                  <span className="font-semibold text-slate-800 truncate max-w-[200px]">{selectedLoanForFine.bookTitle}</span>
+            <div className="p-5 space-y-4">
+              {/* Summary box */}
+              <div className="bg-slate-50 border border-slate-200/80 p-4 rounded-2xl space-y-2 text-xs text-slate-600">
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-slate-500 shrink-0">Tên sách:</span>
+                  <span className="font-bold text-slate-800 text-right truncate">{selectedLoanForFine.bookTitle}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Hạn trả gốc:</span>
-                  <span className="font-semibold text-slate-800">{new Date(selectedLoanForFine.dueDate).toLocaleDateString('vi-VN')}</span>
+                  <span className="text-slate-500">Hạn trả gốc:</span>
+                  <span className="font-semibold text-slate-700">{new Date(selectedLoanForFine.dueDate).toLocaleDateString('vi-VN')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Số ngày trễ:</span>
-                  <span className="font-semibold text-rose-600 font-mono">{selectedLoanForFine.overdueDays} ngày</span>
+                  <span className="text-slate-500">Số ngày quá hạn:</span>
+                  <span className="font-bold text-rose-600">{selectedLoanForFine.overdueDays || 1} ngày</span>
                 </div>
-                <div className="border-t border-slate-200 pt-2 flex justify-between text-sm font-bold">
-                  <span className="text-slate-800">Số tiền phạt:</span>
-                  <span className="text-rose-600 font-mono">{(selectedLoanForFine.fineAmount || 0).toLocaleString('vi-VN')}đ</span>
+                <div className="border-t border-slate-200/80 pt-2 flex justify-between items-center text-sm font-bold">
+                  <span className="text-slate-800">Số tiền phải nộp:</span>
+                  <span className="text-rose-600 font-extrabold text-base">
+                    {(selectedLoanForFine.fineAmount || 0).toLocaleString('vi-VN')}đ
+                  </span>
                 </div>
               </div>
 
+              {/* Payment methods */}
               <div className="space-y-2">
-                <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Phương thức thanh toán</label>
+                <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                  Phương thức thanh toán
+                </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('demo')}
-                    className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all cursor-pointer ${
                       paymentMethod === 'demo'
-                        ? 'border-orange-600 bg-orange-50/50 text-orange-600 ring-2 ring-orange-500/20'
+                        ? 'border-teal-600 bg-teal-50 text-teal-800 ring-2 ring-teal-500/20 shadow-xs'
                         : 'border-slate-200 hover:bg-slate-50 text-slate-600'
                     }`}
                   >
-                    <Sparkles size={16} className={`${paymentMethod === 'demo' ? 'text-orange-500' : 'text-slate-400'} mb-1`} />
-                    <span className="text-xs font-bold">Demo (Mặc định)</span>
+                    <Sparkles size={16} className={`${paymentMethod === 'demo' ? 'text-teal-600' : 'text-slate-400'} mb-1`} />
+                    <span className="text-xs font-bold">Demo (Tức thì)</span>
                   </button>
                   
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('cash')}
-                    className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all cursor-pointer ${
                       paymentMethod === 'cash'
-                        ? 'border-orange-600 bg-orange-50/50 text-orange-600 ring-2 ring-orange-500/20'
+                        ? 'border-teal-600 bg-teal-50 text-teal-800 ring-2 ring-teal-500/20 shadow-xs'
                         : 'border-slate-200 hover:bg-slate-50 text-slate-600'
                     }`}
                   >
-                    <Wallet size={16} className={`${paymentMethod === 'cash' ? 'text-orange-500' : 'text-slate-400'} mb-1`} />
-                    <span className="text-xs font-bold">Tiền mặt</span>
+                    <Wallet size={16} className={`${paymentMethod === 'cash' ? 'text-teal-600' : 'text-slate-400'} mb-1`} />
+                    <span className="text-xs font-bold">Tiền mặt tại quầy</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('bank_transfer')}
-                    className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all cursor-pointer ${
                       paymentMethod === 'bank_transfer'
-                        ? 'border-orange-600 bg-orange-50/50 text-orange-600 ring-2 ring-orange-500/20'
+                        ? 'border-teal-600 bg-teal-50 text-teal-800 ring-2 ring-teal-500/20 shadow-xs'
                         : 'border-slate-200 hover:bg-slate-50 text-slate-600'
                     }`}
                   >
-                    <Landmark size={16} className={`${paymentMethod === 'bank_transfer' ? 'text-orange-500' : 'text-slate-400'} mb-1`} />
-                    <span className="text-xs font-bold">Chuyển khoản</span>
+                    <Landmark size={16} className={`${paymentMethod === 'bank_transfer' ? 'text-teal-600' : 'text-slate-400'} mb-1`} />
+                    <span className="text-xs font-bold">Chuyển khoản QR</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('momo')}
-                    className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all cursor-pointer ${
                       paymentMethod === 'momo'
-                        ? 'border-orange-600 bg-orange-50/50 text-orange-600 ring-2 ring-orange-500/20'
+                        ? 'border-teal-600 bg-teal-50 text-teal-800 ring-2 ring-teal-500/20 shadow-xs'
                         : 'border-slate-200 hover:bg-slate-50 text-slate-600'
                     }`}
                   >
-                    <CreditCard size={16} className={`${paymentMethod === 'momo' ? 'text-orange-500' : 'text-slate-400'} mb-1`} />
-                    <span className="text-xs font-bold">Ví Momo</span>
+                    <CreditCard size={16} className={`${paymentMethod === 'momo' ? 'text-teal-600' : 'text-slate-400'} mb-1`} />
+                    <span className="text-xs font-bold">Ví điện tử MoMo</span>
                   </button>
                 </div>
               </div>
             </div>
 
+            {/* Footer buttons */}
             <div className="bg-slate-50 p-4 flex gap-2 justify-end border-t border-slate-100">
               <Button
                 variant="outline"
@@ -428,16 +539,22 @@ export const MemberLoansView: React.FC = () => {
                   setPayFineOpen(false);
                   setSelectedLoanForFine(null);
                 }}
-                className="rounded-xl h-10 text-xs"
+                className="rounded-xl h-9 text-xs font-semibold cursor-pointer border-slate-200 hover:bg-white"
               >
                 Hủy bỏ
               </Button>
               <Button
                 onClick={handlePayFine}
                 disabled={payingFine}
-                className="bg-orange-600 hover:bg-orange-700 text-white rounded-xl h-10 text-xs font-bold px-4 shadow-md shadow-orange-500/20"
+                className="bg-teal-600 hover:bg-teal-700 text-white rounded-xl h-9 text-xs font-bold px-4 shadow-sm shadow-teal-600/20 cursor-pointer"
               >
-                {payingFine ? 'Đang xử lý...' : 'Xác nhận thanh toán'}
+                {payingFine ? (
+                  <span className="flex items-center gap-1.5">
+                    <RefreshCw size={13} className="animate-spin" /> Đang thanh toán...
+                  </span>
+                ) : (
+                  'Xác nhận thanh toán'
+                )}
               </Button>
             </div>
           </div>
@@ -447,20 +564,28 @@ export const MemberLoansView: React.FC = () => {
   );
 };
 
-// 2. MEMBER HOLDS SUMMARY
+
+// ============================================================================
+// 2. MEMBER HOLDS SUMMARY (Đặt giữ của tôi & Danh sách chờ)
+// ============================================================================
 export const MemberHoldsView: React.FC = () => {
   const [holds, setHolds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchHolds = async () => {
     try {
       setLoading(true);
+      setError(null);
       const res = await axiosInstance.get('/member/holds');
       if (res.data && res.data.success) {
-        setHolds(res.data.data);
+        setHolds(res.data.data || []);
+      } else {
+        setError(res.data?.message || 'Không thể tải danh sách đặt giữ');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching member holds:', err);
+      setError(parseFriendlyError(err, 'Lỗi kết nối khi tải danh sách đặt giữ'));
     } finally {
       setLoading(false);
     }
@@ -470,285 +595,460 @@ export const MemberHoldsView: React.FC = () => {
     fetchHolds();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6 pb-16">
-      <div className="bg-slate-50 rounded-2xl border border-slate-200/60 p-5 flex items-center justify-between gap-4 animate-in fade-in duration-300">
-        <div>
-          <h3 className="text-base font-bold text-slate-800">Sách đặt chỗ & Danh sách chờ (Hold Queue)</h3>
-          <p className="text-xs text-slate-500 mt-0.5">Khi sách mượn trước đó được trả lại, bạn sẽ nhận được thông báo để tới quầy nhận sách trong thời hạn giữ chỗ.</p>
+      {/* 1. VIEW HEADER */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-teal-50 border border-teal-200/80 flex items-center justify-center text-teal-600 shrink-0">
+            <Bookmark size={22} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+                Đặt giữ của tôi &amp; Danh sách chờ
+              </h2>
+              <span className="hidden sm:inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
+                Hold Queue
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Theo dõi vị trí thứ tự ưu tiên nhận sách khi tài liệu mượn trước đó được hoàn trả về thư viện.
+            </p>
+          </div>
         </div>
-        <Button onClick={fetchHolds} variant="outline" size="sm" className="bg-white hover:bg-slate-50 shrink-0 gap-1 rounded-xl">
-          <RefreshCw size={14} /> Làm mới
+
+        <Button
+          onClick={fetchHolds}
+          disabled={loading}
+          variant="outline"
+          size="sm"
+          className="self-start sm:self-auto border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl text-xs h-9 px-3 shrink-0 gap-1.5 cursor-pointer"
+        >
+          <RefreshCw size={13} className={loading ? 'animate-spin text-teal-600' : 'text-slate-500'} />
+          <span>Làm mới</span>
         </Button>
       </div>
 
-      {holds.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center text-slate-400 space-y-4">
-          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
-            <Clock size={28} />
+      {/* 2. LOADING STATE */}
+      {loading && (
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center shadow-xs flex flex-col items-center justify-center">
+          <div className="w-10 h-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mb-3 border border-teal-100">
+            <RefreshCw className="animate-spin text-teal-600" size={20} />
           </div>
-          <div className="space-y-1">
-            <p className="font-semibold text-slate-600">Bạn chưa đặt giữ sách nào</p>
-            <p className="text-xs text-slate-400">Các sách không sẵn có bạn có thể đặt giữ thông qua nhân viên thư viện.</p>
-          </div>
+          <p className="text-sm font-bold text-slate-800">Đang tải danh sách đặt giữ...</p>
+          <p className="text-xs text-slate-500 mt-1">Hệ thống đang kiểm tra trạng thái hàng chờ của bạn.</p>
         </div>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-1">
-          {holds.map((hold) => {
-            const getStatusConfig = () => {
-              const status = hold.status;
-              const isReady = hold.isReadyForPickup || status === 'Ready' || status === 'Waiting';
-              
-              if (isReady) {
-                return {
-                  text: 'Sẵn sàng nhận',
-                  classes: 'bg-blue-50 text-blue-600 border border-blue-100 animate-pulse',
-                  description: 'Sách đã có sẵn, vui lòng đến quầy nhận.'
-                };
-              }
-              if (status === 'Pending') {
-                return {
-                  text: 'Đang chờ sách',
-                  classes: 'bg-amber-50 text-amber-600 border border-amber-100',
-                  description: 'Bạn đang trong hàng chờ. Khi sách có sẵn, thư viện sẽ xử lý.'
-                };
-              }
-              if (status === 'Fulfilled') {
-                return {
-                  text: 'Đã cho mượn',
-                  classes: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
-                  description: 'Yêu cầu đặt giữ đã được chuyển thành phiếu mượn.'
-                };
-              }
-              if (status === 'Cancelled' || status === 'Expired') {
-                return {
-                  text: 'Đã hủy / Hết hạn',
-                  classes: 'bg-slate-100 text-slate-600 border border-slate-200',
-                  description: 'Yêu cầu đặt giữ đã bị hủy hoặc hết hạn hạn chờ.'
-                };
-              }
-              return {
-                text: status || 'Không rõ',
-                classes: 'bg-slate-100 text-slate-600 border border-slate-200',
-                description: 'Trạng thái yêu cầu đặt giữ.'
-              };
-            };
+      )}
 
-            const statusConfig = getStatusConfig();
+      {/* 3. ERROR STATE */}
+      {!loading && error && (
+        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center shadow-xs flex flex-col items-center justify-center">
+          <XCircle className="text-rose-500 mb-2" size={28} />
+          <h3 className="text-sm font-bold text-rose-900">Không thể tải dữ liệu đặt giữ</h3>
+          <p className="text-xs text-rose-700 mt-1 max-w-md">{error}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchHolds}
+            className="mt-3 border-rose-300 text-rose-700 hover:bg-rose-100 font-semibold rounded-xl text-xs h-8 px-3"
+          >
+            <RefreshCw size={12} className="mr-1.5" /> Thử lại
+          </Button>
+        </div>
+      )}
 
-            return (
-              <div key={hold.id} className="bg-white border border-slate-200 p-5 rounded-2xl hover:shadow-md transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex gap-4">
-                  <div className="w-12 h-16 bg-slate-50 rounded-lg shrink-0 flex items-center justify-center border border-slate-200 relative overflow-hidden">
-                    <BookCoverImage src={hold.coverUrl} title={hold.bookTitle} className="w-12 h-16 rounded-lg"/>
-                  </div>
-                  <div className="space-y-1 min-w-0">
-                    <h4 className="font-bold text-slate-800 text-sm md:text-base leading-tight truncate">{hold.bookTitle}</h4>
-                    <p className="text-xs text-slate-500">Tác giả: {hold.author || 'Đang cập nhật'}</p>
-                    <p className="text-[10px] text-slate-400 font-mono">ISBN: {hold.isbn}</p>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2 text-xs text-slate-500 font-medium">
-                      <span className="flex items-center gap-1"><Calendar size={12} /> Đăng ký: {new Date(hold.holdDate).toLocaleDateString('vi-VN')}</span>
-                      <span className="flex items-center gap-1"><Clock size={12} /> Giữ đến: {new Date(hold.expiryDate).toLocaleDateString('vi-VN')}</span>
-                    </div>
-                    {statusConfig.description && (
-                      <p className="text-xs text-slate-400 font-medium mt-1.5 italic bg-slate-50 p-2 rounded-lg border border-slate-100 inline-block">
-                        {statusConfig.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center md:flex-col md:items-end justify-between border-t md:border-t-0 border-slate-100 pt-3 md:pt-0 gap-2 shrink-0">
-                  <div className="text-left md:text-right">
-                    <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Vị trí hàng chờ</p>
-                    <p className="text-lg font-extrabold text-blue-600">STT #{hold.queuePosition}</p>
-                  </div>
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusConfig.classes}`}>
-                    {statusConfig.text}
-                  </span>
-                </div>
+      {/* 4. CONTENT LIST */}
+      {!loading && !error && (
+        <>
+          {holds.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-slate-200/80 border-dashed p-10 sm:p-14 text-center text-slate-500 space-y-3 shadow-xs">
+              <div className="w-14 h-14 bg-teal-50 text-teal-600 rounded-2xl flex items-center justify-center mx-auto border border-teal-100">
+                <Clock size={28} />
               </div>
-            );
-          })}
-        </div>
+              <div className="space-y-1">
+                <p className="font-bold text-slate-800 text-base">Bạn chưa đặt giữ cuốn sách nào</p>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  Khi tài liệu yêu thích đang hết bản sao sẵn có, hãy nhấn nút "Đặt giữ" tại trang Tra cứu để xếp hàng nhận sách ngay khi có bạn đọc trả lại.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-4 grid-cols-1">
+              {holds.map((hold) => {
+                const getStatusConfig = () => {
+                  const status = hold.status;
+                  const isReady = hold.isReadyForPickup || status === 'Ready' || status === 'Waiting';
+                  
+                  if (isReady) {
+                    return {
+                      text: 'Sẵn sàng nhận',
+                      classes: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                      badgeDot: 'bg-emerald-500',
+                      description: 'Sách đã có sẵn tại quầy. Vui lòng mang thẻ thư viện đến nhận trước ngày hết hạn.'
+                    };
+                  }
+                  if (status === 'Pending') {
+                    return {
+                      text: 'Đang chờ sách',
+                      classes: 'bg-amber-50 text-amber-700 border-amber-200',
+                      badgeDot: 'bg-amber-500',
+                      description: 'Bạn đang trong hàng đợi. Ngay khi có sách hoàn trả, hệ thống sẽ tự động gửi thông báo.'
+                    };
+                  }
+                  if (status === 'Fulfilled') {
+                    return {
+                      text: 'Đã hoàn tất nhận',
+                      classes: 'bg-teal-50 text-teal-700 border-teal-200',
+                      badgeDot: 'bg-teal-500',
+                      description: 'Yêu cầu đặt giữ đã được chuyển đổi thành phiếu mượn thành công.'
+                    };
+                  }
+                  if (status === 'Cancelled' || status === 'Expired') {
+                    return {
+                      text: 'Đã hủy / Hết hạn',
+                      classes: 'bg-slate-100 text-slate-600 border-slate-200',
+                      badgeDot: 'bg-slate-400',
+                      description: 'Yêu cầu đặt giữ đã quá thời gian chờ nhận hoặc đã được hủy.'
+                    };
+                  }
+                  return {
+                    text: status || 'Chờ xử lý',
+                    classes: 'bg-slate-100 text-slate-600 border-slate-200',
+                    badgeDot: 'bg-slate-400',
+                    description: 'Trạng thái yêu cầu đặt giữ.'
+                  };
+                };
+
+                const statusConfig = getStatusConfig();
+
+                return (
+                  <div 
+                    key={hold.id} 
+                    className="bg-white border border-slate-200/80 p-4 sm:p-5 rounded-2xl hover:border-teal-300 hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                  >
+                    <div className="flex gap-3.5 sm:gap-4 items-start">
+                      <BookCoverImage 
+                        src={hold.coverUrl} 
+                        title={hold.bookTitle} 
+                        className="w-16 h-22 sm:w-18 sm:h-26 rounded-xl shadow-xs border border-slate-100 shrink-0"
+                      />
+                      <div className="space-y-1 min-w-0">
+                        <h4 className="font-bold text-slate-900 text-sm sm:text-base leading-snug line-clamp-2" title={hold.bookTitle}>
+                          {hold.bookTitle}
+                        </h4>
+                        <p className="text-xs font-medium text-slate-500 truncate">
+                          Tác giả: {hold.author || 'Đang cập nhật'}
+                        </p>
+                        <p className="text-[11px] text-slate-400 font-mono">
+                          ISBN: {hold.isbn || 'N/A'}
+                        </p>
+                        
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2 text-xs text-slate-600 font-medium pt-1">
+                          <span className="flex items-center gap-1 text-slate-500">
+                            <Calendar size={12} className="text-slate-400" /> Ngày đặt: <strong className="text-slate-800">{new Date(hold.holdDate).toLocaleDateString('vi-VN')}</strong>
+                          </span>
+                          <span className="flex items-center gap-1 text-slate-500">
+                            <Clock size={12} className="text-slate-400" /> Hạn giữ chỗ: <strong className="text-slate-800">{new Date(hold.expiryDate).toLocaleDateString('vi-VN')}</strong>
+                          </span>
+                        </div>
+
+                        {statusConfig.description && (
+                          <p className="text-xs text-slate-600 font-medium mt-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100/80 leading-relaxed">
+                            {statusConfig.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right side: queue position & status */}
+                    <div className="flex items-center md:flex-col md:items-end justify-between border-t md:border-t-0 border-slate-100 pt-3 md:pt-0 gap-2 shrink-0">
+                      <div className="text-left md:text-right">
+                        <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Vị trí hàng chờ</p>
+                        <p className="text-base sm:text-lg font-extrabold text-teal-700 font-mono">
+                          STT #{hold.queuePosition || 1}
+                        </p>
+                      </div>
+
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${statusConfig.classes}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.badgeDot}`} />
+                        {statusConfig.text}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
 };
 
-// 3. MEMBER PROFILE & VIRTUAL ID CARD COMPONENT
+
+// ============================================================================
+// 3. MEMBER PROFILE & VIRTUAL ID CARD COMPONENT (Hồ sơ / Thẻ thư viện)
+// ============================================================================
 export const MemberProfileView: React.FC = () => {
   const { t } = useTranslation();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await axiosInstance.get('/member/profile');
+      if (res.data && res.data.success) {
+        setProfile(res.data.data);
+      } else {
+        setError(res.data?.message || 'Không thể tải hồ sơ độc giả');
+      }
+    } catch (err: any) {
+      console.error('Error fetching member profile:', err);
+      setError(parseFriendlyError(err, 'Lỗi kết nối khi tải hồ sơ độc giả'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const res = await axiosInstance.get('/member/profile');
-        if (res.data && res.data.success) {
-          setProfile(res.data.data);
-        }
-      } catch (err) {
-        console.error('Error fetching member profile:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchProfile();
   }, []);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center shadow-xs flex flex-col items-center justify-center">
+        <div className="w-10 h-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mb-3 border border-teal-100">
+          <RefreshCw className="animate-spin text-teal-600" size={20} />
+        </div>
+        <p className="text-sm font-bold text-slate-800">Đang tải hồ sơ độc giả...</p>
+        <p className="text-xs text-slate-500 mt-1">Đang kết xuất thông tin thẻ và định danh thư viện số.</p>
       </div>
     );
   }
 
-  const fullName = profile?.fullName || 'John Doe';
+  if (error) {
+    return (
+      <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center shadow-xs flex flex-col items-center justify-center">
+        <XCircle className="text-rose-500 mb-2" size={28} />
+        <h3 className="text-sm font-bold text-rose-900">Không thể tải thông tin hồ sơ</h3>
+        <p className="text-xs text-rose-700 mt-1 max-w-md">{error}</p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={fetchProfile}
+          className="mt-3 border-rose-300 text-rose-700 hover:bg-rose-100 font-semibold rounded-xl text-xs h-8 px-3"
+        >
+          <RefreshCw size={12} className="mr-1.5" /> Thử lại
+        </Button>
+      </div>
+    );
+  }
+
+  const fullName = profile?.fullName || 'Độc giả Thư viện';
   const memberCode = profile?.memberCode || 'U002';
-  const email = profile?.email || 'john@example.com';
+  const email = profile?.email || 'member@example.com';
   const phone = profile?.phone || '0987654321';
   const memberType = profile?.memberType || 'Student';
   const status = profile?.status || 'Active';
   const joinDate = profile?.joinDate ? new Date(profile.joinDate).toLocaleDateString('vi-VN') : '15/02/2025';
   const expiryDate = profile?.expiryDate ? new Date(profile.expiryDate).toLocaleDateString('vi-VN') : '15/02/2026';
+  const cardNumberValue = profile?.cardNumber || profile?.libraryCardNumber || memberCode;
 
   return (
-    <div className="grid gap-8 lg:grid-cols-3 pb-16">
-      {/* 2/3 Left Side: Personal specs */}
-      <div className="lg:col-span-2 space-y-6">
-        <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-6 animate-in fade-in duration-300">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-            <h3 className="text-base font-bold text-slate-800">Thông tin cá nhân độc giả</h3>
-            <span className="text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-              <ShieldCheck size={14} /> ID Verified
-            </span>
+    <div className="space-y-6 pb-16">
+      {/* 1. VIEW HEADER */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-teal-50 border border-teal-200/80 flex items-center justify-center text-teal-600 shrink-0">
+            <IdCard size={22} />
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-1">
-              <span className="text-xs text-slate-400 font-medium">Họ và Tên</span>
-              <p className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                <User size={15} className="text-slate-400" /> {fullName}
-              </p>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+                Hồ sơ cá nhân &amp; Thẻ thư viện điện tử
+              </h2>
+              <span className="hidden sm:inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
+                Digital ID
+              </span>
             </div>
-            <div className="space-y-1">
-              <span className="text-xs text-slate-400 font-medium">Mã độc giả</span>
-              <p className="text-sm font-bold text-slate-700 font-mono flex items-center gap-2">
-                <IdCard size={15} className="text-slate-400" /> {memberCode}
-              </p>
-            </div>
-            <div className="space-y-1">
-              <span className="text-xs text-slate-400 font-medium">Hộp thư điện tử (Email)</span>
-              <p className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <Mail size={15} className="text-slate-400" /> {email}
-              </p>
-            </div>
-            <div className="space-y-1">
-              <span className="text-xs text-slate-400 font-medium">Số điện thoại</span>
-              <p className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <Phone size={15} className="text-slate-400" /> {phone}
-              </p>
-            </div>
-            <div className="space-y-1">
-              <span className="text-xs text-slate-400 font-medium">Loại độc giả</span>
-              <p className="text-sm font-bold text-blue-600 border border-blue-50 bg-blue-500/5 px-2.5 py-0.5 rounded-md inline-block">
-                {memberType}
-              </p>
-            </div>
-            <div className="space-y-1">
-              <span className="text-xs text-slate-400 font-medium">Thời hạn tài khoản</span>
-              <p className="text-sm font-semibold text-slate-700">
-                {joinDate} - {expiryDate}
-              </p>
-            </div>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Quản lý định danh thành viên, mã vạch mượn trả và thời hạn hiệu lực của thẻ độc giả.
+            </p>
           </div>
         </div>
 
-        {/* Dynamic usage stats */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm text-center">
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Trạng thái thẻ</p>
-            <p className="text-base font-extrabold text-emerald-600 mt-1 uppercase">{status === 'Active' ? 'Hoạt động' : status}</p>
-          </div>
-          <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm text-center border-l-indigo-500 border-l-[3px]">
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Hạn dùng</p>
-            <p className="text-xs font-extrabold text-indigo-600 mt-1.5">{expiryDate}</p>
-          </div>
-          <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm text-center">
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Hỗ trợ AI</p>
-            <p className="text-xs font-extrabold text-blue-600 mt-1.5 uppercase">Kích hoạt</p>
-          </div>
-        </div>
+        <Button
+          onClick={fetchProfile}
+          variant="outline"
+          size="sm"
+          className="self-start sm:self-auto border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl text-xs h-9 px-3 shrink-0 gap-1.5 cursor-pointer"
+        >
+          <RefreshCw size={13} className="text-slate-500" />
+          <span>Cập nhật</span>
+        </Button>
       </div>
 
-      {/* 1/3 Right Side: Beautiful Virtual ID Card */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest pl-1 font-sans">Thẻ thư viện số</h3>
-        
-        {/* Glowing wallet-like card */}
-        <div className="relative w-full rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-6 shadow-2xl flex flex-col justify-between text-white border border-slate-700/60 overflow-hidden group space-y-6">
-          {/* Accent graphics background */}
-          <div className="absolute top-0 right-0 w-[150px] h-[150px] bg-gradient-to-bl from-indigo-500/10 via-rose-500/10 to-transparent rounded-full blur-2xl group-hover:scale-125 transition-transform duration-350" />
-          <div className="absolute -bottom-10 -left-10 w-[120px] h-[120px] bg-teal-500/5 rounded-full blur-xl" />
-
-          {/* Header */}
-          <div className="flex items-center justify-between z-10 shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center text-white text-[11px] font-extrabold shadow-md shadow-indigo-500/25">L</span>
-              <span className="text-[11px] font-bold uppercase tracking-widest text-slate-200">LIBRA PLATFORM</span>
+      {/* 2. TWO-COLUMN LAYOUT: SPECS & CARD */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Left Side (2 cols): Personal specs & usage details */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-xs space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <h3 className="text-base font-bold text-slate-900">Chi tiết thông tin độc giả</h3>
+              <span className="text-teal-700 bg-teal-50 border border-teal-200 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <ShieldCheck size={14} className="text-teal-600" /> Đã xác thực
+              </span>
             </div>
-            <span className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full border uppercase ${
-              status === 'Active' 
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
-                : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-            }`}>
-              {status === 'Active' ? 'Thẻ Hoạt động' : status}
-            </span>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+              <div className="space-y-1">
+                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Họ và Tên</span>
+                <p className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <User size={15} className="text-teal-600 shrink-0" /> {fullName}
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Mã độc giả (ID)</span>
+                <p className="text-sm font-bold text-slate-900 font-mono flex items-center gap-2">
+                  <IdCard size={15} className="text-teal-600 shrink-0" /> {memberCode}
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Hộp thư điện tử (Email)</span>
+                <p className="text-sm font-semibold text-slate-800 flex items-center gap-2 truncate">
+                  <Mail size={15} className="text-teal-600 shrink-0" /> {email}
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Số điện thoại liên lạc</span>
+                <p className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                  <Phone size={15} className="text-teal-600 shrink-0" /> {phone}
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Phân hạng độc giả</span>
+                <div className="pt-0.5">
+                  <span className="text-xs font-bold text-teal-800 border border-teal-200 bg-teal-50 px-2.5 py-1 rounded-lg inline-block">
+                    {memberType === 'Student' ? 'Sinh viên (Student)' : memberType}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Thời hạn thẻ thư viện</span>
+                <p className="text-xs sm:text-sm font-semibold text-slate-800 pt-1 flex items-center gap-1.5">
+                  <Calendar size={14} className="text-slate-400" />
+                  <span>{joinDate}</span>
+                  <ArrowRight size={12} className="text-slate-400" />
+                  <span className="font-bold text-teal-700">{expiryDate}</span>
+                </p>
+              </div>
+            </div>
           </div>
 
-          {/* QR Code central container */}
-          <div className="flex flex-col items-center justify-center bg-white p-4 rounded-xl shadow-lg border border-white/25 hover:scale-105 transition-transform shrink-0">
-            {/* Real SVG QR code using qrcode.react */}
-            <div className="p-1.5 bg-white rounded-md">
-              <QRCodeSVG 
-                value={profile?.cardNumber || profile?.libraryCardNumber || memberCode || ""} 
-                size={110}
-                level="M"
-                includeMargin={false}
-              />
+          {/* Quick status cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs text-center">
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Trạng thái thẻ</p>
+              <p className="text-sm font-extrabold text-emerald-600 mt-1 uppercase flex items-center justify-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                {status === 'Active' ? 'Đang hoạt động' : status}
+              </p>
             </div>
-            <div className="text-[10px] text-slate-800 font-mono font-bold tracking-widest mt-2">
-              {profile?.cardNumber || profile?.libraryCardNumber || memberCode}
-            </div>
-          </div>
 
-          {/* User Details */}
-          <div className="z-10 text-center space-y-1">
-            <p className="text-[9px] text-slate-400 uppercase tracking-wider">Họ và Tên chủ thẻ</p>
-            <h4 className="text-base font-bold tracking-tight text-white uppercase">{fullName}</h4>
-            <div className="flex items-center justify-center gap-4 text-[10px] text-slate-300 pt-1">
-              <span>Mã độc giả: <strong className="text-white font-mono">{memberCode}</strong></span>
-              <span>•</span>
-              <span>Hạn dùng: <strong className="text-white">{expiryDate}</strong></span>
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs text-center">
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Hiệu lực đến</p>
+              <p className="text-sm font-extrabold text-teal-700 mt-1">{expiryDate}</p>
+            </div>
+
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs text-center">
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Trợ lý AI Ngữ nghĩa</p>
+              <p className="text-sm font-extrabold text-slate-800 mt-1 uppercase flex items-center justify-center gap-1">
+                <Sparkles size={13} className="text-teal-500" />
+                Sẵn sàng
+              </p>
             </div>
           </div>
         </div>
 
-        <p className="text-[11.5px] text-slate-400 text-center leading-normal">
-          Quét mã QR/Thẻ thư viện số trên đây tại quầy thủ thư để làm thủ tục mượn hoặc trả sách nhanh chóng.
-        </p>
+        {/* Right Side (1 col): Virtual Digital ID Card (Slate / Teal aesthetic) */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Thẻ thư viện số
+            </h3>
+            <span className="text-[10px] font-bold text-teal-600 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-md">
+              E-Card
+            </span>
+          </div>
+          
+          {/* Glowing Card Component */}
+          <div className="relative w-full rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 p-5 sm:p-6 shadow-xl flex flex-col justify-between text-white border border-teal-500/20 overflow-hidden group space-y-5">
+            {/* Ambient Teal glow effects */}
+            <div className="absolute top-0 right-0 w-44 h-44 bg-teal-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-36 h-36 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
+
+            {/* Top Bar: Brand & Status */}
+            <div className="flex items-center justify-between z-10 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-teal-600 rounded-lg flex items-center justify-center text-white text-[10px] font-extrabold shadow-sm shadow-teal-500/30">
+                  <Library size={13} />
+                </div>
+                <div>
+                  <span className="text-[11px] font-extrabold tracking-wider text-slate-200 block leading-none">TBD LIBRARY</span>
+                  <span className="text-[8px] font-bold text-teal-300 tracking-widest uppercase">Smart Campus</span>
+                </div>
+              </div>
+              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase ${
+                status === 'Active' 
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
+                  : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+              }`}>
+                {status === 'Active' ? 'Thẻ hợp lệ' : status}
+              </span>
+            </div>
+
+            {/* Central QR Code Container */}
+            <div className="flex flex-col items-center justify-center bg-white p-4 rounded-2xl shadow-lg border border-white/20 z-10 shrink-0 group-hover:scale-102 transition-transform">
+              <div className="p-1 bg-white rounded-xl">
+                <QRCodeSVG 
+                  value={cardNumberValue} 
+                  size={120}
+                  level="M"
+                  includeMargin={false}
+                />
+              </div>
+              <div className="text-[11px] text-slate-900 font-mono font-extrabold tracking-widest mt-2">
+                {cardNumberValue}
+              </div>
+            </div>
+
+            {/* Cardholder metadata */}
+            <div className="z-10 text-center space-y-1">
+              <p className="text-[9px] text-teal-200/70 uppercase tracking-widest font-semibold">Chủ thẻ thư viện</p>
+              <h4 className="text-sm sm:text-base font-extrabold tracking-tight text-white uppercase truncate px-2">
+                {fullName}
+              </h4>
+              <div className="flex items-center justify-center gap-3 text-[10px] text-slate-300 pt-0.5">
+                <span>Mã: <strong className="text-teal-300 font-mono">{memberCode}</strong></span>
+                <span>•</span>
+                <span>Hạn: <strong className="text-slate-100">{expiryDate}</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-[11px] text-slate-400 text-center leading-normal px-2">
+            Xuất trình mã QR tại quầy thủ thư hoặc máy mượn trả tự động để xác thực giao dịch nhanh chóng.
+          </p>
+        </div>
       </div>
     </div>
   );

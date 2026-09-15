@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { BookMarked, Eye, EyeOff, Loader2, Building, User, Lock, Zap, ArrowLeft } from 'lucide-react';
+import { Loader2, Building, User, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 import { loginSchema, LoginFormData } from '../schemas';
 import { authService } from '../services/authService';
@@ -16,7 +16,6 @@ import { parseFriendlyError } from '../../../shared/utils/errorParser';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const normalizeUiRole = (apiRole?: string): string => {
@@ -33,7 +32,7 @@ export const LoginForm: React.FC = () => {
   const setAuth = useAuthStore(state => state.setAuth);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<LoginFormData>({
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       tenantCode: 'hq',
@@ -41,13 +40,6 @@ export const LoginForm: React.FC = () => {
       password: '',
     }
   });
-
-  const fillAndSubmit = (tenant: string, user: string, pass: string) => {
-    setValue('tenantCode', tenant);
-    setValue('username', user);
-    setValue('password', pass);
-    handleSubmit(onSubmit)();
-  };
 
   const getFriendlyRoleLabel = (r: string) => {
     if (r === 'SuperAdmin') return 'Super Admin - Quản trị hệ thống';
@@ -93,130 +85,153 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
-      <div className="w-full max-w-[960px] bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden grid grid-cols-1 lg:grid-cols-2">
-        {/* Left Column: Login Form */}
-        <div className="p-6 lg:p-8 space-y-6">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-slate-50 text-slate-900 antialiased selection:bg-teal-600 selection:text-white">
+      <div className="w-full max-w-[440px] bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-slate-200/70 border border-slate-200/80 p-6 sm:p-8 space-y-6">
+        {/* Top bar: Back to Home */}
+        <div className="flex items-center justify-between">
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-teal-600 transition-colors group cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-teal-600 transition-colors cursor-pointer group"
           >
-            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform text-teal-600" />
+            <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform text-teal-600" />
             <span>Về trang chủ</span>
           </button>
+          <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200/70 px-2 py-0.5 rounded-full uppercase tracking-wider">
+            Cổng Xác Thực
+          </span>
+        </div>
 
-          <header className="space-y-1">
+        {/* Brand Header */}
+        <header className="space-y-3">
+          <div className="flex items-center gap-3">
             <img
               src="https://lms.tbd.edu.vn/pluginfile.php/1/theme_edumy/headerlogo2/1786323723/logo-TBD-VI.png"
               alt="Đại học Thái Bình Dương"
-              className="h-10 object-contain mb-3"
+              className="h-9 sm:h-10 object-contain"
               referrerPolicy="no-referrer"
             />
-            <h1 className="text-2xl font-extrabold text-slate-900">Cổng Đăng Nhập Thư Viện Số</h1>
-            <p className="text-slate-500 text-sm">Trường Đại học Thái Bình Dương (TBD)</p>
-          </header>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {mutation.isError && (
-              <Alert variant="destructive" className="bg-red-50 text-red-900 border-red-200">
-                <AlertDescription>
-                  {parseFriendlyError(mutation.error, 'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.')}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="tenantCode" className="text-xs font-bold text-slate-600 uppercase tracking-wide">Phạm vi đăng nhập</Label>
-              <div className="relative">
-                <Building className="absolute left-3 top-3 text-slate-400" size={18} />
-                <select 
-                  id="tenantCode" 
-                  {...register('tenantCode')} 
-                  className="w-full h-11 px-3 pl-10 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm font-medium transition-all cursor-pointer"
-                >
-                  <option value="global">Hệ thống tổng</option>
-                  <option value="hq">Hà Nội HQ</option>
-                  <option value="lib-hcm">Thư viện TP.HCM</option>
-                </select>
-              </div>
-              <p className="text-[11px] text-slate-500 leading-relaxed italic">
-                Super Admin dùng Hệ thống tổng. Các tài khoản còn lại dùng thư viện/khu vực được phân công.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="username" className="text-xs font-bold text-slate-600 uppercase tracking-wide">Tên đăng nhập / Mã thẻ</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 text-slate-400" size={18} />
-                <Input 
-                  id="username" 
-                  {...register('username')} 
-                  className="pl-10 h-11 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" 
-                  placeholder="admin" 
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-xs font-bold text-slate-600 uppercase tracking-wide">Mật khẩu</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 text-slate-400" size={18} />
-                <Input 
-                  id="password" 
-                  type="password" 
-                  {...register('password')} 
-                  className="pl-10 h-11 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" 
-                  placeholder="••••••••" 
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input 
-                type="checkbox" 
-                id="remember" 
-                className="w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500 accent-teal-600 cursor-pointer" 
-              />
-              <Label htmlFor="remember" className="text-sm font-medium cursor-pointer">Duy trì đăng nhập</Label>
-            </div>
-
-            <Button 
-              type="submit" 
-              className="w-full h-11 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-md shadow-teal-950/20 active:scale-95 transition-all cursor-pointer" 
-              disabled={mutation.isPending}
-            >
-              {mutation.isPending ? <Loader2 className="animate-spin" size={20} /> : 'Đăng nhập'}
-            </Button>
-          </form>
-        </div>
-
-        {/* Right Column: Quick Demo Login */}
-        <div className="bg-slate-50 p-6 lg:p-8 border-l border-slate-100 flex flex-col justify-center">
-          <div className="flex items-center gap-2 mb-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <Zap size={14} className="text-teal-600" />
-            <span>Đăng nhập thử nghiệm nhanh</span>
+            <div className="h-5 w-px bg-slate-200" />
+            <span className="text-sm sm:text-base font-bold tracking-wider text-teal-600 uppercase">
+              THƯ VIỆN SỐ
+            </span>
           </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight">
+              Đăng nhập hệ thống
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">
+              Cổng thông tin &amp; học liệu số Trường Đại học Thái Bình Dương (TBD)
+            </p>
+          </div>
+        </header>
 
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { username: 'superadmin', password: 'password', label: '👑 Tài khoản superadmin', tenant: 'global' },
-              { username: 'admin', password: 'password', label: '🏛️ Tài khoản admin', tenant: 'hq' },
-              { username: 'librarian', password: 'password', label: '📚 Tài khoản librarian', tenant: 'hq' },
-              { username: 'U002', password: 'password', label: '👤 Tài khoản U002', tenant: 'hq' },
-            ].map((acc) => (
-              <button
-                key={acc.username}
-                type="button"
-                onClick={() => fillAndSubmit(acc.tenant, acc.username, acc.password)}
-                className="p-3 bg-white border border-slate-200 hover:border-teal-300 hover:bg-teal-50/60 rounded-xl transition-all text-left flex flex-col gap-0.5 cursor-pointer"
+        {/* Form */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {mutation.isError && (
+            <Alert variant="destructive" className="bg-red-50 text-red-900 border-red-200">
+              <AlertDescription>
+                {parseFriendlyError(mutation.error, 'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.')}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* 1. Phạm vi đăng nhập */}
+          <div className="space-y-1.5">
+            <Label htmlFor="tenantCode" className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+              Phạm vi đăng nhập
+            </Label>
+            <div className="relative">
+              <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+              <select 
+                id="tenantCode" 
+                {...register('tenantCode')} 
+                className="w-full h-11 px-3 pl-10 pr-8 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm font-medium text-slate-900 transition-all cursor-pointer"
               >
-                <span className="text-xs font-bold text-slate-800">{acc.label}</span>
-                <span className="text-[10px] text-slate-500 font-mono">{acc.username} / {acc.password}</span>
-              </button>
-            ))}
+                <option value="global">Hệ thống tổng</option>
+                <option value="hq">Hà Nội HQ</option>
+                <option value="lib-hcm">Thư viện TP.HCM</option>
+              </select>
+            </div>
+            {errors.tenantCode && (
+              <p className="text-xs text-rose-600 font-medium">
+                {t(errors.tenantCode.message || '', 'Vui lòng chọn phạm vi đăng nhập')}
+              </p>
+            )}
+            <p className="text-[11px] text-slate-500 leading-relaxed italic">
+              Super Admin dùng Hệ thống tổng. Các tài khoản còn lại dùng thư viện/khu vực được phân công.
+            </p>
           </div>
-        </div>
+
+          {/* 2. Tên đăng nhập / Mã thẻ */}
+          <div className="space-y-1.5">
+            <Label htmlFor="username" className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+              Tên đăng nhập / Mã thẻ
+            </Label>
+            <div className="relative">
+              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+              <Input 
+                id="username" 
+                {...register('username')} 
+                className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 rounded-xl focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm" 
+                placeholder="Nhập tên đăng nhập hoặc mã thẻ"
+                autoComplete="username"
+              />
+            </div>
+            {errors.username && (
+              <p className="text-xs text-rose-600 font-medium">
+                {t(errors.username.message || '', 'Vui lòng nhập tên đăng nhập hoặc mã thẻ')}
+              </p>
+            )}
+          </div>
+
+          {/* 3. Mật khẩu */}
+          <div className="space-y-1.5">
+            <Label htmlFor="password" className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+              Mật khẩu
+            </Label>
+            <div className="relative">
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+              <Input 
+                id="password" 
+                type={showPassword ? 'text' : 'password'} 
+                {...register('password')} 
+                className="pl-10 pr-10 h-11 bg-slate-50 border-slate-200 text-slate-900 rounded-xl focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm" 
+                placeholder="••••••••" 
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
+                aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="text-xs text-rose-600 font-medium">
+                {t(errors.password.message || '', 'Vui lòng nhập mật khẩu')}
+              </p>
+            )}
+          </div>
+
+          {/* 4. Nút đăng nhập */}
+          <Button 
+            type="submit" 
+            className="w-full h-11 bg-teal-600 hover:bg-teal-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-md shadow-teal-950/20 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 text-sm mt-2" 
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? (
+              <>
+                <Loader2 className="animate-spin" size={18} />
+                <span>Đang xác thực...</span>
+              </>
+            ) : (
+              <span>Đăng nhập</span>
+            )}
+          </Button>
+        </form>
       </div>
     </div>
   );

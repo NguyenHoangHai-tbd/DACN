@@ -259,7 +259,7 @@
   "auth": {
     "login": {
       "title": "Library Management System",
-      "subtitle": "Sign in to use the demo system",
+      "subtitle": "Digital Library Portal of Thai Binh Duong University (TBD)",
       "username_placeholder": "Enter username or library card number",
       "password_placeholder": "Password",
       "tenant_placeholder": "Select library / branch",
@@ -289,10 +289,10 @@
     "member": "Member - Reader / Member",
     "ai_suggestion": "AI Role Suggestions",
     "four_role_model": "4-Role Model",
-    "demo_flow": "Demo Flow",
-    "login_as": "Demo Role",
+    "demo_flow": "System roles",
+    "login_as": "Current role",
     "unauthorized": "Access Denied",
-    "unauthorized_message": "Access Denied. Your current demo role does not have permission to view this section. Use the top switcher to change roles.",
+    "unauthorized_message": "Access Denied. Your account does not have permission to access this section. Please contact an administrator if you need access.",
     "sidebar": {
       "my_loans": "My Loans",
       "my_holds": "My Holds",

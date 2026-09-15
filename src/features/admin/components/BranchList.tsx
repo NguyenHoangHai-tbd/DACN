@@ -130,7 +130,7 @@ export const BranchList: React.FC = () => {
 
     if (dialogMode === 'create') {
       const isDuplicate = branches?.some(
-        b => b.code.trim().toLowerCase() === code.trim().toLowerCase()
+        b => String(b?.code || '').trim().toLowerCase() === String(code || '').trim().toLowerCase()
       );
       if (isDuplicate) {
         setValidationError('Mã chi nhánh đã tồn tại trong thư viện này');

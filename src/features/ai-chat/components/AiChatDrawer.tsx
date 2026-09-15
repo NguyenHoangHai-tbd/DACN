@@ -52,7 +52,7 @@ export const AiChatDrawer: React.FC<AiChatDrawerProps> = ({ isOpen, onClose }) =
     let mockCitations: Citation[] = [];
     let mockActions: string[] = [];
 
-    const lowerQ = question.toLowerCase();
+    const lowerQ = String(question || '').toLowerCase();
 
     if (lowerQ.includes('phân quyền') || lowerQ.includes('tài khoản')) {
       mockResponse = "Để phân quyền tài khoản:\n**Bước 1**: Đăng nhập bằng Super Admin.\n**Bước 2**: Vào menu Quản lý tài khoản.\n**Bước 3**: Chọn tài khoản cần chỉnh sửa.\n**Bước 4**: Chọn vai trò mới.\n**Bước 5**: Bấm lưu.\n**Bước 6**: Đăng nhập lại tài khoản đó để kiểm tra giao diện theo quyền mới.";

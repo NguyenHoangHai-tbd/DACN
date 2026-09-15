@@ -30,8 +30,6 @@ import { IntegrationManager } from '../../integrations/components/IntegrationMan
 import { MonitoringDashboard } from '../../monitoring/components/MonitoringDashboard';
 import { BrandingManager } from '../../branding/components/BrandingManager';
 import { AiChatDrawer } from '../../ai-chat/components/AiChatDrawer';
-import { RoleSwitcher } from '../../../shared/components/RoleSwitcher';
-import { QuickDemoAccountSwitcher } from '../../../shared/components/QuickDemoAccountSwitcher';
 import { usePermission } from '../../../shared/hooks/usePermission';
 import { useRoleStore } from '../../../shared/store/roleStore';
 import { MemberLoansView, MemberHoldsView, MemberProfileView } from '../../members/components/MemberPortalViews';
@@ -82,7 +80,7 @@ const Forbidden403: React.FC<{ activeTab: string }> = ({ activeTab }) => {
           {t('role.unauthorized', 'Bạn không có quyền truy cập chức năng này')}
         </h3>
         <p className="text-sm text-slate-500 leading-relaxed px-2">
-          {t('role.unauthorized_message', 'Tài khoản của bạn không có đủ quyền hạn để xem mục này. Hãy thử chuyển đổi vai trò Demo bằng menu góc trên.')}
+          {t('role.unauthorized_message', 'Tài khoản của bạn không có đủ quyền hạn để truy cập mục này. Vui lòng liên hệ quản trị viên nếu bạn cần cấp thêm quyền.')}
         </p>
       </div>
 
@@ -118,7 +116,7 @@ const getTabDescription = (tab: string, defaultLabel: string, currentRole?: stri
     policies: 'Cấu hình chính sách mượn trả và hạn mức phạt',
     transfers: 'Luân chuyển sách giữa các chi nhánh thư viện'
   };
-  return descMap[tab] || `Quản lý ${defaultLabel?.toLowerCase()}`;
+  return descMap[tab] || (defaultLabel ? `Quản lý ${String(defaultLabel).toLowerCase()}` : 'Quản lý nghiệp vụ');
 };
 
 export const AdminDashboard: React.FC = () => {
@@ -220,43 +218,61 @@ export const AdminDashboard: React.FC = () => {
   const isTabAllowed = roleConfig.navItems.some(item => item.id === activeTab);
 
   return (
-    <div className="flex h-screen w-full bg-[#f8fafc] text-slate-900 font-sans overflow-hidden">
+    <div className="flex h-screen w-full bg-slate-50 text-slate-900 font-sans overflow-hidden">
       
       {/* Left Sidebar Scrim Backdrop for Mobile */}
       {isMobileSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden"
+          className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-40 lg:hidden"
           onClick={() => setIsMobileSidebarOpen(false)}
         />
       )}
 
       {/* Left Sidebar */}
-      <div className={`fixed inset-y-0 left-0 w-[260px] bg-[#0f172a] text-slate-300 flex flex-col shrink-0 z-50 lg:z-30 transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-6 shrink-0 relative z-10">
-           <div className="flex flex-row items-center gap-3">
-             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-md" style={{ backgroundColor: roleConfig.color }}>
-               <Building2 size={18} />
-             </div>
-             <h1 className="font-bold text-lg text-white tracking-tight text-nowrap">QUẢN LÝ THƯ VIỆN</h1>
-           </div>
-           
-           <button 
-             onClick={() => setIsMobileSidebarOpen(false)}
-             className="lg:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
-           >
-             <X size={20} />
-           </button>
+      <aside 
+        className={`fixed inset-y-0 left-0 w-[270px] bg-slate-950 text-slate-300 border-r border-slate-800/80 flex flex-col shrink-0 z-50 lg:z-30 transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+          isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {/* Brand Logo & Header */}
+        <div className="h-20 flex items-center justify-between px-5 shrink-0 relative z-10 border-b border-slate-800/80">
+          <div className="flex items-center gap-3 min-w-0">
+            <img
+              src="https://lms.tbd.edu.vn/pluginfile.php/1/theme_edumy/headerlogo1/1786323723/logo-TBD-white%20%282%29.png"
+              alt="Logo TBD"
+              className="h-8 object-contain shrink-0"
+              referrerPolicy="no-referrer"
+            />
+            <div className="flex flex-col min-w-0">
+              <span className="font-extrabold text-xs sm:text-sm text-white tracking-wider uppercase truncate">
+                THƯ VIỆN SỐ
+              </span>
+              <span className="text-[10px] text-teal-400 font-semibold tracking-tight truncate">
+                ĐH THÁI BÌNH DƯƠNG
+              </span>
+            </div>
+          </div>
+          
+          <button 
+            onClick={() => setIsMobileSidebarOpen(false)}
+            className="lg:hidden text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800/70 transition-colors cursor-pointer"
+            aria-label="Đóng menu"
+          >
+            <X size={18} />
+          </button>
         </div>
 
-        {/* Context */}
-        <div className="px-6 py-4 mt-2">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 shadow-sm font-sans">THƯ VIỆN</p>
-          <p className="text-sm font-semibold text-slate-100 truncate">{displayTenantName}</p>
+        {/* Context / Scope */}
+        <div className="px-5 py-3 border-b border-slate-800/60 bg-slate-900/40">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">PHẠM VI THƯ VIỆN</p>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Building2 size={13} className="text-teal-400 shrink-0" />
+            <p className="text-xs font-semibold text-slate-200 truncate">{displayTenantName}</p>
+          </div>
         </div>
 
         {/* Navigation Menu */}
-        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-1 hidden-scrollbar mt-2">
+        <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1 hidden-scrollbar" aria-label="Menu chức năng">
           {visibleMenuItems.map(item => {
             const isActive = activeTab === item.id;
             return (
@@ -266,101 +282,110 @@ export const AdminDashboard: React.FC = () => {
                   setActiveTab(item.id);
                   setIsMobileSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 select-none ${
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 cursor-pointer ${
                   isActive 
-                    ? 'text-white shadow-md font-bold' 
-                    : 'hover:bg-slate-800 text-slate-400 hover:text-white'
+                    ? 'bg-teal-600 text-white shadow-sm shadow-teal-950/40 font-bold' 
+                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900/80'
                 }`}
-                style={isActive ? { backgroundColor: roleConfig.color } : undefined}
               >
-                <item.icon size={18} className={isActive ? 'text-white' : 'text-slate-400'} />
-                {item.label}
+                <item.icon size={17} className={isActive ? 'text-white' : 'text-slate-400'} />
+                <span className="truncate">{item.label}</span>
               </button>
             )
           })}
-        </div>
+        </nav>
 
         {/* Bottom User Area */}
-        <div className="p-4 shrink-0 relative z-10 border-t border-slate-800">
-          <div className="rounded-xl p-2.5 flex items-center gap-3 bg-slate-800/50 hover:bg-slate-800 border border-transparent hover:border-slate-700 transition-colors cursor-pointer">
-             <div className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm" style={{ backgroundColor: roleConfig.color }}>
-                {user?.username.charAt(0).toUpperCase() || 'A'}
-             </div>
-             <div className="flex-1 min-w-0 pr-2">
-               <p className="text-xs font-bold text-white truncate">{user?.username || 'Quản trị viên'}</p>
-               <p className="text-[10px] text-slate-400 uppercase tracking-widest truncate mt-0.5">{roleConfig.defaultLabel}</p>
-             </div>
+        <div className="p-3 shrink-0 relative z-10 border-t border-slate-800/80 bg-slate-900/30">
+          <div className="rounded-xl p-2.5 flex items-center gap-3 bg-slate-900/60 border border-slate-800/80">
+            <div className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs bg-teal-600">
+              {user?.username.charAt(0).toUpperCase() || 'A'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-white truncate">{user?.username || 'Quản trị viên'}</p>
+              <p className="text-[10px] text-teal-400 font-medium truncate mt-0.5">{roleConfig.defaultLabel}</p>
+            </div>
           </div>
         </div>
-      </div>
+      </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 bg-white lg:rounded-l-2xl shadow-[-10px_0_30px_rgba(0,0,0,0.05)] border-l border-slate-200 relative z-10 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 bg-slate-50 overflow-hidden relative">
         {/* Top Header Bar */}
-        <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 sm:px-6 shrink-0 lg:pl-8">
-           <div className="flex items-center gap-2 sm:gap-3">
-             
-             {/* Hamburger Mobile Menu Toggle Button */}
-             <button 
-               onClick={() => setIsMobileSidebarOpen(true)}
-               className="lg:hidden text-slate-500 hover:bg-slate-100 p-2 rounded-lg -ml-2 transition-colors mr-1 shrink-0"
-               aria-label="Mở menu"
-             >
-               <Menu size={20} />
-             </button>
+        <header className="h-16 bg-white border-b border-slate-200/80 flex items-center justify-between px-4 sm:px-6 shrink-0 lg:pl-8 z-10">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            {/* Hamburger Mobile Menu Toggle Button */}
+            <button 
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="lg:hidden text-slate-600 hover:text-slate-900 hover:bg-slate-100 p-2 rounded-xl -ml-2 transition-colors cursor-pointer shrink-0"
+              aria-label="Mở menu"
+            >
+              <Menu size={20} />
+            </button>
 
-             {/* Dynamic Role Switcher */}
-             <RoleSwitcher />
-           </div>
+            {/* Current Page Title & Role Badge */}
+            <div className="flex items-center gap-2.5 min-w-0">
+              <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate">
+                {activeItem?.label || 'Bảng điều khiển'}
+              </h1>
 
-           <div className="flex items-center gap-1.5 sm:gap-3 flex-nowrap shrink-0">
-             {/* Tenant selection dropdown for Super Admin */}
-             {currentRole === 'super_admin' && false && (
-               <div className="flex items-center gap-1 bg-purple-50 border border-purple-200 px-2 sm:px-3 py-1 rounded-full shadow-sm shrink-0 select-none">
-                 <span className="text-[10px] font-bold text-purple-500 uppercase tracking-widest hidden sm:inline">Phạm vi:</span>
-                 <select 
-                   value={tenantCode || 'global'} 
-                   onChange={(e) => useAuthStore.setState({ tenantCode: e.target.value })}
-                   className="text-xs font-bold text-purple-700 bg-transparent border-0 outline-none cursor-pointer focus:ring-0 p-0 max-w-[125px] sm:max-w-none text-ellipsis overflow-hidden font-sans"
-                 >
-                   <option value="global">Hệ thống tổng</option>
-                   <option value="hq">Hà Nội HQ</option>
-                    <option value="lib-hcm">Thư viện TP.HCM</option>
-                 </select>
-               </div>
-             )}
+              {/* Read-only Role Badge */}
+              <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold rounded-full border border-slate-200 bg-slate-50 text-slate-700 shadow-xs select-none shrink-0">
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
+                  style={{ backgroundColor: roleConfig.color }}
+                />
+                <span className="truncate text-slate-800">
+                  {t(roleConfig.labelKey, roleConfig.defaultLabel)}
+                </span>
+              </div>
+            </div>
+          </div>
 
-             <Button variant="outline" size="sm" onClick={() => setIsAiChatOpen(true)} className="gap-2 border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 hidden md:flex rounded-xl">
-               <Sparkles size={16} /> <span className="font-semibold text-xs">AI hỗ trợ</span>
-             </Button>
-             <QuickDemoAccountSwitcher />
-             <NotificationBadge />
+          <div className="flex items-center gap-1.5 sm:gap-3 flex-nowrap shrink-0">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsAiChatOpen(true)} 
+              className="gap-1.5 border-teal-200 text-teal-700 bg-teal-50/70 hover:bg-teal-100/80 hover:text-teal-800 hidden md:flex rounded-xl font-medium text-xs h-9 px-3 transition-colors cursor-pointer"
+            >
+              <Sparkles size={15} className="text-teal-600" />
+              <span className="font-semibold text-xs">AI hỗ trợ</span>
+            </Button>
+            <NotificationBadge />
 
-             {/* Lang Toggle */}
-             <div className="flex items-center bg-slate-50 rounded-full p-0.5 border border-slate-200 shrink-0">
-               <button 
-                 onClick={() => i18n.changeLanguage('vi-VN')}
-                 className={`px-1.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold rounded-full transition-colors ${i18n.language === 'vi-VN' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
-               >
-                 VN
-               </button>
-               <button 
-                 onClick={() => i18n.changeLanguage('en-US')}
-                 className={`px-1.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold rounded-full transition-colors ${i18n.language === 'en-US' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
-               >
-                 EN
-               </button>
-             </div>
-             
-             <Button variant="ghost" size="icon" onClick={() => logout()} className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full">
-               <LogOut size={18} />
-             </Button>
-           </div>
+            {/* Lang Toggle */}
+            <div className="flex items-center bg-slate-100 rounded-full p-0.5 border border-slate-200/80 shrink-0">
+              <button 
+                onClick={() => i18n.changeLanguage('vi-VN')}
+                className={`px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-bold rounded-full transition-colors cursor-pointer ${i18n.language === 'vi-VN' ? 'bg-white shadow-xs text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                VN
+              </button>
+              <button 
+                onClick={() => i18n.changeLanguage('en-US')}
+                className={`px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-bold rounded-full transition-colors cursor-pointer ${i18n.language === 'en-US' ? 'bg-white shadow-xs text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                EN
+              </button>
+            </div>
+            
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => logout()} 
+              className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full h-9 w-9 cursor-pointer transition-colors"
+              title={t('auth.logout', 'Đăng xuất')}
+              aria-label="Đăng xuất"
+            >
+              <LogOut size={18} />
+            </Button>
+          </div>
         </header>
 
         {/* Dynamic Main Content Pane */}
-        <main className="flex-1 overflow-y-auto bg-slate-50/30 p-4 sm:p-6 md:p-8 pb-16 relative">
-           <div className="flex flex-col max-w-[1400px] mx-auto min-h-full">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50/50 p-4 sm:p-6 md:p-8 pb-16 relative">
+           <div className="flex flex-col max-w-[1400px] mx-auto w-full min-h-full">
              
 
 
