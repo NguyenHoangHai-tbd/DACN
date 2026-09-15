@@ -18,7 +18,6 @@ import {
   Calendar,
   Layers,
   ChevronRight,
-  CheckCircle2,
   Menu,
   X,
   Info,
@@ -498,119 +497,82 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 3.5. SECTION: VIDEO GIỚI THIỆU KHÔNG GIAN HỌC TẬP TBD */}
-      <section id="experience" className="py-16 sm:py-20 bg-slate-50/60 border-y border-slate-200/60">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Badge nhỏ: Trải Nghiệm Học Tập TBD */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-50 border border-teal-200/80 text-teal-800 text-xs sm:text-sm font-semibold mb-4 shadow-xs">
-            <Play size={13} className="text-teal-600 fill-teal-600" />
-            <span>Trải Nghiệm Học Tập TBD</span>
-          </div>
-
-          {/* Tiêu đề */}
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
-            Khám Phá Không Gian Học Tập &amp; Nghiên Cứu
-          </h2>
-
-          {/* Lời dẫn ngắn */}
-          <p className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed font-normal">
-            Khuôn viên năng động, cơ sở vật chất hiện đại cùng không gian thư viện truyền cảm hứng sáng tạo tại Đại học Thái Bình Dương.
-          </p>
-
-          {/* Khung video YouTube: căn giữa, 16:9, bo góc lớn, viền mờ cao cấp, đổ bóng mềm */}
-          <div className="relative mx-auto w-full max-w-4xl aspect-video rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/80 shadow-2xl shadow-slate-200/80 bg-slate-950">
-            <iframe
-              className="w-full h-full border-0"
-              src="https://www.youtube.com/embed/qqpFn4bEPys"
-              title="Khám Phá Không Gian Học Tập &amp; Nghiên Cứu - Đại học Thái Bình Dương"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* 4. DỊCH VỤ & THỐNG KÊ (Học thuật & Trải nghiệm số) */}
-      <section id="services" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-            Dịch Vụ Trọng Tâm
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
-            Hạ Tầng Hiện Đại – Tiện Ích Đỉnh Cao
-          </h2>
-          <p className="text-slate-600 text-sm sm:text-base mt-2">
-            Được xây dựng nhằm mang lại trải nghiệm tra cứu và nghiên cứu khoa học tốt nhất cho toàn thể cán bộ, giảng viên và sinh viên.
-          </p>
+      {/* 3.5 & 4. KHỐI LIỀN MẠCH: VIDEO GIỚI THIỆU & 3 THẺ TIỆN ÍCH TỐI GIẢN */}
+      <section id="services" className="pt-16 sm:pt-20 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        {/* Badge nhỏ: Trải Nghiệm Học Tập TBD */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-50 border border-teal-200/80 text-teal-800 text-xs sm:text-sm font-semibold mb-4 shadow-xs">
+          <Play size={13} className="text-teal-600 fill-teal-600" />
+          <span>Trải Nghiệm Học Tập TBD</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white p-7 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col items-start">
-            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl mb-4">
+        {/* Tiêu đề */}
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
+          Khám Phá Không Gian Học Tập &amp; Nghiên Cứu
+        </h2>
+
+        {/* Lời dẫn ngắn */}
+        <p className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed font-normal">
+          Khuôn viên năng động, cơ sở vật chất hiện đại cùng không gian thư viện truyền cảm hứng sáng tạo tại Đại học Thái Bình Dương.
+        </p>
+
+        {/* Khung video YouTube: căn giữa, 16:9, bo góc lớn, viền mờ cao cấp, đổ bóng mềm */}
+        <div className="relative mx-auto w-full max-w-4xl aspect-video rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/80 shadow-2xl shadow-slate-200/80 bg-slate-950 mb-12 sm:mb-16">
+          <iframe
+            className="w-full h-full border-0"
+            src="https://www.youtube.com/embed/qqpFn4bEPys"
+            title="Khám Phá Không Gian Học Tập &amp; Nghiên Cứu - Đại học Thái Bình Dương"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        </div>
+
+        {/* 3 Thẻ Tiện Ích Tối Giản (Minimal Cards) - Đồng bộ tông màu Teal / Slate */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-left">
+          {/* Thẻ 1: Học Liệu & Giáo Trình */}
+          <div className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/80 shadow-xs hover:border-teal-500/40 hover:shadow-md transition-all duration-200 flex flex-col items-start group">
+            <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-700 border border-teal-100/80 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
               <GraduationCap size={24} />
             </div>
-            <h4 className="text-base font-bold text-slate-900 mb-2">Tài liệu học phần & Giáo trình</h4>
-            <p className="text-sm text-slate-600 leading-relaxed mb-4">
-              Cập nhật đồng bộ theo khung chương trình đào tạo của Đại học Thái Bình Dương với quyền truy cập bản in và bản điện tử.
+            <h3 className="text-base font-bold text-slate-900 mb-2 group-hover:text-teal-700 transition-colors">
+              Học Liệu &amp; Giáo Trình
+            </h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Cập nhật đồng bộ theo chương trình đào tạo, truy cập bản in và bản số 24/7.
             </p>
-            <ul className="space-y-2 text-xs text-slate-600">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
-                <span>Hơn 45.000 bản sách giấy chuyên khảo</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
-                <span>120.000+ tài liệu nội sinh và luận văn</span>
-              </li>
-            </ul>
           </div>
 
-          <div className="bg-white p-7 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col items-start">
-            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl mb-4">
+          {/* Thẻ 2: Cơ Sở Dữ Liệu Quốc Tế */}
+          <div className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/80 shadow-xs hover:border-teal-500/40 hover:shadow-md transition-all duration-200 flex flex-col items-start group">
+            <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-800 border border-slate-200/60 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
               <Layers size={24} />
             </div>
-            <h4 className="text-base font-bold text-slate-900 mb-2">Cơ sở dữ liệu quốc tế</h4>
-            <p className="text-sm text-slate-600 leading-relaxed mb-4">
-              Kết nối hệ thống cơ sở dữ liệu học thuật quốc tế (Scopus, ScienceDirect, IEEE, ProQuest) phục vụ nghiên cứu chuyên sâu.
+            <h3 className="text-base font-bold text-slate-900 mb-2 group-hover:text-teal-700 transition-colors">
+              Cơ Sở Dữ Liệu Quốc Tế
+            </h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Kết nối nguồn tài nguyên học thuật uy tín phục vụ nghiên cứu chuyên sâu.
             </p>
-            <ul className="space-y-2 text-xs text-slate-600">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 size={14} className="text-indigo-500 shrink-0" />
-                <span>Truy cập toàn văn bài báo khoa học</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 size={14} className="text-indigo-500 shrink-0" />
-                <span>Hỗ trợ trích dẫn và kiểm tra đạo văn</span>
-              </li>
-            </ul>
           </div>
 
-          <div className="bg-white p-7 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col items-start">
-            <div className="p-3 bg-amber-50 text-amber-600 rounded-xl mb-4">
+          {/* Thẻ 3: Không Gian Sáng Tạo */}
+          <div className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/80 shadow-xs hover:border-teal-500/40 hover:shadow-md transition-all duration-200 flex flex-col items-start group">
+            <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-700 border border-teal-100/80 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
               <Library size={24} />
             </div>
-            <h4 className="text-base font-bold text-slate-900 mb-2">Không gian học tập sáng tạo</h4>
-            <p className="text-sm text-slate-600 leading-relaxed mb-4">
-              Không gian mở đa năng, khu đọc yên tĩnh, phòng thuyết trình nhóm và khu vực mượn trả tự động RFID hiện đại.
+            <h3 className="text-base font-bold text-slate-900 mb-2 group-hover:text-teal-700 transition-colors">
+              Không Gian Sáng Tạo
+            </h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Phòng tự học, khu thảo luận nhóm và trạm mượn trả tự động tiện nghi.
             </p>
-            <ul className="space-y-2 text-xs text-slate-600">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 size={14} className="text-amber-500 shrink-0" />
-                <span>Sức chứa hơn 600 chỗ ngồi đồng thời</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 size={14} className="text-amber-500 shrink-0" />
-                <span>Trạm tự mượn trả Self-Check 24/7</span>
-              </li>
-            </ul>
           </div>
         </div>
       </section>
 
       {/* 5. FOOTER 3 CỘT TINH GỌN (NỀN TỐI SANG TRỌNG) */}
-      <footer id="contact" className="mt-auto bg-slate-900 text-slate-300 pt-16 pb-12 border-t border-slate-800 text-left">
+      <footer id="contact" className="mt-auto bg-slate-900 text-slate-300 pt-16 pb-16 border-t border-slate-800 text-left">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-12 pb-12 border-b border-slate-800/80">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-12">
             {/* Cột 1: Logo, tên Thư viện Đại học Thái Bình Dương và lời giới thiệu ngắn */}
             <div id="footer-col-brand" className="space-y-4">
               <div className="flex items-center gap-3">
@@ -683,12 +645,6 @@ export const LandingPage: React.FC = () => {
                 </Button>
               </div>
             </div>
-          </div>
-
-          {/* Dưới cùng: Dòng bản quyền */}
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-            <p>© {new Date().getFullYear()} Thư viện Trường Đại học Thái Bình Dương. Tất cả các quyền được bảo lưu.</p>
-            <p className="text-[11px] text-slate-500">Cổng Dịch Vụ Thư Viện Số</p>
           </div>
         </div>
       </footer>
