@@ -8,11 +8,7 @@ const getBaseUrl = (): string => {
   let url = env?.VITE_API_BASE_URL;
 
   if (!url) {
-    if (typeof window !== 'undefined' && window.location.hostname.endsWith('.run.app')) {
-      url = 'https://galore-harpist-borough.ngrok-free.dev';
-    } else {
-      url = '/api';
-    }
+    url = '/api';
   }
 
   url = url.trim().replace(/\/+$/, '');
@@ -26,13 +22,9 @@ const getBaseUrl = (): string => {
 export const axiosInstance = axios.create({
   baseURL: getBaseUrl(),
   timeout: 10000,
-  headers: {
-    'ngrok-skip-browser-warning': 'true',
-  },
 });
 
 axiosInstance.interceptors.request.use((config) => {
-  config.headers['ngrok-skip-browser-warning'] = 'true';
   const { accessToken, tenantCode, user } = useAuthStore.getState();
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
@@ -100,8 +92,7 @@ axiosInstance.interceptors.response.use(
       try {
         const { data } = await axios.post(
           `${getBaseUrl()}/auth/refresh`,
-          { refreshToken },
-          { headers: { 'ngrok-skip-browser-warning': 'true' } }
+          { refreshToken }
         );
         if (data?.success) {
           setTokens(data.data.accessToken, data.data.refreshToken);

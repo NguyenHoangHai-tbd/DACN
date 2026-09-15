@@ -35,7 +35,7 @@ import { QuickDemoAccountSwitcher } from '../../../shared/components/QuickDemoAc
 import { usePermission } from '../../../shared/hooks/usePermission';
 import { useRoleStore } from '../../../shared/store/roleStore';
 import { MemberLoansView, MemberHoldsView, MemberProfileView } from '../../members/components/MemberPortalViews';
-import { Building2, LogOut, Search, ArrowRightLeft, Users, GitBranch, Globe, BookOpen, MessageSquareText, ScanBarcode, Printer, Activity, Shield, ClipboardList, FileBarChart2, FileSpreadsheet, Sparkles, Zap, BrainCircuit, Bot, ScanLine, Plug, MonitorPlay, Palette, Clock, ShieldCheck, ShieldAlert, Menu, X } from 'lucide-react';
+import { Building2, LogOut, Search, ArrowRightLeft, Users, GitBranch, Globe, BookOpen, MessageSquareText, ScanBarcode, Printer, Activity, Shield, ClipboardList, FileBarChart2, FileSpreadsheet, Sparkles, Zap, BrainCircuit, Bot, ScanLine, Plug, MonitorPlay, Palette, Clock, ShieldCheck, ShieldAlert, Menu, X, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const iconMap: Record<string, React.ComponentType<any>> = {
@@ -233,20 +233,31 @@ export const AdminDashboard: React.FC = () => {
       {/* Left Sidebar */}
       <div className={`fixed inset-y-0 left-0 w-[260px] bg-[#0f172a] text-slate-300 flex flex-col shrink-0 z-50 lg:z-30 transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-6 shrink-0 relative z-10">
-           <div className="flex flex-row items-center gap-3">
-             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-md" style={{ backgroundColor: roleConfig.color }}>
-               <Building2 size={18} />
-             </div>
-             <h1 className="font-bold text-lg text-white tracking-tight text-nowrap">QUẢN LÝ THƯ VIỆN</h1>
-           </div>
-           
-           <button 
-             onClick={() => setIsMobileSidebarOpen(false)}
-             className="lg:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
-           >
-             <X size={20} />
-           </button>
+        <div className="h-16 flex items-center justify-between px-4 sm:px-5 shrink-0 relative z-10 border-b border-white/10">
+          <div className="flex items-center gap-2.5">
+            <img
+              src="https://lms.tbd.edu.vn/pluginfile.php/1/theme_edumy/headerlogo1/1786323723/logo-TBD-white%20%282%29.png"
+              alt="Đại học Thái Bình Dương"
+              className="h-8 sm:h-9 object-contain"
+              referrerPolicy="no-referrer"
+            />
+            <div className="h-5 w-px bg-white/20" />
+            <div className="flex flex-col text-left">
+              <span className="text-teal-400 font-bold text-sm tracking-wider uppercase leading-tight">
+                THƯ VIỆN SỐ
+              </span>
+              <span className="text-slate-400 text-[10px] font-medium tracking-wide leading-tight">
+                ĐH THÁI BÌNH DƯƠNG
+              </span>
+            </div>
+          </div>
+          
+          <button 
+            onClick={() => setIsMobileSidebarOpen(false)}
+            className="lg:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         {/* Context */}
@@ -330,7 +341,19 @@ export const AdminDashboard: React.FC = () => {
                </div>
              )}
 
-             <Button variant="outline" size="sm" onClick={() => setIsAiChatOpen(true)} className="gap-2 border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 hidden md:flex rounded-xl">
+             <Button 
+               variant="outline" 
+               size="sm" 
+               onClick={() => window.open('/', '_blank')} 
+               className="gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-teal-700 rounded-xl hidden sm:flex cursor-pointer transition-colors"
+               title="Mở Cổng bạn đọc (Trang chủ thư viện) trong tab mới"
+             >
+               <Globe size={15} className="text-teal-600" />
+               <span className="font-semibold text-xs">Cổng bạn đọc</span>
+               <ExternalLink size={12} className="text-slate-400" />
+             </Button>
+
+             <Button variant="outline" size="sm" onClick={() => setIsAiChatOpen(true)} className="gap-2 border-teal-200 text-teal-700 bg-teal-50 hover:bg-teal-100 hidden md:flex rounded-xl cursor-pointer">
                <Sparkles size={16} /> <span className="font-semibold text-xs">AI hỗ trợ</span>
              </Button>
              <QuickDemoAccountSwitcher />
@@ -340,13 +363,13 @@ export const AdminDashboard: React.FC = () => {
              <div className="flex items-center bg-slate-50 rounded-full p-0.5 border border-slate-200 shrink-0">
                <button 
                  onClick={() => i18n.changeLanguage('vi-VN')}
-                 className={`px-1.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold rounded-full transition-colors ${i18n.language === 'vi-VN' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                 className={`px-1.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold rounded-full transition-colors cursor-pointer ${i18n.language === 'vi-VN' ? 'bg-white shadow-sm text-teal-600' : 'text-slate-500 hover:text-slate-700'}`}
                >
                  VN
                </button>
                <button 
                  onClick={() => i18n.changeLanguage('en-US')}
-                 className={`px-1.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold rounded-full transition-colors ${i18n.language === 'en-US' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                 className={`px-1.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold rounded-full transition-colors cursor-pointer ${i18n.language === 'en-US' ? 'bg-white shadow-sm text-teal-600' : 'text-slate-500 hover:text-slate-700'}`}
                >
                  EN
                </button>
