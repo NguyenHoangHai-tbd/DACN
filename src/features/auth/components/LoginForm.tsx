@@ -100,15 +100,21 @@ export const LoginForm: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600 transition-colors group cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-teal-600 transition-colors group cursor-pointer"
           >
-            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-            <span>Về trang chủ Thư viện TBD</span>
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform text-teal-600" />
+            <span>Về trang chủ</span>
           </button>
 
           <header className="space-y-1">
-            <h1 className="text-2xl font-extrabold text-slate-900">Hệ thống quản lý thư viện</h1>
-            <p className="text-slate-500">Đăng nhập để sử dụng hệ thống demo</p>
+            <img
+              src="https://lms.tbd.edu.vn/pluginfile.php/1/theme_edumy/headerlogo2/1786323723/logo-TBD-VI.png"
+              alt="Đại học Thái Bình Dương"
+              className="h-10 object-contain mb-3"
+              referrerPolicy="no-referrer"
+            />
+            <h1 className="text-2xl font-extrabold text-slate-900">Cổng Đăng Nhập Thư Viện Số</h1>
+            <p className="text-slate-500 text-sm">Trường Đại học Thái Bình Dương (TBD)</p>
           </header>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -127,7 +133,7 @@ export const LoginForm: React.FC = () => {
                 <select 
                   id="tenantCode" 
                   {...register('tenantCode')} 
-                  className="w-full h-11 px-3 pl-10 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium transition-all cursor-pointer"
+                  className="w-full h-11 px-3 pl-10 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm font-medium transition-all cursor-pointer"
                 >
                   <option value="global">Hệ thống tổng</option>
                   <option value="hq">Hà Nội HQ</option>
@@ -143,7 +149,12 @@ export const LoginForm: React.FC = () => {
               <Label htmlFor="username" className="text-xs font-bold text-slate-600 uppercase tracking-wide">Tên đăng nhập / Mã thẻ</Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 text-slate-400" size={18} />
-                <Input id="username" {...register('username')} className="pl-10 h-11" placeholder="admin" />
+                <Input 
+                  id="username" 
+                  {...register('username')} 
+                  className="pl-10 h-11 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" 
+                  placeholder="admin" 
+                />
               </div>
             </div>
 
@@ -151,16 +162,30 @@ export const LoginForm: React.FC = () => {
               <Label htmlFor="password" className="text-xs font-bold text-slate-600 uppercase tracking-wide">Mật khẩu</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 text-slate-400" size={18} />
-                <Input id="password" type="password" {...register('password')} className="pl-10 h-11" placeholder="••••••••" />
+                <Input 
+                  id="password" 
+                  type="password" 
+                  {...register('password')} 
+                  className="pl-10 h-11 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" 
+                  placeholder="••••••••" 
+                />
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <input type="checkbox" id="remember" className="w-4 h-4 rounded border-slate-300 text-indigo-600" />
+              <input 
+                type="checkbox" 
+                id="remember" 
+                className="w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500 accent-teal-600 cursor-pointer" 
+              />
               <Label htmlFor="remember" className="text-sm font-medium cursor-pointer">Duy trì đăng nhập</Label>
             </div>
 
-            <Button type="submit" className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl" disabled={mutation.isPending}>
+            <Button 
+              type="submit" 
+              className="w-full h-11 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-md shadow-teal-950/20 active:scale-95 transition-all cursor-pointer" 
+              disabled={mutation.isPending}
+            >
               {mutation.isPending ? <Loader2 className="animate-spin" size={20} /> : 'Đăng nhập'}
             </Button>
           </form>
@@ -169,7 +194,7 @@ export const LoginForm: React.FC = () => {
         {/* Right Column: Quick Demo Login */}
         <div className="bg-slate-50 p-6 lg:p-8 border-l border-slate-100 flex flex-col justify-center">
           <div className="flex items-center gap-2 mb-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <Zap size={14} />
+            <Zap size={14} className="text-teal-600" />
             <span>Đăng nhập thử nghiệm nhanh</span>
           </div>
 
@@ -184,7 +209,7 @@ export const LoginForm: React.FC = () => {
                 key={acc.username}
                 type="button"
                 onClick={() => fillAndSubmit(acc.tenant, acc.username, acc.password)}
-                className="p-3 bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 rounded-xl transition-all text-left flex flex-col gap-0.5"
+                className="p-3 bg-white border border-slate-200 hover:border-teal-300 hover:bg-teal-50/60 rounded-xl transition-all text-left flex flex-col gap-0.5 cursor-pointer"
               >
                 <span className="text-xs font-bold text-slate-800">{acc.label}</span>
                 <span className="text-[10px] text-slate-500 font-mono">{acc.username} / {acc.password}</span>
