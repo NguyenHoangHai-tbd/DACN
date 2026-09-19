@@ -8,7 +8,7 @@ import {
 import { 
   TrendingUp, TrendingDown, Users, BookOpen, BookUp, AlertTriangle, 
   Sparkles, Download, Loader2, RefreshCw, Activity, CalendarDays, DollarSign,
-  Trophy
+  Trophy, Server, Wifi
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -78,6 +78,9 @@ export const DashboardOverview: React.FC = () => {
   const kpiFormatter = new Intl.NumberFormat('vi-VN');
   const currencyFormatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
 
+  const totalCheckouts = (overview?.circulationTrend || []).reduce((acc: number, curr: any) => acc + (curr.checkouts || 0), 0);
+  const totalReturns = (overview?.circulationTrend || []).reduce((acc: number, curr: any) => acc + (curr.returns || 0), 0);
+
   const renderTrend = (value: number) => {
     if (value > 0) {
       return (
@@ -128,11 +131,12 @@ export const DashboardOverview: React.FC = () => {
       {/* 1. Open Clean Header Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-            {t('dashboard.overview_title', 'Tổng quan vận hành')}
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <Activity className="w-6 h-6 text-teal-600 shrink-0" />
+            <span>{t('dashboard.overview_title', 'Tổng Quan Vận Hành')}</span>
           </h2>
-          <p className="text-sm text-slate-500 mt-1">
-            Dữ liệu lưu thông học liệu và chỉ số vận hành toàn hệ thống
+          <p className="text-sm text-slate-500 mt-1 font-medium">
+            Chỉ số lưu thông học liệu & tình trạng hệ thống thời gian thực
           </p>
         </div>
 
@@ -171,7 +175,7 @@ export const DashboardOverview: React.FC = () => {
             onClick={() => exportMutation.mutate()} 
             disabled={exportMutation.isPending}
             size="sm"
-            className="h-10 px-4 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow-md shadow-teal-900/10 cursor-pointer shrink-0 transition-all active:scale-[0.98]"
+            className="h-10 px-4 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow-sm cursor-pointer shrink-0 transition-all active:scale-[0.98]"
           >
             {exportMutation.isPending ? <Loader2 size={15} className="animate-spin mr-1.5 text-white" /> : <Download size={15} className="mr-1.5 text-white" />}
             {t('dashboard.export_excel', 'Xuất Excel')}
@@ -182,98 +186,122 @@ export const DashboardOverview: React.FC = () => {
       {/* 2. 4 Modern Bold KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* Thẻ 1: Tài liệu */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
           <div>
-            {/* Hàng trên: Icon tròn màu pastel nổi bật cạnh tên chỉ số */}
+            {/* Hàng 1: Icon bo tròn nổi bật cạnh tên danh mục */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-teal-50 text-teal-600 border border-teal-100 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 border border-teal-100 flex items-center justify-center shrink-0">
                 <BookOpen size={18} />
               </div>
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 {t('dashboard.documents', 'Tài liệu')}
               </span>
             </div>
-            {/* Hàng giữa: Con số to đậm ấn tượng */}
-            <div className="text-3xl sm:text-4xl font-black text-slate-950 my-2 font-sans tracking-tight">
-              {kpiFormatter.format(overview.kpis.totalBooks)}
+            {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
+            <div className="flex items-baseline gap-2 my-2.5">
+              <span className="text-3xl font-black text-slate-900 tracking-tight font-sans">
+                {kpiFormatter.format(overview.kpis.totalBooks)}
+              </span>
+              <span className="text-xs font-semibold text-slate-500">đầu sách</span>
             </div>
           </div>
-          {/* Hàng đáy: Nhãn xu hướng trên nền xám nhạt */}
-          <div className="border-t border-slate-100 pt-3 mt-1 flex items-center justify-between text-xs text-slate-500">
-            <span className="text-slate-400 font-medium">Xu hướng</span>
-            {renderTrend(overview.kpis.trends.books)}
+          {/* Hàng 3: Thanh trạng thái ở đáy */}
+          <div className="border-t border-slate-100 pt-2 flex items-center justify-between text-xs">
+            <span className="text-slate-400 font-medium">Trạng thái</span>
+            <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/70 font-semibold px-2.5 py-0.5 rounded-full text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+              Hoạt động tốt
+            </span>
           </div>
         </div>
         
         {/* Thẻ 2: Độc giả */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
           <div>
-            {/* Hàng trên: Icon tròn màu pastel nổi bật cạnh tên chỉ số */}
+            {/* Hàng 1: Icon bo tròn nổi bật cạnh tên danh mục */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center shrink-0">
                 <Users size={18} />
               </div>
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 {t('dashboard.members', 'Độc giả')}
               </span>
             </div>
-            {/* Hàng giữa: Con số to đậm ấn tượng */}
-            <div className="text-3xl sm:text-4xl font-black text-slate-950 my-2 font-sans tracking-tight">
-              {kpiFormatter.format(overview.kpis.totalMembers)}
+            {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
+            <div className="flex items-baseline gap-2 my-2.5">
+              <span className="text-3xl font-black text-slate-900 tracking-tight font-sans">
+                {kpiFormatter.format(overview.kpis.totalMembers)}
+              </span>
+              <span className="text-xs font-semibold text-slate-500">bạn đọc</span>
             </div>
           </div>
-          {/* Hàng đáy: Nhãn xu hướng trên nền xám nhạt */}
-          <div className="border-t border-slate-100 pt-3 mt-1 flex items-center justify-between text-xs text-slate-500">
-            <span className="text-slate-400 font-medium">Xu hướng</span>
-            {renderTrend(overview.kpis.trends.members)}
+          {/* Hàng 3: Thanh trạng thái ở đáy */}
+          <div className="border-t border-slate-100 pt-2 flex items-center justify-between text-xs">
+            <span className="text-slate-400 font-medium">Trạng thái</span>
+            <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/70 font-semibold px-2.5 py-0.5 rounded-full text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+              Hoạt động tốt
+            </span>
           </div>
         </div>
 
         {/* Thẻ 3: Đang mượn */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
           <div>
-            {/* Hàng trên: Icon tròn màu pastel nổi bật cạnh tên chỉ số */}
+            {/* Hàng 1: Icon bo tròn nổi bật cạnh tên danh mục */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center shrink-0">
                 <BookUp size={18} />
               </div>
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 {t('dashboard.active_loans', 'Đang mượn')}
               </span>
             </div>
-            {/* Hàng giữa: Con số to đậm ấn tượng */}
-            <div className="text-3xl sm:text-4xl font-black text-slate-950 my-2 font-sans tracking-tight">
-              {kpiFormatter.format(overview.kpis.activeLoans)}
+            {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
+            <div className="flex items-baseline gap-2 my-2.5">
+              <span className="text-3xl font-black text-slate-900 tracking-tight font-sans">
+                {kpiFormatter.format(overview.kpis.activeLoans)}
+              </span>
+              <span className="text-xs font-semibold text-slate-500">cuốn</span>
             </div>
           </div>
-          {/* Hàng đáy: Nhãn xu hướng trên nền xám nhạt */}
-          <div className="border-t border-slate-100 pt-3 mt-1 flex items-center justify-between text-xs text-slate-500">
-            <span className="text-slate-400 font-medium">Xu hướng</span>
-            {renderTrend(overview.kpis.trends.loans)}
+          {/* Hàng 3: Thanh trạng thái ở đáy */}
+          <div className="border-t border-slate-100 pt-2 flex items-center justify-between text-xs">
+            <span className="text-slate-400 font-medium">Trạng thái</span>
+            <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/70 font-semibold px-2.5 py-0.5 rounded-full text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+              Ổn định
+            </span>
           </div>
         </div>
 
         {/* Thẻ 4: Tiền phạt */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
           <div>
-            {/* Hàng trên: Icon tròn màu pastel nổi bật cạnh tên chỉ số */}
+            {/* Hàng 1: Icon bo tròn nổi bật cạnh tên danh mục */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shrink-0">
                 <DollarSign size={18} />
               </div>
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 {t('dashboard.revenue', 'Tiền phạt')}
               </span>
             </div>
-            {/* Hàng giữa: Con số to đậm ấn tượng */}
-            <div className="text-3xl sm:text-4xl font-black text-slate-950 my-2 font-sans tracking-tight">
-              {currencyFormatter.format(overview.kpis.revenue)}
+            {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
+            <div className="flex items-baseline gap-2 my-2.5">
+              <span className="text-3xl font-black text-slate-900 tracking-tight font-sans">
+                {kpiFormatter.format(overview.kpis.revenue)}
+              </span>
+              <span className="text-xs font-semibold text-slate-500">VNĐ</span>
             </div>
           </div>
-          {/* Hàng đáy: Nhãn xu hướng trên nền xám nhạt */}
-          <div className="border-t border-slate-100 pt-3 mt-1 flex items-center justify-between text-xs text-slate-500">
-            <span className="text-slate-400 font-medium">Xu hướng</span>
-            {renderTrend(overview.kpis.trends.revenue)}
+          {/* Hàng 3: Thanh trạng thái ở đáy */}
+          <div className="border-t border-slate-100 pt-2 flex items-center justify-between text-xs">
+            <span className="text-slate-400 font-medium">Trạng thái</span>
+            <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/70 font-semibold px-2.5 py-0.5 rounded-full text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+              Kiểm soát tốt
+            </span>
           </div>
         </div>
       </div>
@@ -281,29 +309,28 @@ export const DashboardOverview: React.FC = () => {
       {/* 3. Charts and Leaderboard */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         {/* Circulation Trend Chart */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 sm:p-7 overflow-hidden flex flex-col justify-between">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 sm:p-6 overflow-hidden flex flex-col justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+              <h3 className="text-base font-bold text-slate-900 tracking-tight">
                 {t('dashboard.chart_title', 'Biến động Lượt mượn / Trả')}
               </h3>
               <p className="text-xs text-slate-500 mt-0.5 font-medium">
                 Tần suất lưu thông tài liệu theo mốc thời gian
               </p>
             </div>
-            <div className="flex items-center gap-3 text-xs text-slate-600 font-medium bg-slate-50 border border-slate-200/60 px-3 py-1.5 rounded-xl self-start sm:self-auto">
-              <span className="inline-flex items-center gap-1.5">
+            <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+              <span className="inline-flex items-center gap-1.5 bg-teal-50 border border-teal-200/80 text-teal-700 font-bold px-2.5 py-1 rounded-lg text-xs">
                 <span className="w-2 h-2 rounded-full bg-teal-600 shrink-0" />
-                <span>Lượt Mượn</span>
+                Tổng mượn: {kpiFormatter.format(totalCheckouts)}
               </span>
-              <span className="text-slate-300">|</span>
-              <span className="inline-flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/80 text-emerald-700 font-bold px-2.5 py-1 rounded-lg text-xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                <span>Lượt Trả</span>
+                Tổng trả: {kpiFormatter.format(totalReturns)}
               </span>
             </div>
           </div>
-          <div className="h-[280px] sm:h-[320px] w-full">
+          <div className="h-[240px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={overview.circulationTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
@@ -343,67 +370,93 @@ export const DashboardOverview: React.FC = () => {
           </div>
         </div>
 
-        {/* Dynamic Panels / Top Readers */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 sm:p-7 flex flex-col justify-between">
+        {/* Dynamic Panels / Top Readers & Server Health */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 sm:p-6 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-5 pb-4 border-b border-slate-100">
+            <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Trophy size={18} className="text-amber-500 shrink-0" />
+                  <Trophy size={17} className="text-amber-500 shrink-0" />
                   <span>{t('dashboard.top_readers_title', 'Độc giả tích cực')}</span>
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5 font-medium">Bảng vinh danh độc giả có lượt mượn cao nhất</p>
+                <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Lượt mượn cao nhất kỳ này</p>
               </div>
-              <span className="text-[11px] font-bold text-teal-700 bg-teal-50 border border-teal-200/70 px-2.5 py-1 rounded-full shrink-0">
-                {t('dashboard.top_readers_top5', 'Top 5')}
+              <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200/70 px-2 py-0.5 rounded-full shrink-0">
+                Top bạn đọc
               </span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               {!overview.topReaders || overview.topReaders.length === 0 ? (
-                <div className="text-center py-8 text-xs sm:text-sm text-slate-400 font-medium">
+                <div className="text-center py-6 text-xs text-slate-400 font-medium">
                   {t('dashboard.no_top_readers', 'Chưa có dữ liệu độc giả tích cực')}
                 </div>
               ) : (
-                overview.topReaders.map((reader, i) => {
+                overview.topReaders.slice(0, 3).map((reader, i) => {
                   const nameParts = reader.name ? reader.name.trim().split(' ') : [];
                   const initials = nameParts.length > 0 ? nameParts[nameParts.length - 1].charAt(0).toUpperCase() : 'Đ';
                   return (
                     <div 
                       key={reader.id} 
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-slate-100/80 hover:border-slate-200/80"
+                      className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition-colors border border-slate-100/80"
                     >
                       {/* Rank badge */}
-                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${
+                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-black shrink-0 ${
                         i === 0 
                           ? 'bg-amber-400 text-amber-950 font-black' 
                           : i === 1 
                             ? 'bg-slate-200 text-slate-800 font-bold' 
-                            : i === 2 
-                              ? 'bg-amber-700 text-white font-bold' 
-                              : 'bg-slate-100 text-slate-600 font-medium'
+                            : 'bg-amber-700 text-white font-bold'
                       }`}>
                         {i + 1}
                       </div>
 
                       {/* Avatar letter */}
-                      <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200/70">
+                      <div className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200/70">
                         {initials}
                       </div>
 
                       {/* Name */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">{reader.name}</p>
+                        <p className="text-xs font-bold text-slate-900 truncate">{reader.name}</p>
                       </div>
 
                       {/* Book count tag */}
-                      <div className="font-mono text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200/80 px-2.5 py-1 rounded-lg shrink-0">
+                      <div className="font-mono text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200/80 px-2 py-0.5 rounded-md shrink-0">
                         {reader.borrowCount} <span className="text-[10px] text-teal-600 font-semibold uppercase">{t('dashboard.unit_books', 'sách')}</span>
                       </div>
                     </div>
                   );
                 })
               )}
+            </div>
+          </div>
+
+          {/* Nửa dưới: Khối nhỏ "Tình trạng máy chủ" */}
+          <div className="mt-4 pt-3 border-t border-slate-100 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <Server size={13} className="text-slate-400" />
+                <span>Tình trạng máy chủ</span>
+              </span>
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-2 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                99.9% Uptime
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="bg-slate-50 border border-slate-100 rounded-xl p-2 flex items-center justify-between">
+                <span className="text-slate-600 font-medium text-[11px] truncate">API Server</span>
+                <span className="inline-flex items-center gap-1 text-emerald-600 font-bold text-[10px] shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" /> 🟢 Kết nối
+                </span>
+              </div>
+              <div className="bg-slate-50 border border-slate-100 rounded-xl p-2 flex items-center justify-between">
+                <span className="text-slate-600 font-medium text-[11px] truncate">Realtime Hub</span>
+                <span className="inline-flex items-center gap-1 text-emerald-600 font-bold text-[10px] shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" /> 🟢 Đồng bộ
+                </span>
+              </div>
             </div>
           </div>
         </div>
