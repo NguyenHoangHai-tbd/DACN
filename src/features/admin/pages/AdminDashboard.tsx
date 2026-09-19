@@ -280,10 +280,10 @@ export const AdminDashboard: React.FC = () => {
                   setActiveTab(item.id);
                   setIsMobileSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 cursor-pointer ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition-all duration-150 select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 cursor-pointer ${
                   isActive 
-                    ? 'bg-teal-600 text-white font-bold rounded-xl shadow-md shadow-teal-950/40' 
-                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900/80'
+                    ? 'bg-teal-600 text-white font-bold rounded-2xl shadow-md shadow-teal-900/30 border border-teal-500/30' 
+                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900/80 rounded-2xl'
                 }`}
               >
                 <item.icon size={17} className={isActive ? 'text-white' : 'text-slate-400'} />
@@ -344,7 +344,7 @@ export const AdminDashboard: React.FC = () => {
             {/* Nút Cổng Thư Viện */}
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => window.open('/landing', '_blank')}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-teal-700 hover:bg-teal-50/60 rounded-xl border border-slate-200/80 transition-colors cursor-pointer shrink-0"
               title="Xem Cổng Thư Viện công khai"
             >
@@ -396,22 +396,6 @@ export const AdminDashboard: React.FC = () => {
         {/* Dynamic Main Content Pane */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50/50 p-4 sm:p-6 md:p-8 pb-16 relative">
            <div className="flex flex-col max-w-[1400px] mx-auto w-full min-h-full">
-             
-
-
-             <div className="flex flex-col gap-1 mb-8 shrink-0">
-               <div className="flex items-center justify-between">
-                 {isTabAllowed && (
-                   <h2 className="text-2xl font-bold text-slate-800 tracking-tight">{activeItem?.label}</h2>
-                 )}
-                 
-
-               </div>
-               {isTabAllowed && (
-                 <p className="text-sm text-slate-500 font-medium">{getTabDescription(activeTab, activeItem?.label, currentRole)}</p>
-               )}
-             </div>
-
              <div className="flex-1 relative pb-10">
                {/* Inner View Components with 403 Gating */}
                {!isTabAllowed && <Forbidden403 activeTab={activeTab} />}
