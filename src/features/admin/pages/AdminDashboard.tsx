@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '../services/adminService';
@@ -33,7 +34,7 @@ import { AiChatDrawer } from '../../ai-chat/components/AiChatDrawer';
 import { usePermission } from '../../../shared/hooks/usePermission';
 import { useRoleStore } from '../../../shared/store/roleStore';
 import { MemberLoansView, MemberHoldsView, MemberProfileView } from '../../members/components/MemberPortalViews';
-import { Building2, LogOut, Search, ArrowRightLeft, Users, GitBranch, Globe, BookOpen, MessageSquareText, ScanBarcode, Printer, Activity, Shield, ClipboardList, FileBarChart2, FileSpreadsheet, Sparkles, Zap, BrainCircuit, Bot, ScanLine, Plug, MonitorPlay, Palette, Clock, ShieldCheck, ShieldAlert, Menu, X } from 'lucide-react';
+import { Building2, LogOut, Search, ArrowRightLeft, Users, GitBranch, Globe, BookOpen, MessageSquareText, ScanBarcode, Printer, Activity, Shield, ClipboardList, FileBarChart2, FileSpreadsheet, Sparkles, Zap, BrainCircuit, Bot, ScanLine, Plug, MonitorPlay, Palette, Clock, ShieldCheck, ShieldAlert, Menu, X, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const iconMap: Record<string, React.ComponentType<any>> = {
@@ -120,6 +121,7 @@ const getTabDescription = (tab: string, defaultLabel: string, currentRole?: stri
 };
 
 export const AdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { user, tenantCode, logout } = useAuthStore();
   const { i18n, t } = useTranslation();
   const [isAiChatOpen, setIsAiChatOpen] = useState(false);
@@ -236,21 +238,17 @@ export const AdminDashboard: React.FC = () => {
       >
         {/* Brand Logo & Header */}
         <div className="h-20 flex items-center justify-between px-5 shrink-0 relative z-10 border-b border-slate-800/80">
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0">
             <img
               src="https://lms.tbd.edu.vn/pluginfile.php/1/theme_edumy/headerlogo1/1786323723/logo-TBD-white%20%282%29.png"
               alt="Logo TBD"
               className="h-8 object-contain shrink-0"
               referrerPolicy="no-referrer"
             />
-            <div className="flex flex-col min-w-0">
-              <span className="font-extrabold text-xs sm:text-sm text-white tracking-wider uppercase truncate">
-                THƯ VIỆN SỐ
-              </span>
-              <span className="text-[10px] text-teal-400 font-semibold tracking-tight truncate">
-                ĐH THÁI BÌNH DƯƠNG
-              </span>
-            </div>
+            <div className="h-4 w-px bg-white/20 shrink-0" />
+            <span className="text-teal-400 font-bold text-xs uppercase tracking-wider truncate">
+              THƯ VIỆN SỐ
+            </span>
           </div>
           
           <button 
@@ -264,10 +262,10 @@ export const AdminDashboard: React.FC = () => {
 
         {/* Context / Scope */}
         <div className="px-5 py-3 border-b border-slate-800/60 bg-slate-900/40">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">PHẠM VI THƯ VIỆN</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Phạm vi hoạt động</p>
           <div className="flex items-center gap-1.5 min-w-0">
             <Building2 size={13} className="text-teal-400 shrink-0" />
-            <p className="text-xs font-semibold text-slate-200 truncate">{displayTenantName}</p>
+            <p className="text-xs text-teal-300 font-semibold truncate">{displayTenantName}</p>
           </div>
         </div>
 
@@ -284,7 +282,7 @@ export const AdminDashboard: React.FC = () => {
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 cursor-pointer ${
                   isActive 
-                    ? 'bg-teal-600 text-white shadow-sm shadow-teal-950/40 font-bold' 
+                    ? 'bg-teal-600 text-white font-bold rounded-xl shadow-md shadow-teal-950/40' 
                     : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900/80'
                 }`}
               >
@@ -297,7 +295,7 @@ export const AdminDashboard: React.FC = () => {
 
         {/* Bottom User Area */}
         <div className="p-3 shrink-0 relative z-10 border-t border-slate-800/80 bg-slate-900/30">
-          <div className="rounded-xl p-2.5 flex items-center gap-3 bg-slate-900/60 border border-slate-800/80">
+          <div className="rounded-2xl p-2.5 flex items-center gap-3 bg-slate-900/60 border border-slate-800">
             <div className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs bg-teal-600">
               {user?.username.charAt(0).toUpperCase() || 'A'}
             </div>
@@ -312,7 +310,7 @@ export const AdminDashboard: React.FC = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 bg-slate-50 overflow-hidden relative">
         {/* Top Header Bar */}
-        <header className="h-16 bg-white border-b border-slate-200/80 flex items-center justify-between px-4 sm:px-6 shrink-0 lg:pl-8 z-10">
+        <header className="h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/80 flex items-center justify-between px-4 sm:px-6 shrink-0 lg:pl-8 z-10">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             {/* Hamburger Mobile Menu Toggle Button */}
             <button 
@@ -342,15 +340,27 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-3 flex-nowrap shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 flex-nowrap shrink-0">
+            {/* Nút Cổng Thư Viện */}
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-teal-700 hover:bg-teal-50/60 rounded-xl border border-slate-200/80 transition-colors cursor-pointer shrink-0"
+              title="Xem Cổng Thư Viện công khai"
+            >
+              <span>🌐</span>
+              <span className="hidden sm:inline">Cổng Thư Viện</span>
+              <ExternalLink size={13} className="text-slate-400" />
+            </button>
+
             <Button 
               variant="outline" 
               size="sm" 
               onClick={() => setIsAiChatOpen(true)} 
-              className="gap-1.5 border-teal-200 text-teal-700 bg-teal-50/70 hover:bg-teal-100/80 hover:text-teal-800 hidden md:flex rounded-xl font-medium text-xs h-9 px-3 transition-colors cursor-pointer"
+              className="gap-1.5 bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100 rounded-xl hidden md:flex font-semibold text-xs h-9 px-3 transition-colors cursor-pointer"
             >
               <Sparkles size={15} className="text-teal-600" />
-              <span className="font-semibold text-xs">AI hỗ trợ</span>
+              <span>AI hỗ trợ</span>
             </Button>
             <NotificationBadge />
 

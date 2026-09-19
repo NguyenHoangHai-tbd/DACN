@@ -21,7 +21,7 @@ export const ROLE_CONFIGS: Record<string, RoleConfig> = {
     id: 'super_admin',
     labelKey: 'role.super_admin',
     defaultLabel: 'Super Admin - Quản trị hệ thống',
-    color: '#534AB7',
+    color: '#0d9488',
     defaultPath: 'dashboard',
     navItems: [
       { id: 'dashboard', iconName: 'Activity', labelKey: 'menu.dashboard', defaultLabel: 'Tổng quan' },
