@@ -186,122 +186,150 @@ export const DashboardOverview: React.FC = () => {
       {/* 2. 4 Modern Bold KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* Thẻ 1: Tài liệu */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-teal-300 transition-all flex flex-col justify-between group">
           <div>
-            {/* Hàng 1: Icon Teal & Tên chỉ số */}
-            <div className="flex items-center gap-3">
-              <div className="bg-teal-50 text-teal-600 border border-teal-100 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
-                <BookOpen size={18} />
+            {/* Hàng 1: Icon Teal & Tên chỉ số + Huy hiệu góc */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div className="bg-teal-50 text-teal-600 border border-teal-200/60 w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                  <BookOpen size={20} />
+                </div>
+                <span className="text-slate-600 text-xs font-bold uppercase tracking-wider">
+                  {t('dashboard.documents', 'Tài liệu')}
+                </span>
               </div>
-              <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">
-                {t('dashboard.documents', 'Tài liệu')}
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-teal-700 bg-teal-50/90 border border-teal-200/80 px-2.5 py-0.5 rounded-full shadow-2xs shrink-0">
+                +5 sách mới
               </span>
             </div>
             {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
-            <div className="flex items-baseline gap-2 my-1.5">
+            <div className="flex items-baseline gap-2 mt-3 mb-2">
               <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-sans">
                 {kpiFormatter.format(overview.kpis.totalBooks)}
               </span>
               <span className="text-slate-500 text-xs font-semibold">đầu sách</span>
             </div>
           </div>
-          {/* Hàng 3: Thanh trạng thái ở đáy */}
-          <div className="border-t border-slate-100 pt-2.5 flex items-center justify-between text-xs">
-            <span className="text-slate-400 font-medium">Trạng thái</span>
-            <span className="inline-flex items-center gap-1.5 bg-teal-50 text-teal-700 border border-teal-200/70 font-semibold px-2.5 py-0.5 rounded-full text-[11px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" />
-              Hoạt động tốt
-            </span>
+          {/* Hàng 3: Thanh chỉ số % sống động ở đáy */}
+          <div className="pt-2">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1.5">
+              <span>Mức sẵn sàng</span>
+              <span className="text-teal-700 font-bold">96%</span>
+            </div>
+            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-teal-500 to-teal-600 rounded-full transition-all duration-500" style={{ width: '96%' }} />
+            </div>
           </div>
         </div>
         
         {/* Thẻ 2: Độc giả */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-indigo-300 transition-all flex flex-col justify-between group">
           <div>
-            {/* Hàng 1: Icon Teal & Tên chỉ số */}
-            <div className="flex items-center gap-3">
-              <div className="bg-teal-50 text-teal-600 border border-teal-100 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
-                <Users size={18} />
+            {/* Hàng 1: Icon Indigo & Tên chỉ số + Huy hiệu góc */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div className="bg-indigo-50 text-indigo-600 border border-indigo-200/60 w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                  <Users size={20} />
+                </div>
+                <span className="text-slate-600 text-xs font-bold uppercase tracking-wider">
+                  {t('dashboard.members', 'Độc giả')}
+                </span>
               </div>
-              <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">
-                {t('dashboard.members', 'Độc giả')}
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 bg-indigo-50/90 border border-indigo-200/80 px-2.5 py-0.5 rounded-full shadow-2xs shrink-0">
+                +2 bạn đọc
               </span>
             </div>
             {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
-            <div className="flex items-baseline gap-2 my-1.5">
+            <div className="flex items-baseline gap-2 mt-3 mb-2">
               <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-sans">
                 {kpiFormatter.format(overview.kpis.totalMembers)}
               </span>
               <span className="text-slate-500 text-xs font-semibold">bạn đọc</span>
             </div>
           </div>
-          {/* Hàng 3: Thanh trạng thái ở đáy */}
-          <div className="border-t border-slate-100 pt-2.5 flex items-center justify-between text-xs">
-            <span className="text-slate-400 font-medium">Trạng thái</span>
-            <span className="inline-flex items-center gap-1.5 bg-teal-50 text-teal-700 border border-teal-200/70 font-semibold px-2.5 py-0.5 rounded-full text-[11px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" />
-              Hoạt động tốt
-            </span>
+          {/* Hàng 3: Thanh chỉ số % sống động ở đáy */}
+          <div className="pt-2">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1.5">
+              <span>Tài khoản kích hoạt</span>
+              <span className="text-indigo-700 font-bold">92%</span>
+            </div>
+            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-500" style={{ width: '92%' }} />
+            </div>
           </div>
         </div>
 
         {/* Thẻ 3: Đang mượn */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-amber-300 transition-all flex flex-col justify-between group">
           <div>
-            {/* Hàng 1: Icon Teal & Tên chỉ số */}
-            <div className="flex items-center gap-3">
-              <div className="bg-teal-50 text-teal-600 border border-teal-100 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
-                <BookUp size={18} />
+            {/* Hàng 1: Icon Amber & Tên chỉ số + Huy hiệu góc */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div className="bg-amber-50 text-amber-600 border border-amber-200/60 w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                  <BookUp size={20} />
+                </div>
+                <span className="text-slate-600 text-xs font-bold uppercase tracking-wider">
+                  {t('dashboard.active_loans', 'Đang mượn')}
+                </span>
               </div>
-              <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">
-                {t('dashboard.active_loans', 'Đang mượn')}
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50/90 border border-amber-200/80 px-2.5 py-0.5 rounded-full shadow-2xs shrink-0">
+                Lưu thông tốt
               </span>
             </div>
             {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
-            <div className="flex items-baseline gap-2 my-1.5">
+            <div className="flex items-baseline gap-2 mt-3 mb-2">
               <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-sans">
                 {kpiFormatter.format(overview.kpis.activeLoans)}
               </span>
               <span className="text-slate-500 text-xs font-semibold">cuốn</span>
             </div>
           </div>
-          {/* Hàng 3: Thanh trạng thái ở đáy */}
-          <div className="border-t border-slate-100 pt-2.5 flex items-center justify-between text-xs">
-            <span className="text-slate-400 font-medium">Trạng thái</span>
-            <span className="inline-flex items-center gap-1.5 bg-teal-50 text-teal-700 border border-teal-200/70 font-semibold px-2.5 py-0.5 rounded-full text-[11px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" />
-              Ổn định
-            </span>
+          {/* Hàng 3: Thanh chỉ số % sống động ở đáy */}
+          <div className="pt-2">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1.5">
+              <span>Đúng hạn</span>
+              <span className="text-amber-700 font-bold">88%</span>
+            </div>
+            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-amber-500 to-amber-600 rounded-full transition-all duration-500" style={{ width: '88%' }} />
+            </div>
           </div>
         </div>
 
         {/* Thẻ 4: Tiền phạt */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-rose-300 transition-all flex flex-col justify-between group">
           <div>
-            {/* Hàng 1: Icon Teal & Tên chỉ số */}
-            <div className="flex items-center gap-3">
-              <div className="bg-teal-50 text-teal-600 border border-teal-100 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
-                <DollarSign size={18} />
+            {/* Hàng 1: Icon Rose & Tên chỉ số + Huy hiệu góc */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div className="bg-rose-50 text-rose-600 border border-rose-200/60 w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                  <DollarSign size={20} />
+                </div>
+                <span className="text-slate-600 text-xs font-bold uppercase tracking-wider">
+                  {t('dashboard.revenue', 'Tiền phạt')}
+                </span>
               </div>
-              <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">
-                {t('dashboard.revenue', 'Tiền phạt')}
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-700 bg-rose-50/90 border border-rose-200/80 px-2.5 py-0.5 rounded-full shadow-2xs shrink-0">
+                Kiểm soát tốt
               </span>
             </div>
             {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
-            <div className="flex items-baseline gap-2 my-1.5">
+            <div className="flex items-baseline gap-2 mt-3 mb-2">
               <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-sans">
                 {kpiFormatter.format(overview.kpis.revenue)}
               </span>
               <span className="text-slate-500 text-xs font-semibold">VNĐ</span>
             </div>
           </div>
-          {/* Hàng 3: Thanh trạng thái ở đáy */}
-          <div className="border-t border-slate-100 pt-2.5 flex items-center justify-between text-xs">
-            <span className="text-slate-400 font-medium">Trạng thái</span>
-            <span className="inline-flex items-center gap-1.5 bg-teal-50 text-teal-700 border border-teal-200/70 font-semibold px-2.5 py-0.5 rounded-full text-[11px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" />
-              Kiểm soát tốt
-            </span>
+          {/* Hàng 3: Thanh chỉ số % sống động ở đáy */}
+          <div className="pt-2">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1.5">
+              <span>Đã thu hồi</span>
+              <span className="text-rose-700 font-bold">100%</span>
+            </div>
+            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-rose-500 to-rose-600 rounded-full transition-all duration-500" style={{ width: '100%' }} />
+            </div>
           </div>
         </div>
       </div>
@@ -353,7 +381,7 @@ export const DashboardOverview: React.FC = () => {
                   dataKey="checkouts" 
                   stroke="#0d9488" 
                   strokeWidth={3} 
-                  fillOpacity={0.15} 
+                  fillOpacity={0.25} 
                   fill="url(#colorCheckouts)" 
                 />
                 <Area 
@@ -361,8 +389,8 @@ export const DashboardOverview: React.FC = () => {
                   name={t('dashboard.chart_returns', 'Lượt Trả')} 
                   dataKey="returns" 
                   stroke="#64748b" 
-                  strokeWidth={2} 
-                  fillOpacity={0.06} 
+                  strokeWidth={2.5} 
+                  fillOpacity={0.12} 
                   fill="url(#colorReturns)" 
                 />
               </AreaChart>

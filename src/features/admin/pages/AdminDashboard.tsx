@@ -328,16 +328,16 @@ export const AdminDashboard: React.FC = () => {
 
         {/* Left Sidebar (260px) */}
         <aside 
-          className={`fixed lg:relative inset-y-0 lg:inset-y-auto left-0 top-16 lg:top-0 bottom-0 w-[260px] bg-slate-950 text-slate-300 border-r border-slate-800/80 flex flex-col shrink-0 z-50 lg:z-10 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          className={`fixed lg:relative inset-y-0 lg:inset-y-auto left-0 top-16 lg:top-0 bottom-0 w-[260px] bg-white text-slate-700 border-r border-slate-200/80 flex flex-col shrink-0 z-50 lg:z-10 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
             isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
           {/* Context / Scope */}
-          <div className="px-4 py-3 bg-slate-900/60 border-b border-slate-800/80">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Phạm vi hoạt động</p>
+          <div className="px-4 py-3 bg-slate-50/80 border-b border-slate-100">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Phạm vi hoạt động</p>
             <div className="flex items-center gap-1.5 min-w-0">
-              <Building2 size={13} className="text-teal-400 shrink-0" />
-              <p className="text-xs text-teal-300 font-semibold truncate">{displayTenantName}</p>
+              <Building2 size={13} className="text-teal-600 shrink-0" />
+              <p className="text-xs text-slate-800 font-bold truncate">{displayTenantName}</p>
             </div>
           </div>
 
@@ -352,13 +352,13 @@ export const AdminDashboard: React.FC = () => {
                     setActiveTab(item.id);
                     setIsMobileSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 cursor-pointer ${
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 cursor-pointer ${
                     isActive 
-                      ? 'bg-teal-500/10 text-teal-300 border-l-2 border-teal-400 shadow-xs' 
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      ? 'bg-teal-50 text-teal-700 font-bold border-l-4 border-teal-600 shadow-xs' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
                   }`}
                 >
-                  <item.icon size={17} className={isActive ? 'text-teal-300' : 'text-slate-400'} />
+                  <item.icon size={17} className={isActive ? 'text-teal-700' : 'text-slate-500'} />
                   <span className="truncate">{item.label}</span>
                 </button>
               );
@@ -366,14 +366,14 @@ export const AdminDashboard: React.FC = () => {
           </nav>
 
           {/* Bottom User Area */}
-          <div className="p-3 border-t border-slate-800/80 bg-slate-900/30 rounded-xl m-3 shrink-0">
+          <div className="p-3 border border-slate-100 bg-slate-50/80 rounded-xl m-3 shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs bg-teal-600">
                 {user?.username.charAt(0).toUpperCase() || 'A'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-white truncate">{user?.username || 'Quản trị viên'}</p>
-                <p className="text-teal-400 text-[11px] font-medium truncate mt-0.5">{roleConfig.defaultLabel}</p>
+                <p className="text-sm font-bold text-slate-800 truncate">{user?.username || 'Quản trị viên'}</p>
+                <p className="text-teal-600 text-[11px] font-medium truncate mt-0.5">{roleConfig.defaultLabel}</p>
               </div>
             </div>
           </div>
