@@ -220,24 +220,21 @@ export const AdminDashboard: React.FC = () => {
   const isTabAllowed = roleConfig.navItems.some(item => item.id === activeTab);
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 text-slate-900 font-sans overflow-hidden">
+    <div className="flex flex-col h-screen w-full bg-slate-50 text-slate-900 font-sans overflow-hidden">
       
-      {/* Left Sidebar Scrim Backdrop for Mobile */}
-      {isMobileSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-40 lg:hidden"
-          onClick={() => setIsMobileSidebarOpen(false)}
-        />
-      )}
+      {/* 1. Full-Width Topbar Header */}
+      <header className="bg-slate-950 border-b border-white/10 text-white h-16 w-full flex items-center justify-between px-5 sm:px-6 z-50 shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          {/* Hamburger Mobile Menu Toggle Button */}
+          <button 
+            onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+            className="lg:hidden text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+            aria-label="Mở menu"
+          >
+            {isMobileSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
 
-      {/* Left Sidebar */}
-      <aside 
-        className={`fixed inset-y-0 left-0 w-[270px] bg-slate-950 text-slate-300 border-r border-slate-800/80 flex flex-col shrink-0 z-50 lg:z-30 transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
-          isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        {/* Brand Logo & Header */}
-        <div className="h-20 flex items-center justify-between px-5 shrink-0 relative z-10 border-b border-slate-800/80">
+          {/* Logo TBD & Brand */}
           <div className="flex items-center gap-2.5 min-w-0">
             <img
               src="https://lms.tbd.edu.vn/pluginfile.php/1/theme_edumy/headerlogo1/1786323723/logo-TBD-white%20%282%29.png"
@@ -250,197 +247,180 @@ export const AdminDashboard: React.FC = () => {
               THƯ VIỆN SỐ
             </span>
           </div>
-          
-          <button 
-            onClick={() => setIsMobileSidebarOpen(false)}
-            className="lg:hidden text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800/70 transition-colors cursor-pointer"
-            aria-label="Đóng menu"
+
+          {/* Read-only Role Badge */}
+          <div className="hidden md:inline-flex items-center gap-2 bg-teal-500/15 border border-teal-500/30 text-teal-300 text-xs font-semibold px-3 py-1 rounded-full shadow-xs select-none shrink-0 ml-1">
+            <span className="w-2 h-2 rounded-full shrink-0 shadow-xs bg-teal-400" />
+            <span className="truncate font-semibold">
+              {t(roleConfig.labelKey, roleConfig.defaultLabel)}
+            </span>
+          </div>
+        </div>
+
+        {/* Right Tools & Actions */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 flex-nowrap shrink-0">
+          {/* Nút Cổng Thư Viện */}
+          <button
+            type="button"
+            onClick={() => window.open('/landing', '_blank')}
+            className="inline-flex items-center gap-1.5 text-slate-200 hover:text-white bg-white/5 hover:bg-white/10 border border-white/15 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0"
+            title="Xem Cổng Thư Viện công khai"
           >
-            <X size={18} />
+            <span>🌐</span>
+            <span className="hidden sm:inline">Cổng Thư Viện</span>
+            <ExternalLink size={13} className="text-slate-400" />
           </button>
-        </div>
 
-        {/* Context / Scope */}
-        <div className="px-5 py-3 border-b border-slate-800/60 bg-slate-900/40">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Phạm vi hoạt động</p>
-          <div className="flex items-center gap-1.5 min-w-0">
-            <Building2 size={13} className="text-teal-400 shrink-0" />
-            <p className="text-xs text-teal-300 font-semibold truncate">{displayTenantName}</p>
+          {/* Nút AI Hỗ Trợ */}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setIsAiChatOpen(true)} 
+            className="gap-1.5 bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 border border-teal-500/30 font-semibold text-xs h-9 px-3.5 rounded-xl transition-all hidden md:flex cursor-pointer"
+          >
+            <Sparkles size={15} className="text-teal-300" />
+            <span>AI hỗ trợ</span>
+          </Button>
+          
+          <div className="text-slate-300 hover:text-white [&_button]:hover:bg-white/10 [&_svg]:text-slate-300">
+            <NotificationBadge />
           </div>
-        </div>
 
-        {/* Navigation Menu */}
-        <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1 hidden-scrollbar" aria-label="Menu chức năng">
-          {visibleMenuItems.map(item => {
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveTab(item.id);
-                  setIsMobileSidebarOpen(false);
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition-all duration-150 select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 cursor-pointer ${
-                  isActive 
-                    ? 'bg-teal-600 text-white font-bold rounded-2xl shadow-md shadow-teal-900/30 border border-teal-500/30' 
-                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900/80 rounded-2xl'
-                }`}
-              >
-                <item.icon size={17} className={isActive ? 'text-white' : 'text-slate-400'} />
-                <span className="truncate">{item.label}</span>
-              </button>
-            )
-          })}
-        </nav>
-
-        {/* Bottom User Area */}
-        <div className="p-3 shrink-0 relative z-10 border-t border-slate-800/80 bg-slate-900/30">
-          <div className="rounded-2xl p-2.5 flex items-center gap-3 bg-slate-900/60 border border-slate-800">
-            <div className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs bg-teal-600">
-              {user?.username.charAt(0).toUpperCase() || 'A'}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-white truncate">{user?.username || 'Quản trị viên'}</p>
-              <p className="text-[10px] text-teal-400 font-medium truncate mt-0.5">{roleConfig.defaultLabel}</p>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 bg-slate-50 overflow-hidden relative">
-        {/* Top Header Bar */}
-        <header className="h-16 bg-slate-950/95 backdrop-blur-md border-b border-white/10 text-white flex items-center justify-between px-4 sm:px-6 shrink-0 lg:pl-8 z-10">
-          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-            {/* Hamburger Mobile Menu Toggle Button */}
+          {/* Lang Toggle */}
+          <div className="flex items-center bg-white/5 border border-white/10 p-0.5 rounded-full text-slate-300 shrink-0">
             <button 
-              onClick={() => setIsMobileSidebarOpen(true)}
-              className="lg:hidden text-slate-300 hover:text-white hover:bg-white/10 p-2 rounded-xl -ml-2 transition-colors cursor-pointer shrink-0"
-              aria-label="Mở menu"
+              onClick={() => i18n.changeLanguage('vi-VN')}
+              className={`px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs rounded-full transition-colors cursor-pointer ${i18n.language === 'vi-VN' ? 'bg-teal-600 text-white font-bold' : 'text-slate-400 hover:text-white'}`}
             >
-              <Menu size={20} />
+              VN
             </button>
+            <button 
+              onClick={() => i18n.changeLanguage('en-US')}
+              className={`px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs rounded-full transition-colors cursor-pointer ${i18n.language === 'en-US' ? 'bg-teal-600 text-white font-bold' : 'text-slate-400 hover:text-white'}`}
+            >
+              EN
+            </button>
+          </div>
+          
+          {/* Nút Đăng Xuất */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => logout()} 
+            className="text-slate-400 hover:text-rose-400 hover:bg-white/5 rounded-full h-9 w-9 cursor-pointer transition-colors"
+            title={t('auth.logout', 'Đăng xuất')}
+            aria-label="Đăng xuất"
+          >
+            <LogOut size={18} />
+          </Button>
+        </div>
+      </header>
 
-            {/* Current Page Title & Role Badge */}
-            <div className="flex items-center gap-2.5 min-w-0">
-              <h1 className="text-white font-bold text-base sm:text-lg tracking-tight truncate">
-                {activeItem?.label || 'Bảng điều khiển'}
-              </h1>
+      {/* 2. Below Topbar: Sidebar (260px) + Main Content */}
+      <div className="flex-1 flex min-h-0 w-full relative overflow-hidden">
+        {/* Left Sidebar Scrim Backdrop for Mobile */}
+        {isMobileSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 lg:hidden top-16"
+            onClick={() => setIsMobileSidebarOpen(false)}
+          />
+        )}
 
-              {/* Read-only Role Badge */}
-              <div className="hidden sm:inline-flex items-center gap-2 bg-teal-500/15 border border-teal-500/30 text-teal-300 text-xs font-semibold px-3 py-1 rounded-full shadow-xs select-none shrink-0">
-                <span
-                  className="w-2 h-2 rounded-full shrink-0 shadow-xs"
-                  style={{ backgroundColor: roleConfig.color || '#2dd4bf' }}
-                />
-                <span className="truncate text-teal-300 font-semibold">
-                  {t(roleConfig.labelKey, roleConfig.defaultLabel)}
-                </span>
+        {/* Left Sidebar (260px) */}
+        <aside 
+          className={`fixed lg:relative inset-y-0 lg:inset-y-auto left-0 top-16 lg:top-0 bottom-0 w-[260px] bg-slate-950 text-slate-300 border-r border-slate-800/80 flex flex-col shrink-0 z-50 lg:z-10 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+            isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          {/* Context / Scope */}
+          <div className="px-4 py-3 bg-slate-900/60 border-b border-slate-800/80">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Phạm vi hoạt động</p>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Building2 size={13} className="text-teal-400 shrink-0" />
+              <p className="text-xs text-teal-300 font-semibold truncate">{displayTenantName}</p>
+            </div>
+          </div>
+
+          {/* Navigation Menu */}
+          <nav className="flex-1 overflow-y-auto px-3.5 py-3 space-y-1 hidden-scrollbar" aria-label="Menu chức năng">
+            {visibleMenuItems.map(item => {
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setIsMobileSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-colors select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 cursor-pointer ${
+                    isActive 
+                      ? 'bg-teal-600 text-white font-bold rounded-xl shadow-sm' 
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-xl'
+                  }`}
+                >
+                  <item.icon size={16} className={isActive ? 'text-white' : 'text-slate-400'} />
+                  <span className="truncate">{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Bottom User Area */}
+          <div className="p-3 border-t border-slate-800 bg-slate-900/30 rounded-xl m-3 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs bg-teal-600">
+                {user?.username.charAt(0).toUpperCase() || 'A'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-white truncate">{user?.username || 'Quản trị viên'}</p>
+                <p className="text-[10px] text-teal-400 font-medium truncate mt-0.5">{roleConfig.defaultLabel}</p>
               </div>
             </div>
           </div>
-
-          <div className="flex items-center gap-1.5 sm:gap-2.5 flex-nowrap shrink-0">
-            {/* Nút Cổng Thư Viện */}
-            <button
-              type="button"
-              onClick={() => window.open('/landing', '_blank')}
-              className="inline-flex items-center gap-1.5 text-slate-200 hover:text-white bg-white/5 hover:bg-white/10 border border-white/15 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0"
-              title="Xem Cổng Thư Viện công khai"
-            >
-              <span>🌐</span>
-              <span className="hidden sm:inline">Cổng Thư Viện</span>
-              <ExternalLink size={13} className="text-slate-400" />
-            </button>
-
-            {/* Nút AI Hỗ Trợ */}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setIsAiChatOpen(true)} 
-              className="gap-1.5 bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 border border-teal-500/30 font-semibold text-xs h-9 px-3.5 rounded-xl transition-all hidden md:flex cursor-pointer"
-            >
-              <Sparkles size={15} className="text-teal-300" />
-              <span>AI hỗ trợ</span>
-            </Button>
-            
-            <div className="text-slate-300 hover:text-white [&_button]:hover:bg-white/10 [&_svg]:text-slate-300">
-              <NotificationBadge />
-            </div>
-
-            {/* Lang Toggle */}
-            <div className="flex items-center bg-white/5 border border-white/10 p-0.5 rounded-full text-slate-300 shrink-0">
-              <button 
-                onClick={() => i18n.changeLanguage('vi-VN')}
-                className={`px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs rounded-full transition-colors cursor-pointer ${i18n.language === 'vi-VN' ? 'bg-teal-600 text-white font-bold' : 'text-slate-400 hover:text-white'}`}
-              >
-                VN
-              </button>
-              <button 
-                onClick={() => i18n.changeLanguage('en-US')}
-                className={`px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs rounded-full transition-colors cursor-pointer ${i18n.language === 'en-US' ? 'bg-teal-600 text-white font-bold' : 'text-slate-400 hover:text-white'}`}
-              >
-                EN
-              </button>
-            </div>
-            
-            {/* Nút Đăng Xuất */}
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => logout()} 
-              className="text-slate-400 hover:text-rose-400 hover:bg-white/5 rounded-full p-2 h-9 w-9 cursor-pointer transition-colors"
-              title={t('auth.logout', 'Đăng xuất')}
-              aria-label="Đăng xuất"
-            >
-              <LogOut size={18} />
-            </Button>
-          </div>
-        </header>
+        </aside>
 
         {/* Dynamic Main Content Pane */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-100/80 p-4 sm:p-6 md:p-8 pb-16 relative">
-           <div className="flex flex-col max-w-[1400px] mx-auto w-full min-h-full">
-             <div className="flex-1 relative pb-10">
-               {/* Inner View Components with 403 Gating */}
-               {!isTabAllowed && <Forbidden403 activeTab={activeTab} />}
+        <main className="bg-slate-50 overflow-y-auto flex-1 p-4 sm:p-6 md:p-8 pb-16 relative">
+          <div className="flex flex-col max-w-[1400px] mx-auto w-full min-h-full">
+            <div className="flex-1 relative pb-10">
+              {/* Inner View Components with 403 Gating */}
+              {!isTabAllowed && <Forbidden403 activeTab={activeTab} />}
 
-               {isTabAllowed && activeTab === 'dashboard' && <div className="animate-in fade-in zoom-in-95 duration-300"><DashboardOverview /></div>}
-               {isTabAllowed && activeTab === 'audit' && <div className="animate-in fade-in zoom-in-95 duration-300"><AuditLogList /></div>}
-               {isTabAllowed && activeTab === 'reports' && <div className="animate-in fade-in zoom-in-95 duration-300"><ReportBuilder /></div>}
-               {isTabAllowed && activeTab === 'policies' && <div className="animate-in fade-in zoom-in-95 duration-300"><PolicyManager /></div>}
-               {isTabAllowed && activeTab === 'transfers' && <div className="animate-in fade-in zoom-in-95 duration-300"><TransferBoard /></div>}
-               {isTabAllowed && activeTab === 'imports' && <div className="animate-in fade-in zoom-in-95 duration-300"><ImportExportManager /></div>}
-               {isTabAllowed && activeTab === 'workflows' && <div className="animate-in fade-in zoom-in-95 duration-300"><WorkflowManager /></div>}
-               {isTabAllowed && activeTab === 'integrations' && <div className="animate-in fade-in zoom-in-95 duration-300"><IntegrationManager /></div>}
-               {isTabAllowed && activeTab === 'monitoring' && <div className="animate-in fade-in zoom-in-95 duration-300"><MonitoringDashboard /></div>}
-               {isTabAllowed && activeTab === 'recommendations' && <div className="animate-in fade-in zoom-in-95 duration-300"><RecommendationCenter /></div>}
-               {isTabAllowed && activeTab === 'branding' && <div className="animate-in fade-in zoom-in-95 duration-300"><BrandingManager /></div>}
-               {isTabAllowed && activeTab === 'search' && <div className="animate-in fade-in zoom-in-95 duration-300"><SearchInterface /></div>}
-               {isTabAllowed && activeTab === 'scanner' && <div className="animate-in fade-in zoom-in-95 duration-300"><BarcodeScanner /></div>}
-               {isTabAllowed && activeTab === 'print_codes' && <div className="animate-in fade-in zoom-in-95 duration-300"><PrintManager /></div>}
-               {isTabAllowed && activeTab === 'circulation' && (
-                 <div className="flex flex-col gap-6 w-full transition-all">
-                   <CirculationPanel />
-                   <ActiveLoans />
-                   <ReturnedUnpaidFines />
-                   <ActiveHolds />
-                 </div>
-               )}
-               {isTabAllowed && activeTab === 'catalog' && <BookList />}
-               {isTabAllowed && activeTab === 'members' && <MemberList />}
-               {isTabAllowed && activeTab === 'tenants' && <TenantList />}
-               {isTabAllowed && activeTab === 'users' && <UserList />}
+              {isTabAllowed && activeTab === 'dashboard' && <div className="animate-in fade-in zoom-in-95 duration-300"><DashboardOverview /></div>}
+              {isTabAllowed && activeTab === 'audit' && <div className="animate-in fade-in zoom-in-95 duration-300"><AuditLogList /></div>}
+              {isTabAllowed && activeTab === 'reports' && <div className="animate-in fade-in zoom-in-95 duration-300"><ReportBuilder /></div>}
+              {isTabAllowed && activeTab === 'policies' && <div className="animate-in fade-in zoom-in-95 duration-300"><PolicyManager /></div>}
+              {isTabAllowed && activeTab === 'transfers' && <div className="animate-in fade-in zoom-in-95 duration-300"><TransferBoard /></div>}
+              {isTabAllowed && activeTab === 'imports' && <div className="animate-in fade-in zoom-in-95 duration-300"><ImportExportManager /></div>}
+              {isTabAllowed && activeTab === 'workflows' && <div className="animate-in fade-in zoom-in-95 duration-300"><WorkflowManager /></div>}
+              {isTabAllowed && activeTab === 'integrations' && <div className="animate-in fade-in zoom-in-95 duration-300"><IntegrationManager /></div>}
+              {isTabAllowed && activeTab === 'monitoring' && <div className="animate-in fade-in zoom-in-95 duration-300"><MonitoringDashboard /></div>}
+              {isTabAllowed && activeTab === 'recommendations' && <div className="animate-in fade-in zoom-in-95 duration-300"><RecommendationCenter /></div>}
+              {isTabAllowed && activeTab === 'branding' && <div className="animate-in fade-in zoom-in-95 duration-300"><BrandingManager /></div>}
+              {isTabAllowed && activeTab === 'search' && <div className="animate-in fade-in zoom-in-95 duration-300"><SearchInterface /></div>}
+              {isTabAllowed && activeTab === 'scanner' && <div className="animate-in fade-in zoom-in-95 duration-300"><BarcodeScanner /></div>}
+              {isTabAllowed && activeTab === 'print_codes' && <div className="animate-in fade-in zoom-in-95 duration-300"><PrintManager /></div>}
+              {isTabAllowed && activeTab === 'circulation' && (
+                <div className="flex flex-col gap-6 w-full transition-all">
+                  <CirculationPanel />
+                  <ActiveLoans />
+                  <ReturnedUnpaidFines />
+                  <ActiveHolds />
+                </div>
+              )}
+              {isTabAllowed && activeTab === 'catalog' && <BookList />}
+              {isTabAllowed && activeTab === 'members' && <MemberList />}
+              {isTabAllowed && activeTab === 'tenants' && <TenantList />}
+              {isTabAllowed && activeTab === 'users' && <UserList />}
 
-               {isTabAllowed && activeTab === 'templates' && <TemplateManager />}
+              {isTabAllowed && activeTab === 'templates' && <TemplateManager />}
 
-               {/* Member Portal Custom Sections */}
-               {isTabAllowed && activeTab === 'my-loans' && <div className="animate-in fade-in duration-300"><MemberLoansView /></div>}
-               {isTabAllowed && activeTab === 'my-holds' && <div className="animate-in fade-in duration-300"><MemberHoldsView /></div>}
-               {isTabAllowed && activeTab === 'profile' && <div className="animate-in fade-in duration-300"><MemberProfileView /></div>}
-             </div>
-             
-           </div>
+              {/* Member Portal Custom Sections */}
+              {isTabAllowed && activeTab === 'my-loans' && <div className="animate-in fade-in duration-300"><MemberLoansView /></div>}
+              {isTabAllowed && activeTab === 'my-holds' && <div className="animate-in fade-in duration-300"><MemberHoldsView /></div>}
+              {isTabAllowed && activeTab === 'profile' && <div className="animate-in fade-in duration-300"><MemberProfileView /></div>}
+            </div>
+          </div>
         </main>
       </div>
 
