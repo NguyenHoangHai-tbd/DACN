@@ -186,7 +186,7 @@ export const DashboardOverview: React.FC = () => {
       {/* 2. 4 Modern Bold KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* Thẻ 1: Tài liệu */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-teal-300 transition-all flex flex-col justify-between group">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 border-t-4 border-t-teal-500 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
           <div>
             {/* Hàng 1: Icon Teal & Tên chỉ số + Huy hiệu góc */}
             <div className="flex items-center justify-between gap-2">
@@ -223,7 +223,7 @@ export const DashboardOverview: React.FC = () => {
         </div>
         
         {/* Thẻ 2: Độc giả */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-indigo-300 transition-all flex flex-col justify-between group">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 border-t-4 border-t-indigo-500 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
           <div>
             {/* Hàng 1: Icon Indigo & Tên chỉ số + Huy hiệu góc */}
             <div className="flex items-center justify-between gap-2">
@@ -260,7 +260,7 @@ export const DashboardOverview: React.FC = () => {
         </div>
 
         {/* Thẻ 3: Đang mượn */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-amber-300 transition-all flex flex-col justify-between group">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 border-t-4 border-t-amber-500 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
           <div>
             {/* Hàng 1: Icon Amber & Tên chỉ số + Huy hiệu góc */}
             <div className="flex items-center justify-between gap-2">
@@ -297,7 +297,7 @@ export const DashboardOverview: React.FC = () => {
         </div>
 
         {/* Thẻ 4: Tiền phạt */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-rose-300 transition-all flex flex-col justify-between group">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 border-t-4 border-t-rose-500 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
           <div>
             {/* Hàng 1: Icon Rose & Tên chỉ số + Huy hiệu góc */}
             <div className="flex items-center justify-between gap-2">
@@ -337,7 +337,7 @@ export const DashboardOverview: React.FC = () => {
       {/* 3. Charts and Leaderboard */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         {/* Circulation Trend Chart */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 overflow-hidden flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-hidden flex flex-col justify-between">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
               <h3 className="text-base font-bold text-slate-900 tracking-tight">
@@ -399,7 +399,7 @@ export const DashboardOverview: React.FC = () => {
         </div>
 
         {/* Dynamic Panels / Top Readers & Server Health */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 flex flex-col justify-between">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
               <div>
