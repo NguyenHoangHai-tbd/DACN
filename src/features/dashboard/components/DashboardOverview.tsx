@@ -126,7 +126,7 @@ export const DashboardOverview: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* 1. Header Admin Banner */}
-      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-teal-950 text-white rounded-3xl p-6 sm:p-7 relative overflow-hidden shadow-xl border border-slate-800/80 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-teal-950 text-white rounded-3xl p-6 sm:p-7 relative overflow-hidden shadow-xl border border-slate-800 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         {/* Subtle Ambient Glow */}
         <div className="pointer-events-none absolute -right-12 -bottom-12 w-72 h-72 bg-teal-500/15 rounded-full blur-3xl" />
         <div className="pointer-events-none absolute left-1/3 -top-12 w-56 h-56 bg-teal-600/10 rounded-full blur-2xl" />
@@ -142,12 +142,12 @@ export const DashboardOverview: React.FC = () => {
             </div>
             <span>Tổng Quan Trung Tâm Chỉ Huy</span>
           </h2>
-          <p className="text-xs sm:text-sm text-slate-300/80 mt-1.5 font-medium max-w-xl">
+          <p className="text-xs sm:text-sm text-slate-300/80 mt-1.5 font-medium max-w-xl leading-relaxed">
             Tình hình lưu thông học liệu, hiệu suất phục vụ và chỉ số hoạt động toàn hệ thống thời gian thực.
           </p>
         </div>
 
-        <div className="relative z-10 flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full lg:w-auto">
+        <div className="relative z-10 flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full lg:w-auto shrink-0">
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger className="w-full sm:w-40 font-semibold text-xs h-10 rounded-xl border-slate-700 bg-slate-800/80 text-white focus:ring-teal-500">
               <CalendarDays className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
@@ -190,97 +190,109 @@ export const DashboardOverview: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. 4 KPI Cards */}
+      {/* 2. 4 KPI Cards - 3-Tier Structure */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* Thẻ 1: Tài liệu */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 border-t-4 border-t-teal-500 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 border-t-4 border-t-teal-500 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+          <div>
+            {/* Tầng trên: Tiêu đề + Icon ngang hàng */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 {t('dashboard.documents', 'Tài liệu')}
-              </p>
-              <div className="text-3xl sm:text-4xl font-black text-slate-950 font-sans tracking-tight mb-2">
-                {kpiFormatter.format(overview.kpis.totalBooks)}
+              </span>
+              <div className="bg-teal-50 text-teal-600 rounded-2xl w-11 h-11 flex items-center justify-center shrink-0 shadow-xs">
+                <BookOpen size={20} />
               </div>
             </div>
-            <div className="bg-teal-50 text-teal-600 rounded-2xl w-12 h-12 flex items-center justify-center shrink-0">
-              <BookOpen size={22} />
+            {/* Tầng giữa: Con số to bản, đậm nét */}
+            <div className="text-3xl sm:text-4xl font-black text-slate-900 font-sans tracking-tight my-2">
+              {kpiFormatter.format(overview.kpis.totalBooks)}
             </div>
           </div>
-          <div className="mt-2 pt-3 border-t border-slate-100 flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-medium">Xu hướng</span>
+          {/* Tầng đáy: Đường gạch mờ + Xu hướng */}
+          <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Xu hướng</span>
             {renderTrend(overview.kpis.trends.books)}
           </div>
         </div>
         
         {/* Thẻ 2: Độc giả */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 border-t-4 border-t-indigo-500 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 border-t-4 border-t-indigo-500 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+          <div>
+            {/* Tầng trên: Tiêu đề + Icon ngang hàng */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 {t('dashboard.members', 'Độc giả')}
-              </p>
-              <div className="text-3xl sm:text-4xl font-black text-slate-950 font-sans tracking-tight mb-2">
-                {kpiFormatter.format(overview.kpis.totalMembers)}
+              </span>
+              <div className="bg-indigo-50 text-indigo-600 rounded-2xl w-11 h-11 flex items-center justify-center shrink-0 shadow-xs">
+                <Users size={20} />
               </div>
             </div>
-            <div className="bg-indigo-50 text-indigo-600 rounded-2xl w-12 h-12 flex items-center justify-center shrink-0">
-              <Users size={22} />
+            {/* Tầng giữa: Con số to bản, đậm nét */}
+            <div className="text-3xl sm:text-4xl font-black text-slate-900 font-sans tracking-tight my-2">
+              {kpiFormatter.format(overview.kpis.totalMembers)}
             </div>
           </div>
-          <div className="mt-2 pt-3 border-t border-slate-100 flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-medium">Xu hướng</span>
+          {/* Tầng đáy: Đường gạch mờ + Xu hướng */}
+          <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Xu hướng</span>
             {renderTrend(overview.kpis.trends.members)}
           </div>
         </div>
 
         {/* Thẻ 3: Đang mượn */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 border-t-4 border-t-amber-500 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 border-t-4 border-t-amber-500 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+          <div>
+            {/* Tầng trên: Tiêu đề + Icon ngang hàng */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 {t('dashboard.active_loans', 'Đang mượn')}
-              </p>
-              <div className="text-3xl sm:text-4xl font-black text-slate-950 font-sans tracking-tight mb-2">
-                {kpiFormatter.format(overview.kpis.activeLoans)}
+              </span>
+              <div className="bg-amber-50 text-amber-600 rounded-2xl w-11 h-11 flex items-center justify-center shrink-0 shadow-xs">
+                <BookUp size={20} />
               </div>
             </div>
-            <div className="bg-amber-50 text-amber-600 rounded-2xl w-12 h-12 flex items-center justify-center shrink-0">
-              <BookUp size={22} />
+            {/* Tầng giữa: Con số to bản, đậm nét */}
+            <div className="text-3xl sm:text-4xl font-black text-slate-900 font-sans tracking-tight my-2">
+              {kpiFormatter.format(overview.kpis.activeLoans)}
             </div>
           </div>
-          <div className="mt-2 pt-3 border-t border-slate-100 flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-medium">Xu hướng</span>
+          {/* Tầng đáy: Đường gạch mờ + Xu hướng */}
+          <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Xu hướng</span>
             {renderTrend(overview.kpis.trends.loans)}
           </div>
         </div>
 
         {/* Thẻ 4: Tiền phạt */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 border-t-4 border-t-rose-500 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 border-t-4 border-t-rose-500 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+          <div>
+            {/* Tầng trên: Tiêu đề + Icon ngang hàng */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 {t('dashboard.revenue', 'Tiền phạt')}
-              </p>
-              <div className="text-3xl sm:text-4xl font-black text-slate-950 font-sans tracking-tight mb-2">
-                {currencyFormatter.format(overview.kpis.revenue)}
+              </span>
+              <div className="bg-rose-50 text-rose-600 rounded-2xl w-11 h-11 flex items-center justify-center shrink-0 shadow-xs">
+                <DollarSign size={20} />
               </div>
             </div>
-            <div className="bg-rose-50 text-rose-600 rounded-2xl w-12 h-12 flex items-center justify-center shrink-0">
-              <DollarSign size={22} />
+            {/* Tầng giữa: Con số to bản, đậm nét */}
+            <div className="text-3xl sm:text-4xl font-black text-slate-900 font-sans tracking-tight my-2">
+              {currencyFormatter.format(overview.kpis.revenue)}
             </div>
           </div>
-          <div className="mt-2 pt-3 border-t border-slate-100 flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-medium">Xu hướng</span>
+          {/* Tầng đáy: Đường gạch mờ + Xu hướng */}
+          <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Xu hướng</span>
             {renderTrend(overview.kpis.trends.revenue)}
           </div>
         </div>
       </div>
 
       {/* 3. Charts and Leaderboard */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         {/* Circulation Trend Chart */}
-        <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-7 overflow-hidden">
+        <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-7 overflow-hidden flex flex-col justify-between">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <div>
               <h3 className="text-base sm:text-lg font-bold text-slate-950 tracking-tight">
@@ -307,12 +319,12 @@ export const DashboardOverview: React.FC = () => {
               <AreaChart data={overview.circulationTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorCheckouts" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0d9488" stopOpacity={0.35}/>
-                    <stop offset="95%" stopColor="#0d9488" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#0d9488" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="#0d9488" stopOpacity={0.02}/>
                   </linearGradient>
                   <linearGradient id="colorReturns" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.35}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.02}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -324,8 +336,8 @@ export const DashboardOverview: React.FC = () => {
                   name={t('dashboard.chart_checkouts', 'Lượt Mượn')} 
                   dataKey="checkouts" 
                   stroke="#0d9488" 
-                  strokeWidth={2.5} 
-                  fillOpacity={1} 
+                  strokeWidth={3} 
+                  fillOpacity={0.2} 
                   fill="url(#colorCheckouts)" 
                 />
                 <Area 
@@ -333,8 +345,8 @@ export const DashboardOverview: React.FC = () => {
                   name={t('dashboard.chart_returns', 'Lượt Trả')} 
                   dataKey="returns" 
                   stroke="#10b981" 
-                  strokeWidth={2.5} 
-                  fillOpacity={1} 
+                  strokeWidth={3} 
+                  fillOpacity={0.15} 
                   fill="url(#colorReturns)" 
                 />
               </AreaChart>
@@ -343,8 +355,8 @@ export const DashboardOverview: React.FC = () => {
         </div>
 
         {/* Dynamic Panels / Top Readers */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-7">
+        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-7 flex flex-col justify-between">
+          <div>
             <div className="flex items-center justify-between mb-5 pb-4 border-b border-slate-100">
               <div>
                 <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
@@ -375,12 +387,12 @@ export const DashboardOverview: React.FC = () => {
                       {/* Rank badge */}
                       <div className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-black shrink-0 shadow-xs ${
                         i === 0 
-                          ? 'bg-amber-400 text-amber-950 ring-2 ring-amber-300/50' 
+                          ? 'bg-amber-400 text-amber-950 ring-2 ring-amber-300/60 font-black' 
                           : i === 1 
-                            ? 'bg-slate-200 text-slate-800' 
+                            ? 'bg-slate-200 text-slate-800 ring-2 ring-slate-300/60 font-black' 
                             : i === 2 
-                              ? 'bg-amber-700 text-white' 
-                              : 'bg-slate-100 text-slate-600'
+                              ? 'bg-amber-700 text-white font-black' 
+                              : 'bg-slate-100 text-slate-600 font-bold'
                       }`}>
                         {i + 1}
                       </div>
