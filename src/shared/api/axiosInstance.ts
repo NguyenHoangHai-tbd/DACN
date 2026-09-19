@@ -8,11 +8,7 @@ const getBaseUrl = (): string => {
   let url = env?.VITE_API_BASE_URL;
 
   if (!url) {
-    if (typeof window !== 'undefined' && window.location.hostname.endsWith('.run.app')) {
-      url = 'https://galore-harpist-borough.ngrok-free.dev';
-    } else {
-      url = '/api';
-    }
+    url = '/api';
   }
 
   url = url.trim().replace(/\/+$/, '');
