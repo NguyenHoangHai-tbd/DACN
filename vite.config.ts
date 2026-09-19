@@ -11,6 +11,11 @@ export default defineConfig(() => {
         '@': path.resolve(__dirname, './src'),
       },
     },
+    build: {
+      outDir: 'dist',
+      emptyOutDir: false,
+      chunkSizeWarningLimit: 3000,
+    },
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',
       watch: process.env.DISABLE_HMR === 'true' ? null : {},

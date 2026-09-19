@@ -1,6 +1,6 @@
 {
-  "name": "Library Management SaaS",
-  "description": "Multi-tenant library management workspace focusing on secure authentication and branch scope access.",
+  "name": "Thư Viện Đại Học Thái Bình Dương - TBD Library",
+  "description": "Hệ thống Thư viện Số Trường Đại học Thái Bình Dương - Tra cứu tài liệu, mượn trả và dịch vụ học thuật",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

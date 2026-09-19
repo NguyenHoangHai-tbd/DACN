@@ -109,15 +109,15 @@ export const DashboardOverview: React.FC = () => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-slate-900/95 backdrop-blur-md border border-slate-800 shadow-2xl rounded-2xl p-3.5 space-y-1.5 text-xs text-slate-200">
-          <p className="font-bold text-white border-b border-slate-800 pb-1">{label}</p>
+        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-xl rounded-2xl p-3.5 space-y-1.5 text-xs text-slate-800">
+          <p className="font-bold text-slate-900 border-b border-slate-100 pb-1">{label}</p>
           {payload.map((entry: any, index: number) => (
             <div key={`tooltip-${index}`} className="flex items-center justify-between gap-4">
-              <span className="flex items-center gap-1.5 font-medium text-slate-400">
+              <span className="flex items-center gap-1.5 font-medium text-slate-600">
                 <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
                 {entry.name}:
               </span>
-              <span className="font-bold text-white font-mono">{entry.value}</span>
+              <span className="font-bold text-slate-900 font-mono">{entry.value}</span>
             </div>
           ))}
         </div>
@@ -131,26 +131,26 @@ export const DashboardOverview: React.FC = () => {
       {/* 1. Open Clean Header Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <Activity className="w-6 h-6 text-teal-400 shrink-0" />
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <Activity className="w-6 h-6 text-teal-600 shrink-0" />
             <span>{t('dashboard.overview_title', 'Tổng Quan Vận Hành')}</span>
           </h2>
-          <p className="text-slate-400 text-xs sm:text-sm mt-1 font-medium">
+          <p className="text-slate-500 text-xs sm:text-sm mt-1 font-medium">
             Chỉ số lưu thông học liệu & tình trạng hệ thống thời gian thực
           </p>
         </div>
 
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-full sm:w-36 font-semibold text-xs h-10 rounded-xl bg-slate-900 border-slate-800 text-slate-200 shadow-xs hover:bg-slate-800/80 focus:ring-teal-500">
+            <SelectTrigger className="w-full sm:w-36 font-semibold text-xs h-10 rounded-xl bg-white border-slate-200 text-slate-700 shadow-xs hover:bg-slate-50 focus:ring-teal-500">
               <CalendarDays className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-slate-800 bg-slate-900 text-slate-200 shadow-xl">
-              <SelectItem value="7d" className="focus:bg-slate-800 focus:text-white cursor-pointer">{t('dashboard.filter_7d', '7 ngày qua')}</SelectItem>
-              <SelectItem value="30d" className="focus:bg-slate-800 focus:text-white cursor-pointer">{t('dashboard.filter_30d', '30 ngày qua')}</SelectItem>
-              <SelectItem value="90d" className="focus:bg-slate-800 focus:text-white cursor-pointer">{t('dashboard.filter_90d', '90 ngày qua')}</SelectItem>
-              <SelectItem value="ytd" className="focus:bg-slate-800 focus:text-white cursor-pointer">{t('dashboard.filter_ytd', 'Từ đầu năm')}</SelectItem>
+            <SelectContent className="rounded-xl border-slate-200 bg-white text-slate-800 shadow-lg">
+              <SelectItem value="7d" className="cursor-pointer">{t('dashboard.filter_7d', '7 ngày qua')}</SelectItem>
+              <SelectItem value="30d" className="cursor-pointer">{t('dashboard.filter_30d', '30 ngày qua')}</SelectItem>
+              <SelectItem value="90d" className="cursor-pointer">{t('dashboard.filter_90d', '90 ngày qua')}</SelectItem>
+              <SelectItem value="ytd" className="cursor-pointer">{t('dashboard.filter_ytd', 'Từ đầu năm')}</SelectItem>
             </SelectContent>
           </Select>
           
@@ -165,19 +165,19 @@ export const DashboardOverview: React.FC = () => {
                 error: t('dashboard.refresh_error', 'Lỗi khi làm mới dữ liệu')
               });
             }}
-            className="h-10 px-3.5 border-slate-800 bg-slate-900/80 backdrop-blur-sm text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl cursor-pointer shrink-0 shadow-xs transition-colors"
+            className="h-10 px-3.5 bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 rounded-xl cursor-pointer shrink-0 shadow-xs transition-colors"
             title="Làm mới"
           >
-            <RefreshCw size={15} className={overviewLoading ? 'animate-spin text-teal-400' : 'text-slate-300'} />
+            <RefreshCw size={15} className={overviewLoading ? 'animate-spin text-teal-600' : 'text-slate-600'} />
           </Button>
 
           <Button 
             onClick={() => exportMutation.mutate()} 
             disabled={exportMutation.isPending}
             size="sm"
-            className="h-10 px-4 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-teal-500/20 cursor-pointer shrink-0 transition-all active:scale-[0.98]"
+            className="h-10 px-4 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-sm cursor-pointer shrink-0 transition-all active:scale-[0.98]"
           >
-            {exportMutation.isPending ? <Loader2 size={15} className="animate-spin mr-1.5 text-slate-950" /> : <Download size={15} className="mr-1.5 text-slate-950" />}
+            {exportMutation.isPending ? <Loader2 size={15} className="animate-spin mr-1.5 text-white" /> : <Download size={15} className="mr-1.5 text-white" />}
             {t('dashboard.export_excel', 'Xuất Excel')}
           </Button>
         </div>
@@ -186,120 +186,120 @@ export const DashboardOverview: React.FC = () => {
       {/* 2. 4 Modern Bold KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* Thẻ 1: Tài liệu */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-5 shadow-xl hover:border-teal-500/40 transition-all flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
           <div>
-            {/* Hàng 1: Icon Teal phát sáng & Tên chỉ số */}
+            {/* Hàng 1: Icon Teal & Tên chỉ số */}
             <div className="flex items-center gap-3">
-              <div className="bg-teal-500/10 text-teal-400 border border-teal-500/20 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+              <div className="bg-teal-50 text-teal-600 border border-teal-100 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
                 <BookOpen size={18} />
               </div>
-              <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+              <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">
                 {t('dashboard.documents', 'Tài liệu')}
               </span>
             </div>
             {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
             <div className="flex items-baseline gap-2 my-1.5">
-              <span className="text-3xl sm:text-4xl font-black text-white tracking-tight font-sans">
+              <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-sans">
                 {kpiFormatter.format(overview.kpis.totalBooks)}
               </span>
-              <span className="text-teal-400 text-xs font-semibold">đầu sách</span>
+              <span className="text-slate-500 text-xs font-semibold">đầu sách</span>
             </div>
           </div>
           {/* Hàng 3: Thanh trạng thái ở đáy */}
-          <div className="border-t border-slate-800/80 pt-2.5 flex items-center justify-between text-xs">
+          <div className="border-t border-slate-100 pt-2.5 flex items-center justify-between text-xs">
             <span className="text-slate-400 font-medium">Trạng thái</span>
-            <span className="inline-flex items-center gap-1.5 bg-teal-500/10 border border-teal-500/25 text-teal-300 px-2.5 py-0.5 rounded-full font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0" />
+            <span className="inline-flex items-center gap-1.5 bg-teal-50 text-teal-700 border border-teal-200/70 font-semibold px-2.5 py-0.5 rounded-full text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" />
               Hoạt động tốt
             </span>
           </div>
         </div>
         
         {/* Thẻ 2: Độc giả */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-5 shadow-xl hover:border-teal-500/40 transition-all flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
           <div>
-            {/* Hàng 1: Icon Teal phát sáng & Tên chỉ số */}
+            {/* Hàng 1: Icon Teal & Tên chỉ số */}
             <div className="flex items-center gap-3">
-              <div className="bg-teal-500/10 text-teal-400 border border-teal-500/20 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+              <div className="bg-teal-50 text-teal-600 border border-teal-100 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
                 <Users size={18} />
               </div>
-              <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+              <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">
                 {t('dashboard.members', 'Độc giả')}
               </span>
             </div>
             {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
             <div className="flex items-baseline gap-2 my-1.5">
-              <span className="text-3xl sm:text-4xl font-black text-white tracking-tight font-sans">
+              <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-sans">
                 {kpiFormatter.format(overview.kpis.totalMembers)}
               </span>
-              <span className="text-teal-400 text-xs font-semibold">bạn đọc</span>
+              <span className="text-slate-500 text-xs font-semibold">bạn đọc</span>
             </div>
           </div>
           {/* Hàng 3: Thanh trạng thái ở đáy */}
-          <div className="border-t border-slate-800/80 pt-2.5 flex items-center justify-between text-xs">
+          <div className="border-t border-slate-100 pt-2.5 flex items-center justify-between text-xs">
             <span className="text-slate-400 font-medium">Trạng thái</span>
-            <span className="inline-flex items-center gap-1.5 bg-teal-500/10 border border-teal-500/25 text-teal-300 px-2.5 py-0.5 rounded-full font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0" />
+            <span className="inline-flex items-center gap-1.5 bg-teal-50 text-teal-700 border border-teal-200/70 font-semibold px-2.5 py-0.5 rounded-full text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" />
               Hoạt động tốt
             </span>
           </div>
         </div>
 
         {/* Thẻ 3: Đang mượn */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-5 shadow-xl hover:border-teal-500/40 transition-all flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
           <div>
-            {/* Hàng 1: Icon Teal phát sáng & Tên chỉ số */}
+            {/* Hàng 1: Icon Teal & Tên chỉ số */}
             <div className="flex items-center gap-3">
-              <div className="bg-teal-500/10 text-teal-400 border border-teal-500/20 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+              <div className="bg-teal-50 text-teal-600 border border-teal-100 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
                 <BookUp size={18} />
               </div>
-              <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+              <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">
                 {t('dashboard.active_loans', 'Đang mượn')}
               </span>
             </div>
             {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
             <div className="flex items-baseline gap-2 my-1.5">
-              <span className="text-3xl sm:text-4xl font-black text-white tracking-tight font-sans">
+              <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-sans">
                 {kpiFormatter.format(overview.kpis.activeLoans)}
               </span>
-              <span className="text-teal-400 text-xs font-semibold">cuốn</span>
+              <span className="text-slate-500 text-xs font-semibold">cuốn</span>
             </div>
           </div>
           {/* Hàng 3: Thanh trạng thái ở đáy */}
-          <div className="border-t border-slate-800/80 pt-2.5 flex items-center justify-between text-xs">
+          <div className="border-t border-slate-100 pt-2.5 flex items-center justify-between text-xs">
             <span className="text-slate-400 font-medium">Trạng thái</span>
-            <span className="inline-flex items-center gap-1.5 bg-teal-500/10 border border-teal-500/25 text-teal-300 px-2.5 py-0.5 rounded-full font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0" />
+            <span className="inline-flex items-center gap-1.5 bg-teal-50 text-teal-700 border border-teal-200/70 font-semibold px-2.5 py-0.5 rounded-full text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" />
               Ổn định
             </span>
           </div>
         </div>
 
         {/* Thẻ 4: Tiền phạt */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-5 shadow-xl hover:border-teal-500/40 transition-all flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
           <div>
-            {/* Hàng 1: Icon Teal phát sáng & Tên chỉ số */}
+            {/* Hàng 1: Icon Teal & Tên chỉ số */}
             <div className="flex items-center gap-3">
-              <div className="bg-teal-500/10 text-teal-400 border border-teal-500/20 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+              <div className="bg-teal-50 text-teal-600 border border-teal-100 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
                 <DollarSign size={18} />
               </div>
-              <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+              <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">
                 {t('dashboard.revenue', 'Tiền phạt')}
               </span>
             </div>
             {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
             <div className="flex items-baseline gap-2 my-1.5">
-              <span className="text-3xl sm:text-4xl font-black text-white tracking-tight font-sans">
+              <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-sans">
                 {kpiFormatter.format(overview.kpis.revenue)}
               </span>
-              <span className="text-teal-400 text-xs font-semibold">VNĐ</span>
+              <span className="text-slate-500 text-xs font-semibold">VNĐ</span>
             </div>
           </div>
           {/* Hàng 3: Thanh trạng thái ở đáy */}
-          <div className="border-t border-slate-800/80 pt-2.5 flex items-center justify-between text-xs">
+          <div className="border-t border-slate-100 pt-2.5 flex items-center justify-between text-xs">
             <span className="text-slate-400 font-medium">Trạng thái</span>
-            <span className="inline-flex items-center gap-1.5 bg-teal-500/10 border border-teal-500/25 text-teal-300 px-2.5 py-0.5 rounded-full font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0" />
+            <span className="inline-flex items-center gap-1.5 bg-teal-50 text-teal-700 border border-teal-200/70 font-semibold px-2.5 py-0.5 rounded-full text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" />
               Kiểm soát tốt
             </span>
           </div>
@@ -309,23 +309,23 @@ export const DashboardOverview: React.FC = () => {
       {/* 3. Charts and Leaderboard */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         {/* Circulation Trend Chart */}
-        <div className="lg:col-span-2 bg-slate-900/90 border border-slate-800/90 rounded-2xl p-6 shadow-xl overflow-hidden flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 overflow-hidden flex flex-col justify-between">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
-              <h3 className="text-base font-bold text-white tracking-tight">
+              <h3 className="text-base font-bold text-slate-900 tracking-tight">
                 {t('dashboard.chart_title', 'Biến động Lượt mượn / Trả')}
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5 font-medium">
+              <p className="text-xs text-slate-500 mt-0.5 font-medium">
                 Tần suất lưu thông tài liệu theo mốc thời gian
               </p>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-              <span className="inline-flex items-center gap-1.5 bg-teal-500/10 border border-teal-500/30 text-teal-300 font-bold px-2.5 py-1 rounded-lg text-xs">
-                <span className="w-2 h-2 rounded-full bg-teal-400 shadow-[0_0_6px_#2dd4bf] shrink-0" />
+              <span className="inline-flex items-center gap-1.5 bg-teal-50 border border-teal-200/90 text-teal-700 font-bold px-2.5 py-1 rounded-lg text-xs">
+                <span className="w-2 h-2 rounded-full bg-teal-600 shrink-0" />
                 Tổng mượn: {kpiFormatter.format(totalCheckouts)}
               </span>
-              <span className="inline-flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/80 text-slate-300 font-bold px-2.5 py-1 rounded-lg text-xs">
-                <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0" />
+              <span className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-700 font-bold px-2.5 py-1 rounded-lg text-xs">
+                <span className="w-2 h-2 rounded-full bg-slate-500 shrink-0" />
                 Tổng trả: {kpiFormatter.format(totalReturns)}
               </span>
             </div>
@@ -335,25 +335,25 @@ export const DashboardOverview: React.FC = () => {
               <AreaChart data={overview.circulationTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorCheckouts" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2dd4bf" stopOpacity={0.35}/>
-                    <stop offset="95%" stopColor="#2dd4bf" stopOpacity={0.0}/>
+                    <stop offset="5%" stopColor="#0d9488" stopOpacity={0.25}/>
+                    <stop offset="95%" stopColor="#0d9488" stopOpacity={0.01}/>
                   </linearGradient>
                   <linearGradient id="colorReturns" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#64748b" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#64748b" stopOpacity={0.0}/>
+                    <stop offset="5%" stopColor="#64748b" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#64748b" stopOpacity={0.01}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94a3b8' }} dy={8} minTickGap={20} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94a3b8' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} dy={8} minTickGap={20} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Area 
                   type="monotone" 
                   name={t('dashboard.chart_checkouts', 'Lượt Mượn')} 
                   dataKey="checkouts" 
-                  stroke="#2dd4bf" 
+                  stroke="#0d9488" 
                   strokeWidth={3} 
-                  fillOpacity={1} 
+                  fillOpacity={0.15} 
                   fill="url(#colorCheckouts)" 
                 />
                 <Area 
@@ -362,7 +362,7 @@ export const DashboardOverview: React.FC = () => {
                   dataKey="returns" 
                   stroke="#64748b" 
                   strokeWidth={2} 
-                  fillOpacity={1} 
+                  fillOpacity={0.06} 
                   fill="url(#colorReturns)" 
                 />
               </AreaChart>
@@ -371,17 +371,17 @@ export const DashboardOverview: React.FC = () => {
         </div>
 
         {/* Dynamic Panels / Top Readers & Server Health */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-800/80">
+            <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
               <div>
-                <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                  <Trophy size={18} className="text-amber-400 shrink-0 filter drop-shadow-[0_0_6px_rgba(251,191,36,0.35)]" />
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Trophy size={18} className="text-amber-500 shrink-0" />
                   <span>{t('dashboard.top_readers_title', 'Độc giả tích cực')}</span>
                 </h3>
-                <p className="text-[11px] text-slate-400 mt-0.5 font-medium">Lượt mượn cao nhất kỳ này</p>
+                <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Lượt mượn cao nhất kỳ này</p>
               </div>
-              <span className="text-[10px] font-bold text-teal-300 bg-teal-500/10 border border-teal-500/25 px-2 py-0.5 rounded-full shrink-0">
+              <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200/70 px-2 py-0.5 rounded-full shrink-0">
                 Top bạn đọc
               </span>
             </div>
@@ -398,32 +398,32 @@ export const DashboardOverview: React.FC = () => {
                   return (
                     <div 
                       key={reader.id} 
-                      className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-800/50 transition-colors border border-slate-800/80 bg-slate-950/40"
+                      className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-100/80 transition-colors border border-slate-100 bg-slate-50"
                     >
                       {/* Rank badge */}
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-black shrink-0 ${
                         i === 0 
-                          ? 'bg-amber-400 text-slate-950 font-black shadow-[0_0_8px_rgba(251,191,36,0.4)]' 
+                          ? 'bg-amber-400 text-amber-950 font-black' 
                           : i === 1 
-                            ? 'bg-slate-700 text-slate-200 font-bold' 
-                            : 'bg-slate-800 text-slate-300 font-bold'
+                            ? 'bg-slate-200 text-slate-800 font-bold' 
+                            : 'bg-slate-100 text-slate-600 font-bold'
                       }`}>
                         {i + 1}
                       </div>
 
                       {/* Avatar letter */}
-                      <div className="w-7 h-7 rounded-full bg-slate-800 text-teal-300 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-700">
+                      <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-300/60">
                         {initials}
                       </div>
 
                       {/* Name */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-white truncate">{reader.name}</p>
+                        <p className="text-xs font-bold text-slate-900 truncate">{reader.name}</p>
                       </div>
 
                       {/* Book count tag */}
-                      <div className="font-mono text-xs font-bold text-teal-300 bg-teal-500/15 border border-teal-500/30 px-2.5 py-0.5 rounded-lg shrink-0">
-                        {reader.borrowCount} <span className="text-[10px] text-teal-400/80 font-semibold uppercase">{t('dashboard.unit_books', 'sách')}</span>
+                      <div className="font-mono text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200/80 px-2.5 py-0.5 rounded-lg shrink-0">
+                        {reader.borrowCount} <span className="text-[10px] text-teal-600 font-semibold uppercase">{t('dashboard.unit_books', 'sách')}</span>
                       </div>
                     </div>
                   );
@@ -433,28 +433,28 @@ export const DashboardOverview: React.FC = () => {
           </div>
 
           {/* Nửa dưới: Khối nhỏ "Tình trạng máy chủ" */}
-          <div className="mt-4 pt-4 border-t border-slate-800/80 space-y-2.5 text-xs text-slate-400">
+          <div className="mt-4 pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-500">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                 <Server size={13} className="text-slate-400" />
                 <span>Tình trạng máy chủ</span>
               </span>
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-teal-300 bg-teal-500/10 border border-teal-500/25 px-2.5 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse shadow-[0_0_6px_#2dd4bf]" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-teal-700 bg-teal-50 border border-teal-200/70 px-2 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-600 animate-pulse" />
                 99.9% Uptime
               </span>
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 flex items-center justify-between">
-                <span className="text-slate-400 font-medium text-[11px] truncate">API Server</span>
-                <span className="inline-flex items-center gap-1 text-teal-300 font-bold text-[10px] shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shadow-[0_0_6px_#2dd4bf] shrink-0" /> 🟢 Kết nối
+              <div className="bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex items-center justify-between">
+                <span className="text-slate-600 font-medium text-[11px] truncate">API Server</span>
+                <span className="inline-flex items-center gap-1 text-teal-700 font-bold text-[10px] shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" /> Kết nối
                 </span>
               </div>
-              <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 flex items-center justify-between">
-                <span className="text-slate-400 font-medium text-[11px] truncate">Realtime Hub</span>
-                <span className="inline-flex items-center gap-1 text-teal-300 font-bold text-[10px] shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shadow-[0_0_6px_#2dd4bf] shrink-0" /> 🟢 Đồng bộ
+              <div className="bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex items-center justify-between">
+                <span className="text-slate-600 font-medium text-[11px] truncate">Realtime Hub</span>
+                <span className="inline-flex items-center gap-1 text-teal-700 font-bold text-[10px] shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" /> Đồng bộ
                 </span>
               </div>
             </div>
