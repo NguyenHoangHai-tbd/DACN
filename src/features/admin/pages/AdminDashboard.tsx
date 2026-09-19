@@ -394,7 +394,7 @@ export const AdminDashboard: React.FC = () => {
         </header>
 
         {/* Dynamic Main Content Pane */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50/50 p-4 sm:p-6 md:p-8 pb-16 relative">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-100/80 p-4 sm:p-6 md:p-8 pb-16 relative">
            <div className="flex flex-col max-w-[1400px] mx-auto w-full min-h-full">
              <div className="flex-1 relative pb-10">
                {/* Inner View Components with 403 Gating */}
