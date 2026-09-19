@@ -352,13 +352,13 @@ export const AdminDashboard: React.FC = () => {
                     setActiveTab(item.id);
                     setIsMobileSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-colors select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 cursor-pointer ${
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 cursor-pointer ${
                     isActive 
-                      ? 'bg-teal-600 text-white font-bold rounded-xl shadow-sm' 
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-xl'
+                      ? 'bg-teal-500/10 text-teal-300 border-l-2 border-teal-400 shadow-xs' 
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  <item.icon size={16} className={isActive ? 'text-white' : 'text-slate-400'} />
+                  <item.icon size={17} className={isActive ? 'text-teal-300' : 'text-slate-400'} />
                   <span className="truncate">{item.label}</span>
                 </button>
               );
@@ -366,14 +366,14 @@ export const AdminDashboard: React.FC = () => {
           </nav>
 
           {/* Bottom User Area */}
-          <div className="p-3 border-t border-slate-800 bg-slate-900/30 rounded-xl m-3 shrink-0">
+          <div className="p-3 border-t border-slate-800/80 bg-slate-900/30 rounded-xl m-3 shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs bg-teal-600">
                 {user?.username.charAt(0).toUpperCase() || 'A'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-white truncate">{user?.username || 'Quản trị viên'}</p>
-                <p className="text-[10px] text-teal-400 font-medium truncate mt-0.5">{roleConfig.defaultLabel}</p>
+                <p className="text-sm font-bold text-white truncate">{user?.username || 'Quản trị viên'}</p>
+                <p className="text-teal-400 text-[11px] font-medium truncate mt-0.5">{roleConfig.defaultLabel}</p>
               </div>
             </div>
           </div>
