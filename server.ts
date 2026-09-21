@@ -8,6 +8,11 @@ async function startServer() {
 
   app.use(express.json());
 
+  // Health check endpoint for Cloud Run and container orchestrators
+  app.get(['/api/health', '/healthz'], (req, res) => {
+    res.status(200).json({ status: 'ok', uptime: process.uptime() });
+  });
+
   // --- MOCK ASP.NET CORE BACKEND ---
 
   // Standard API Response Wrapper
