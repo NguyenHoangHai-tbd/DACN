@@ -128,21 +128,21 @@ export const DashboardOverview: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* 1. Open Clean Header Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* 1. Welcome Banner Bar */}
+      <div className="rounded-2xl bg-gradient-to-r from-teal-50/80 via-white/60 to-indigo-50/50 border border-teal-100/80 p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <Activity className="w-6 h-6 text-teal-600 shrink-0" />
-            <span>{t('dashboard.overview_title', 'Tổng Quan Vận Hành')}</span>
+          <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <Activity className="w-5 h-5 text-teal-600 shrink-0" />
+            <span>{t('dashboard.overview_title', 'Trung Tâm Điều Hành Thư Viện Số')}</span>
           </h2>
-          <p className="text-slate-500 text-xs sm:text-sm mt-1 font-medium">
-            Chỉ số lưu thông học liệu & tình trạng hệ thống thời gian thực
+          <p className="text-slate-500 text-xs sm:text-sm mt-0.5 font-medium">
+            Theo dõi lưu thông học liệu & tình trạng hệ thống thời gian thực.
           </p>
         </div>
 
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-full sm:w-36 font-semibold text-xs h-10 rounded-xl bg-white border-slate-200 text-slate-700 shadow-xs hover:bg-slate-50 focus:ring-teal-500">
+            <SelectTrigger className="w-full sm:w-36 font-semibold text-xs h-9 rounded-xl bg-white border-slate-200 text-slate-700 shadow-2xs hover:bg-slate-50 focus:ring-teal-500 cursor-pointer">
               <CalendarDays className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
               <SelectValue />
             </SelectTrigger>
@@ -165,19 +165,19 @@ export const DashboardOverview: React.FC = () => {
                 error: t('dashboard.refresh_error', 'Lỗi khi làm mới dữ liệu')
               });
             }}
-            className="h-10 px-3.5 bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 rounded-xl cursor-pointer shrink-0 shadow-xs transition-colors"
+            className="h-9 px-3 bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 rounded-xl cursor-pointer shrink-0 shadow-2xs transition-colors"
             title="Làm mới"
           >
-            <RefreshCw size={15} className={overviewLoading ? 'animate-spin text-teal-600' : 'text-slate-600'} />
+            <RefreshCw size={14} className={overviewLoading ? 'animate-spin text-teal-600' : 'text-slate-600'} />
           </Button>
 
           <Button 
             onClick={() => exportMutation.mutate()} 
             disabled={exportMutation.isPending}
             size="sm"
-            className="h-10 px-4 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-sm cursor-pointer shrink-0 transition-all active:scale-[0.98]"
+            className="h-9 px-4 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer shrink-0 transition-all active:scale-[0.98]"
           >
-            {exportMutation.isPending ? <Loader2 size={15} className="animate-spin mr-1.5 text-white" /> : <Download size={15} className="mr-1.5 text-white" />}
+            {exportMutation.isPending ? <Loader2 size={14} className="animate-spin mr-1.5 text-white" /> : <Download size={14} className="mr-1.5 text-white" />}
             {t('dashboard.export_excel', 'Xuất Excel')}
           </Button>
         </div>
@@ -202,16 +202,16 @@ export const DashboardOverview: React.FC = () => {
                 +5 sách mới
               </span>
             </div>
-            {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
-            <div className="flex items-baseline gap-2 mt-3 mb-2">
-              <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-sans">
+            {/* Hàng 2: Con số lớn in đậm text-3xl font-black text-slate-900 */}
+            <div className="flex items-baseline gap-2 mt-3.5 mb-1">
+              <span className="text-3xl font-black text-slate-900 tracking-tight font-sans">
                 {kpiFormatter.format(overview.kpis.totalBooks)}
               </span>
               <span className="text-slate-500 text-xs font-semibold">đầu sách</span>
             </div>
           </div>
-          {/* Hàng 3: Thanh chỉ số % sống động ở đáy */}
-          <div className="pt-2">
+          {/* Hàng 3: Thanh chỉ số % có khoảng đệm pt-3 mt-3 border-t border-slate-100 */}
+          <div className="pt-3 mt-3 border-t border-slate-100">
             <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1.5">
               <span>Mức sẵn sàng</span>
               <span className="text-teal-700 font-bold">96%</span>
@@ -239,16 +239,16 @@ export const DashboardOverview: React.FC = () => {
                 +2 bạn đọc
               </span>
             </div>
-            {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
-            <div className="flex items-baseline gap-2 mt-3 mb-2">
-              <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-sans">
+            {/* Hàng 2: Con số lớn in đậm text-3xl font-black text-slate-900 */}
+            <div className="flex items-baseline gap-2 mt-3.5 mb-1">
+              <span className="text-3xl font-black text-slate-900 tracking-tight font-sans">
                 {kpiFormatter.format(overview.kpis.totalMembers)}
               </span>
               <span className="text-slate-500 text-xs font-semibold">bạn đọc</span>
             </div>
           </div>
-          {/* Hàng 3: Thanh chỉ số % sống động ở đáy */}
-          <div className="pt-2">
+          {/* Hàng 3: Thanh chỉ số % có khoảng đệm pt-3 mt-3 border-t border-slate-100 */}
+          <div className="pt-3 mt-3 border-t border-slate-100">
             <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1.5">
               <span>Tài khoản kích hoạt</span>
               <span className="text-indigo-700 font-bold">92%</span>
@@ -276,16 +276,16 @@ export const DashboardOverview: React.FC = () => {
                 Lưu thông tốt
               </span>
             </div>
-            {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
-            <div className="flex items-baseline gap-2 mt-3 mb-2">
-              <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-sans">
+            {/* Hàng 2: Con số lớn in đậm text-3xl font-black text-slate-900 */}
+            <div className="flex items-baseline gap-2 mt-3.5 mb-1">
+              <span className="text-3xl font-black text-slate-900 tracking-tight font-sans">
                 {kpiFormatter.format(overview.kpis.activeLoans)}
               </span>
               <span className="text-slate-500 text-xs font-semibold">cuốn</span>
             </div>
           </div>
-          {/* Hàng 3: Thanh chỉ số % sống động ở đáy */}
-          <div className="pt-2">
+          {/* Hàng 3: Thanh chỉ số % có khoảng đệm pt-3 mt-3 border-t border-slate-100 */}
+          <div className="pt-3 mt-3 border-t border-slate-100">
             <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1.5">
               <span>Đúng hạn</span>
               <span className="text-amber-700 font-bold">88%</span>
@@ -313,16 +313,16 @@ export const DashboardOverview: React.FC = () => {
                 Kiểm soát tốt
               </span>
             </div>
-            {/* Hàng 2: Con số lớn in đậm kèm đơn vị đo */}
-            <div className="flex items-baseline gap-2 mt-3 mb-2">
-              <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-sans">
+            {/* Hàng 2: Con số lớn in đậm text-3xl font-black text-slate-900 */}
+            <div className="flex items-baseline gap-2 mt-3.5 mb-1">
+              <span className="text-3xl font-black text-slate-900 tracking-tight font-sans">
                 {kpiFormatter.format(overview.kpis.revenue)}
               </span>
               <span className="text-slate-500 text-xs font-semibold">VNĐ</span>
             </div>
           </div>
-          {/* Hàng 3: Thanh chỉ số % sống động ở đáy */}
-          <div className="pt-2">
+          {/* Hàng 3: Thanh chỉ số % có khoảng đệm pt-3 mt-3 border-t border-slate-100 */}
+          <div className="pt-3 mt-3 border-t border-slate-100">
             <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1.5">
               <span>Đã thu hồi</span>
               <span className="text-rose-700 font-bold">100%</span>
@@ -337,7 +337,7 @@ export const DashboardOverview: React.FC = () => {
       {/* 3. Charts and Leaderboard */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         {/* Circulation Trend Chart */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-hidden flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 overflow-hidden flex flex-col justify-between">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
               <h3 className="text-base font-bold text-slate-900 tracking-tight">
@@ -399,7 +399,7 @@ export const DashboardOverview: React.FC = () => {
         </div>
 
         {/* Dynamic Panels / Top Readers & Server Health */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
+        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
               <div>

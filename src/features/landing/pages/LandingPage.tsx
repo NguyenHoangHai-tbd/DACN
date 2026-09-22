@@ -26,6 +26,7 @@ import {
   Play,
   LogOut,
   ArrowLeft,
+  Building2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -64,7 +65,7 @@ const HERO_IMAGES = [
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout, isAuthenticated } = useAuthStore();
+  const { user, tenantCode, logout, isAuthenticated } = useAuthStore();
   const { roleConfig } = usePermission();
   const [activeTab, setActiveTab] = useState('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -101,87 +102,57 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-teal-600 selection:text-white hidden-scrollbar overflow-x-hidden">
-      {/* 1. HEADER / NAVBAR */}
-      <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-white/10 text-white shadow-xs transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          {/* Logo & Brand Name & Desktop Nav */}
-          <div className="flex items-center gap-6 lg:gap-8">
-            <div 
-              onClick={() => scrollToSection('hero')}
-              className="flex items-center gap-3 cursor-pointer group"
-            >
-              <img
-                src="https://lms.tbd.edu.vn/pluginfile.php/1/theme_edumy/headerlogo1/1786323723/logo-TBD-white%20%282%29.png"
-                alt="Đại học Thái Bình Dương"
-                className="h-9 sm:h-10 object-contain"
-                referrerPolicy="no-referrer"
-              />
-              <div className="h-5 w-px bg-white/20" />
-              <span className="text-sm sm:text-base font-bold tracking-wider text-teal-400 uppercase">
-                THƯ VIỆN SỐ
-              </span>
-            </div>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1.5 text-sm font-medium text-slate-300">
-              <button
-                onClick={() => {
-                  setActiveTab('home');
-                  scrollToSection('hero');
-                }}
-                className={`transition-colors cursor-pointer px-3.5 py-1.5 rounded-lg ${
-                  activeTab === 'home'
-                    ? 'bg-teal-500/20 text-teal-300 font-bold border border-teal-500/30'
-                    : 'text-slate-300 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                Trang chủ
-              </button>
-
-              {/* Dynamic tabs according to role when logged in */}
-              {isAuthenticated() &&
-                roleConfig?.navItems?.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`transition-colors cursor-pointer px-3 py-1.5 rounded-lg text-xs lg:text-sm font-medium shrink-0 ${
-                      activeTab === item.id
-                        ? 'bg-teal-600 text-white font-bold shadow-xs'
-                        : 'text-slate-300 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    {item.defaultLabel}
-                  </button>
-                ))}
-            </nav>
+      {/* 1. HEADER (TIER 1) - Logo & Brand on left, User / Login on right */}
+      <header className="sticky top-0 z-50 bg-slate-950 h-16 border-b border-white/10 text-white shadow-xs transition-all flex items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-center justify-between">
+          {/* Bên trái: Chỉ giữ Logo TBD, vạch ngăn và chữ THƯ VIỆN SỐ */}
+          <div 
+            onClick={() => {
+              setActiveTab('home');
+              scrollToSection('hero');
+            }}
+            className="flex items-center gap-3 cursor-pointer group"
+          >
+            <img
+              src="https://lms.tbd.edu.vn/pluginfile.php/1/theme_edumy/headerlogo1/1786323723/logo-TBD-white%20%282%29.png"
+              alt="Đại học Thái Bình Dương"
+              className="h-8 sm:h-9 object-contain"
+              referrerPolicy="no-referrer"
+            />
+            <div className="h-5 w-px bg-white/20" />
+            <span className="text-sm sm:text-base font-bold tracking-wider text-teal-400 uppercase">
+              THƯ VIỆN SỐ
+            </span>
           </div>
 
-          {/* Right Section: Login OR User Info + Logout */}
-          <div className="hidden sm:flex items-center gap-3">
+          {/* Bên phải: Chưa đăng nhập -> Nút Đăng nhập; Đã đăng nhập -> Avatar tròn, Tên user, Huy hiệu vai trò & Nút Đăng xuất */}
+          <div className="flex items-center gap-2 sm:gap-3">
             {!isAuthenticated() ? (
               <Button
                 onClick={() => navigate('/login')}
-                className="h-10 px-5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-md shadow-teal-950/30 flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
+                className="h-9 px-4 sm:px-5 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-teal-950/30 flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
               >
-                <User size={16} className="text-teal-100" />
+                <User size={15} className="text-teal-100" />
                 <span>Đăng nhập</span>
               </Button>
             ) : (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2.5 bg-white/10 border border-white/15 px-3 py-1.5 rounded-xl">
-                  <div className="w-7 h-7 rounded-lg bg-teal-500/30 border border-teal-400/40 text-teal-300 flex items-center justify-center font-bold text-xs uppercase">
+              <div className="flex items-center gap-2 sm:gap-3">
+                {/* User Info Capsule: Avatar tròn, Tên user, Huy hiệu vai trò */}
+                <div className="flex items-center gap-2.5 bg-white/10 border border-white/15 px-3 py-1 rounded-xl">
+                  <div className="w-7 h-7 rounded-full bg-teal-500/30 border border-teal-400/40 text-teal-300 flex items-center justify-center font-bold text-xs uppercase shrink-0">
                     {user?.username?.charAt(0) || 'U'}
                   </div>
-                  <div className="flex flex-col text-left">
-                    <span className="text-xs font-bold text-white leading-tight">
+                  <div className="hidden sm:flex flex-col text-left">
+                    <span className="text-xs font-bold text-white leading-tight truncate max-w-[130px]">
                       {user?.username || 'Tài khoản'}
                     </span>
-                    <span className="text-[10px] text-teal-300 font-medium leading-tight">
+                    <span className="text-[10px] text-teal-300 font-medium leading-tight truncate max-w-[140px]">
                       {roleConfig?.defaultLabel || 'Người dùng'}
                     </span>
                   </div>
                 </div>
 
+                {/* Nút Đăng xuất gọn gàng */}
                 <Button
                   onClick={() => {
                     logout();
@@ -189,90 +160,67 @@ export const LandingPage: React.FC = () => {
                     toast.success('Đã đăng xuất thành công');
                   }}
                   variant="outline"
-                  className="h-9 px-3.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-200 border-rose-500/30 font-semibold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="h-8 sm:h-9 px-2.5 sm:px-3.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-200 border-rose-500/30 font-semibold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
+                  title="Đăng xuất"
                 >
-                  <LogOut size={15} />
-                  <span className="text-xs">Đăng xuất</span>
+                  <LogOut size={14} />
+                  <span className="hidden sm:inline text-xs">Đăng xuất</span>
                 </Button>
               </div>
             )}
           </div>
+        </div>
+      </header>
 
-          {/* Mobile menu toggle button */}
-          <div className="flex items-center gap-2 md:hidden">
-            {!isAuthenticated() ? (
-              <Button
-                size="sm"
-                onClick={() => navigate('/login')}
-                className="h-9 px-3.5 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow-md shadow-teal-950/30 flex items-center gap-1.5 cursor-pointer"
-              >
-                <User size={14} className="text-teal-100" />
-                <span>Đăng nhập</span>
-              </Button>
-            ) : (
+      {/* 2. SUB-NAV (TIER 2) - Chỉ hiện khi đã đăng nhập */}
+      {isAuthenticated() && (
+        <nav className="sticky top-16 z-40 bg-white border-b border-slate-200/90 shadow-2xs">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-3 overflow-x-auto hidden-scrollbar">
+            {/* Bên trái: Nút tab Trang chủ + các tab chức năng từ roleConfig.navItems */}
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 onClick={() => {
-                  logout();
                   setActiveTab('home');
-                  toast.success('Đã đăng xuất thành công');
+                  scrollToSection('hero');
                 }}
-                className="p-2 text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 rounded-lg cursor-pointer"
-                title="Đăng xuất"
+                className={`transition-all select-none text-left focus:outline-none cursor-pointer shrink-0 ${
+                  activeTab === 'home'
+                    ? 'bg-teal-600 text-white font-bold rounded-xl px-3.5 py-1.5 shadow-xs text-xs sm:text-sm'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl px-3 py-1.5 text-xs sm:text-sm font-semibold'
+                }`}
               >
-                <LogOut size={18} />
+                Trang chủ
               </button>
-            )}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-300 hover:text-white rounded-lg focus:outline-none cursor-pointer"
-              aria-label="Toggle navigation menu"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
 
-        {/* Mobile dropdown menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-slate-950/95 backdrop-blur-md border-b border-white/10 px-4 pt-3 pb-4 space-y-2 shadow-xl">
-            {isAuthenticated() && (
-              <div className="px-3 py-2 mb-2 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-bold text-white">{user?.username}</div>
-                  <div className="text-[10px] text-teal-300">{roleConfig?.defaultLabel}</div>
-                </div>
-              </div>
-            )}
-            <button
-              onClick={() => {
-                setActiveTab('home');
-                scrollToSection('hero');
-              }}
-              className={`w-full text-left py-2 px-3 text-sm font-medium rounded-lg cursor-pointer ${
-                activeTab === 'home' ? 'bg-teal-600 text-white font-bold' : 'text-slate-200 hover:bg-white/10'
-              }`}
-            >
-              Trang chủ
-            </button>
+              {roleConfig?.navItems?.map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`transition-all select-none text-left focus:outline-none cursor-pointer shrink-0 ${
+                      isActive
+                        ? 'bg-teal-600 text-white font-bold rounded-xl px-3.5 py-1.5 shadow-xs text-xs sm:text-sm'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl px-3 py-1.5 text-xs sm:text-sm font-semibold'
+                    }`}
+                  >
+                    {item.defaultLabel}
+                  </button>
+                );
+              })}
+            </div>
 
-            {isAuthenticated() &&
-              roleConfig?.navItems?.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`w-full text-left py-2 px-3 text-sm font-medium rounded-lg cursor-pointer ${
-                    activeTab === item.id ? 'bg-teal-600 text-white font-bold' : 'text-slate-300 hover:bg-white/10'
-                  }`}
-                >
-                  {item.defaultLabel}
-                </button>
-              ))}
+            {/* Bên phải: Nhãn Phạm vi hoạt động nhỏ gọn */}
+            <div className="hidden md:flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 px-2.5 py-1 rounded-xl shrink-0">
+              <Building2 size={13} className="text-teal-600 shrink-0" />
+              <span className="text-[11px] text-slate-500 font-medium">Phạm vi:</span>
+              <span className="text-[11px] text-slate-800 font-bold truncate max-w-[150px]">
+                {tenantCode === 'global' ? 'Hệ thống tổng' : (tenantCode === 'hq' ? 'Hà Nội HQ' : tenantCode === 'lib-hcm' ? 'TP.HCM' : (tenantCode || 'Trường ĐH TBD'))}
+              </span>
+            </div>
           </div>
-        )}
-      </header>
+        </nav>
+      )}
 
       {/* BODY CONTENT: If activeTab === 'home', show Landing Page sections. If activeTab !== 'home', show corresponding functional component */}
       {activeTab === 'home' ? (
@@ -728,25 +676,7 @@ export const LandingPage: React.FC = () => {
         </>
       ) : (
         /* Workspace pane for functional tabs */
-        <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
-          {/* Navigation Bar / Return to home */}
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
-            <button
-              onClick={() => setActiveTab('home')}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 rounded-xl text-sm font-semibold shadow-xs transition-all cursor-pointer group"
-            >
-              <ArrowLeft size={16} className="text-teal-600 group-hover:-translate-x-0.5 transition-transform" />
-              <span>← Về trang chủ</span>
-            </button>
-
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500 font-medium">Chức năng:</span>
-              <span className="text-xs font-bold text-teal-800 bg-teal-50 border border-teal-200 px-3 py-1 rounded-lg uppercase tracking-wider">
-                {roleConfig?.navItems?.find((i) => i.id === activeTab)?.defaultLabel || activeTab}
-              </span>
-            </div>
-          </div>
-
+        <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-250">
           {/* Render Component Corresponding to activeTab */}
           <div className="w-full">
             {activeTab === 'dashboard' && <DashboardOverview />}
@@ -851,17 +781,26 @@ export const LandingPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-2">
-                <Button
-                  id="footer-login-btn"
-                  onClick={() => navigate('/login')}
-                  className="w-full h-11 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-teal-950/30 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer group"
-                >
-                  <User size={16} className="text-teal-100" />
-                  <span>Đăng nhập hệ thống</span>
-                  <ArrowRight size={14} className="text-teal-100 group-hover:translate-x-0.5 transition-transform" />
-                </Button>
-              </div>
+              {!isAuthenticated() ? (
+                <div className="pt-2">
+                  <Button
+                    id="footer-login-btn"
+                    onClick={() => navigate('/login')}
+                    className="w-full h-11 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-teal-950/30 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer group"
+                  >
+                    <User size={16} className="text-teal-100" />
+                    <span>Đăng nhập hệ thống</span>
+                    <ArrowRight size={14} className="text-teal-100 group-hover:translate-x-0.5 transition-transform" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="pt-2 p-3 bg-white/5 border border-white/10 rounded-xl flex items-center gap-2.5 text-xs text-slate-300">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                  <span>
+                    Phiên làm việc: <strong className="text-white">{user?.username}</strong> ({roleConfig?.defaultLabel})
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
