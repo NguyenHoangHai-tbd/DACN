@@ -74,6 +74,7 @@ export const LoginForm: React.FC = () => {
         const primaryRole = apiRole || '';
         toast.success(`Đăng nhập thành công với vai trò: ${getFriendlyRoleLabel(primaryRole)}`);
       }
+      navigate('/', { replace: true });
     },
     onError: (error: any) => {
       toast.error(parseFriendlyError(error, 'Không thể đăng nhập. Tên đăng nhập hoặc mật khẩu không chính xác.'));

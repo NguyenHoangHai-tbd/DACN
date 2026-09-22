@@ -5,7 +5,6 @@ import { Toaster } from 'sonner';
 
 import { useAuthStore } from './features/auth/store/authStore';
 import { LoginForm } from './features/auth/components/LoginForm';
-import { AdminDashboard } from './features/admin/pages/AdminDashboard';
 import { LandingPage } from './features/landing/pages/LandingPage';
 import { GlobalRealtimeProvider } from './shared/signalr/components/GlobalRealtimeProvider';
 
@@ -17,14 +16,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = useAuthStore(state => state.isAuthenticated());
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  return children;
-}
 
 function MainApp() {
   const isAuthenticated = useAuthStore(state => state.isAuthenticated());
@@ -38,18 +29,8 @@ function MainApp() {
           isAuthenticated ? <Navigate to="/" replace /> : <LoginForm />
         } 
       />
-      <Route 
-        path="/" 
-        element={
-          isAuthenticated ? (
-            <ProtectedRoute>
-              <AdminDashboard />
-            </ProtectedRoute>
-          ) : (
-            <LandingPage />
-          )
-        } 
-      />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

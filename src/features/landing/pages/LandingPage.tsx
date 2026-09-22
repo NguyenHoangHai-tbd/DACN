@@ -24,9 +24,37 @@ import {
   Headphones,
   Users,
   Play,
+  LogOut,
+  ArrowLeft,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useAuthStore } from '../../auth/store/authStore';
+import { usePermission } from '../../../shared/hooks/usePermission';
+import { DashboardOverview } from '../../dashboard/components/DashboardOverview';
+import { BookList } from '../../books/components/BookList';
+import { MemberList } from '../../members/components/MemberList';
+import { CirculationPanel } from '../../circulation/components/CirculationPanel';
+import { ActiveLoans } from '../../circulation/components/ActiveLoans';
+import { ReturnedUnpaidFines } from '../../circulation/components/ReturnedUnpaidFines';
+import { ActiveHolds } from '../../circulation/components/ActiveHolds';
+import { UserList } from '../../admin/components/UserList';
+import { TenantList } from '../../admin/components/TenantList';
+import { AuditLogList } from '../../audit/components/AuditLogList';
+import { ReportBuilder } from '../../reports/components/ReportBuilder';
+import { SearchInterface } from '../../search/components/SearchInterface';
+import { MemberLoansView, MemberHoldsView, MemberProfileView } from '../../members/components/MemberPortalViews';
+import { PolicyManager } from '../../policies/components/PolicyManager';
+import { WorkflowManager } from '../../workflows/components/WorkflowManager';
+import { BarcodeScanner } from '../../scanner/components/BarcodeScanner';
+import { PrintManager } from '../../scanner/components/PrintManager';
+import { TransferBoard } from '../../transfers/components/TransferBoard';
+import { ImportExportManager } from '../../imports/components/ImportExportManager';
+import { IntegrationManager } from '../../integrations/components/IntegrationManager';
+import { MonitoringDashboard } from '../../monitoring/components/MonitoringDashboard';
+import { RecommendationCenter } from '../../recommendations/components/RecommendationCenter';
+import { BrandingManager } from '../../branding/components/BrandingManager';
+import { TemplateManager } from '../../notifications/components/TemplateManager';
 
 const HERO_IMAGES = [
   'https://lms.tbd.edu.vn/pluginfile.php/27963/block_cocoon_slider_8/slides/1/httpstbd.edu.vnwp-contentuploads202008TBD-m%25E1%25BB%259Bi-1.jpg',
@@ -36,6 +64,9 @@ const HERO_IMAGES = [
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user, logout, isAuthenticated } = useAuthStore();
+  const { roleConfig } = usePermission();
+  const [activeTab, setActiveTab] = useState('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchNotice, setShowSearchNotice] = useState(false);
@@ -91,38 +122,106 @@ export const LandingPage: React.FC = () => {
               </span>
             </div>
 
-            {/* Desktop Navigation: Chỉ giữ duy nhất Trang chủ */}
-            <nav className="hidden md:flex items-center text-sm font-medium text-slate-300">
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-1.5 text-sm font-medium text-slate-300">
               <button
-                onClick={() => scrollToSection('hero')}
-                className="hover:text-teal-400 transition-colors cursor-pointer px-3 py-1.5 rounded-lg hover:bg-white/5"
+                onClick={() => {
+                  setActiveTab('home');
+                  scrollToSection('hero');
+                }}
+                className={`transition-colors cursor-pointer px-3.5 py-1.5 rounded-lg ${
+                  activeTab === 'home'
+                    ? 'bg-teal-500/20 text-teal-300 font-bold border border-teal-500/30'
+                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                }`}
               >
                 Trang chủ
               </button>
+
+              {/* Dynamic tabs according to role when logged in */}
+              {isAuthenticated() &&
+                roleConfig?.navItems?.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`transition-colors cursor-pointer px-3 py-1.5 rounded-lg text-xs lg:text-sm font-medium shrink-0 ${
+                      activeTab === item.id
+                        ? 'bg-teal-600 text-white font-bold shadow-xs'
+                        : 'text-slate-300 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    {item.defaultLabel}
+                  </button>
+                ))}
             </nav>
           </div>
 
-          {/* Right CTA Button: Login */}
+          {/* Right Section: Login OR User Info + Logout */}
           <div className="hidden sm:flex items-center gap-3">
-            <Button
-              onClick={() => navigate('/login')}
-              className="h-10 px-5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-md shadow-teal-950/30 flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
-            >
-              <User size={16} className="text-teal-100" />
-              <span>Đăng nhập</span>
-            </Button>
+            {!isAuthenticated() ? (
+              <Button
+                onClick={() => navigate('/login')}
+                className="h-10 px-5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-md shadow-teal-950/30 flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
+              >
+                <User size={16} className="text-teal-100" />
+                <span>Đăng nhập</span>
+              </Button>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5 bg-white/10 border border-white/15 px-3 py-1.5 rounded-xl">
+                  <div className="w-7 h-7 rounded-lg bg-teal-500/30 border border-teal-400/40 text-teal-300 flex items-center justify-center font-bold text-xs uppercase">
+                    {user?.username?.charAt(0) || 'U'}
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-bold text-white leading-tight">
+                      {user?.username || 'Tài khoản'}
+                    </span>
+                    <span className="text-[10px] text-teal-300 font-medium leading-tight">
+                      {roleConfig?.defaultLabel || 'Người dùng'}
+                    </span>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={() => {
+                    logout();
+                    setActiveTab('home');
+                    toast.success('Đã đăng xuất thành công');
+                  }}
+                  variant="outline"
+                  className="h-9 px-3.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-200 border-rose-500/30 font-semibold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <LogOut size={15} />
+                  <span className="text-xs">Đăng xuất</span>
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Mobile menu toggle button */}
           <div className="flex items-center gap-2 md:hidden">
-            <Button
-              size="sm"
-              onClick={() => navigate('/login')}
-              className="h-9 px-3.5 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow-md shadow-teal-950/30 flex items-center gap-1.5 cursor-pointer"
-            >
-              <User size={14} className="text-teal-100" />
-              <span>Đăng nhập</span>
-            </Button>
+            {!isAuthenticated() ? (
+              <Button
+                size="sm"
+                onClick={() => navigate('/login')}
+                className="h-9 px-3.5 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow-md shadow-teal-950/30 flex items-center gap-1.5 cursor-pointer"
+              >
+                <User size={14} className="text-teal-100" />
+                <span>Đăng nhập</span>
+              </Button>
+            ) : (
+              <button
+                onClick={() => {
+                  logout();
+                  setActiveTab('home');
+                  toast.success('Đã đăng xuất thành công');
+                }}
+                className="p-2 text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 rounded-lg cursor-pointer"
+                title="Đăng xuất"
+              >
+                <LogOut size={18} />
+              </button>
+            )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-slate-300 hover:text-white rounded-lg focus:outline-none cursor-pointer"
@@ -136,21 +235,53 @@ export const LandingPage: React.FC = () => {
         {/* Mobile dropdown menu */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-slate-950/95 backdrop-blur-md border-b border-white/10 px-4 pt-3 pb-4 space-y-2 shadow-xl">
+            {isAuthenticated() && (
+              <div className="px-3 py-2 mb-2 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-bold text-white">{user?.username}</div>
+                  <div className="text-[10px] text-teal-300">{roleConfig?.defaultLabel}</div>
+                </div>
+              </div>
+            )}
             <button
-              onClick={() => scrollToSection('hero')}
-              className="w-full text-left py-2 px-3 text-sm font-medium text-slate-200 hover:bg-white/10 rounded-lg cursor-pointer"
+              onClick={() => {
+                setActiveTab('home');
+                scrollToSection('hero');
+              }}
+              className={`w-full text-left py-2 px-3 text-sm font-medium rounded-lg cursor-pointer ${
+                activeTab === 'home' ? 'bg-teal-600 text-white font-bold' : 'text-slate-200 hover:bg-white/10'
+              }`}
             >
               Trang chủ
             </button>
+
+            {isAuthenticated() &&
+              roleConfig?.navItems?.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full text-left py-2 px-3 text-sm font-medium rounded-lg cursor-pointer ${
+                    activeTab === item.id ? 'bg-teal-600 text-white font-bold' : 'text-slate-300 hover:bg-white/10'
+                  }`}
+                >
+                  {item.defaultLabel}
+                </button>
+              ))}
           </div>
         )}
       </header>
 
-      {/* 2. HERO SECTION - CỔNG THƯ VIỆN SỐ HIỆN ĐẠI (SLIDER NỀN TRƯỜNG TBD) */}
-      <section
-        id="hero"
-        className="relative bg-slate-950 text-white overflow-hidden pt-12 pb-20 lg:pt-18 lg:pb-26 border-b border-white/10"
-      >
+      {/* BODY CONTENT: If activeTab === 'home', show Landing Page sections. If activeTab !== 'home', show corresponding functional component */}
+      {activeTab === 'home' ? (
+        <>
+          {/* 2. HERO SECTION - CỔNG THƯ VIỆN SỐ HIỆN ĐẠI (SLIDER NỀN TRƯỜNG TBD) */}
+          <section
+            id="hero"
+            className="relative bg-slate-950 text-white overflow-hidden pt-12 pb-20 lg:pt-18 lg:pb-26 border-b border-white/10"
+          >
         {/* Background Images Slider */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           {HERO_IMAGES.map((imgUrl, index) => (
@@ -594,6 +725,65 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
       </section>
+        </>
+      ) : (
+        /* Workspace pane for functional tabs */
+        <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
+          {/* Navigation Bar / Return to home */}
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
+            <button
+              onClick={() => setActiveTab('home')}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 rounded-xl text-sm font-semibold shadow-xs transition-all cursor-pointer group"
+            >
+              <ArrowLeft size={16} className="text-teal-600 group-hover:-translate-x-0.5 transition-transform" />
+              <span>← Về trang chủ</span>
+            </button>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500 font-medium">Chức năng:</span>
+              <span className="text-xs font-bold text-teal-800 bg-teal-50 border border-teal-200 px-3 py-1 rounded-lg uppercase tracking-wider">
+                {roleConfig?.navItems?.find((i) => i.id === activeTab)?.defaultLabel || activeTab}
+              </span>
+            </div>
+          </div>
+
+          {/* Render Component Corresponding to activeTab */}
+          <div className="w-full">
+            {activeTab === 'dashboard' && <DashboardOverview />}
+            {activeTab === 'catalog' && <BookList />}
+            {activeTab === 'members' && <MemberList />}
+            {activeTab === 'circulation' && (
+              <div className="flex flex-col gap-6 w-full transition-all">
+                <CirculationPanel />
+                <ActiveLoans />
+                <ReturnedUnpaidFines />
+                <ActiveHolds />
+              </div>
+            )}
+            {activeTab === 'users' && <UserList />}
+            {activeTab === 'tenants' && <TenantList />}
+            {activeTab === 'audit' && <AuditLogList />}
+            {activeTab === 'reports' && <ReportBuilder />}
+            {activeTab === 'search' && <SearchInterface />}
+            {activeTab === 'policies' && <PolicyManager />}
+            {activeTab === 'workflows' && <WorkflowManager />}
+            {activeTab === 'scanner' && <BarcodeScanner />}
+            {activeTab === 'print_codes' && <PrintManager />}
+            {activeTab === 'transfers' && <TransferBoard />}
+            {activeTab === 'imports' && <ImportExportManager />}
+            {activeTab === 'integrations' && <IntegrationManager />}
+            {activeTab === 'monitoring' && <MonitoringDashboard />}
+            {activeTab === 'recommendations' && <RecommendationCenter />}
+            {activeTab === 'branding' && <BrandingManager />}
+            {activeTab === 'templates' && <TemplateManager />}
+
+            {/* Member Portal Custom Sections */}
+            {activeTab === 'my-loans' && <MemberLoansView />}
+            {activeTab === 'my-holds' && <MemberHoldsView />}
+            {activeTab === 'profile' && <MemberProfileView />}
+          </div>
+        </main>
+      )}
 
       {/* 5. FOOTER 3 CỘT TINH GỌN (NỀN TỐI ĐỒNG NHẤT VỚI TOPBAR) */}
       <footer id="contact" className="mt-auto bg-slate-950 text-slate-300 pt-16 pb-16 border-t border-white/10 text-left">
