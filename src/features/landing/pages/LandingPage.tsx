@@ -72,6 +72,7 @@ export const LandingPage: React.FC = () => {
   const { user, tenantCode, logout, isAuthenticated } = useAuthStore();
   const { roleConfig } = usePermission();
   const [activeTab, setActiveTab] = useState('home');
+  const [circSubTab, setCircSubTab] = useState<'panel' | 'loans' | 'holds' | 'fines'>('panel');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchNotice, setShowSearchNotice] = useState(false);
@@ -889,11 +890,62 @@ export const LandingPage: React.FC = () => {
             {activeTab === 'catalog' && <BookList />}
             {activeTab === 'members' && <MemberList />}
             {activeTab === 'circulation' && (
-              <div className="flex flex-col gap-6 w-full transition-all">
-                <CirculationPanel />
-                <ActiveLoans />
-                <ReturnedUnpaidFines />
-                <ActiveHolds />
+              <div className="flex flex-col w-full transition-all">
+                {/* Thanh Sub-Tabs ngang chọn phân hệ mượn trả */}
+                <div className="bg-slate-100/90 border border-slate-200/80 p-1 rounded-xl flex items-center gap-1.5 w-fit mb-5 shadow-2xs overflow-x-auto max-w-full">
+                  <button
+                    type="button"
+                    onClick={() => setCircSubTab('panel')}
+                    className={`px-3 py-1.5 rounded-lg text-xs transition-all shrink-0 cursor-pointer ${
+                      circSubTab === 'panel'
+                        ? 'bg-white text-teal-800 font-bold shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 font-medium'
+                    }`}
+                  >
+                    ⚡ Quầy Mượn - Trả
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCircSubTab('loans')}
+                    className={`px-3 py-1.5 rounded-lg text-xs transition-all shrink-0 cursor-pointer ${
+                      circSubTab === 'loans'
+                        ? 'bg-white text-teal-800 font-bold shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 font-medium'
+                    }`}
+                  >
+                    📚 Danh sách đang mượn
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCircSubTab('holds')}
+                    className={`px-3 py-1.5 rounded-lg text-xs transition-all shrink-0 cursor-pointer ${
+                      circSubTab === 'holds'
+                        ? 'bg-white text-teal-800 font-bold shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 font-medium'
+                    }`}
+                  >
+                    ⏳ Hàng chờ đặt giữ
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCircSubTab('fines')}
+                    className={`px-3 py-1.5 rounded-lg text-xs transition-all shrink-0 cursor-pointer ${
+                      circSubTab === 'fines'
+                        ? 'bg-white text-teal-800 font-bold shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 font-medium'
+                    }`}
+                  >
+                    💰 Phí phạt chưa thu
+                  </button>
+                </div>
+
+                {/* Render component tương ứng với circSubTab */}
+                <div className="w-full">
+                  {circSubTab === 'panel' && <CirculationPanel />}
+                  {circSubTab === 'loans' && <ActiveLoans />}
+                  {circSubTab === 'holds' && <ActiveHolds />}
+                  {circSubTab === 'fines' && <ReturnedUnpaidFines />}
+                </div>
               </div>
             )}
             {activeTab === 'users' && <UserList />}
