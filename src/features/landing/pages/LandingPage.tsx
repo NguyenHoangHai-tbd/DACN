@@ -85,6 +85,37 @@ export const LandingPage: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    const syncHashToTab = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (
+        hash &&
+        [
+          'dashboard',
+          'catalog',
+          'members',
+          'circulation',
+          'users',
+          'tenants',
+          'audit',
+          'reports',
+          'policies',
+          'workflows',
+          'my-loans',
+          'my-holds',
+          'profile',
+          'search',
+        ].includes(hash)
+      ) {
+        setActiveTab(hash);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    syncHashToTab();
+    window.addEventListener('hashchange', syncHashToTab);
+    return () => window.removeEventListener('hashchange', syncHashToTab);
+  }, []);
+
   const scrollToSection = (id: string) => {
     setMobileMenuOpen(false);
     const element = document.getElementById(id);
