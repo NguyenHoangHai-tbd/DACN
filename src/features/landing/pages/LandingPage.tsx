@@ -860,29 +860,31 @@ export const LandingPage: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Dòng dưới: Tiêu đề lớn in đậm, mô tả phụ và badge cơ sở */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/60">
-                  <div>
-                    <h1 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tight">
-                      {activeTitle}
-                    </h1>
-                    <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                      {activeDescription}
-                    </p>
-                  </div>
+                {/* Dòng dưới: Tiêu đề lớn in đậm, mô tả phụ và badge cơ sở (Ẩn khi ở tab dashboard vì DashboardOverview đã có banner riêng) */}
+                {activeTab !== 'dashboard' && (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/60">
+                    <div>
+                      <h1 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tight">
+                        {activeTitle}
+                      </h1>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                        {activeDescription}
+                      </p>
+                    </div>
 
-                  <div className="shrink-0 self-start sm:self-auto">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-800 border border-teal-200/70 shadow-2xs">
-                      🏛️ Trường ĐH Thái Bình Dương (TBD)
-                    </span>
+                    <div className="shrink-0 self-start sm:self-auto">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-800 border border-teal-200/70 shadow-2xs">
+                        🏛️ Trường ĐH Thái Bình Dương (TBD)
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             );
           })()}
 
-          {/* Khung thẻ chuẩn chứa component chức năng */}
-          <div className="w-full bg-white border border-slate-200/80 rounded-2xl shadow-xs p-6 sm:p-8 min-h-[500px]">
+          {/* Khung chứa component chức năng */}
+          <div className="w-full min-h-[500px]">
             {activeTab === 'dashboard' && <DashboardOverview />}
             {activeTab === 'catalog' && <BookList />}
             {activeTab === 'members' && <MemberList />}
