@@ -105,47 +105,48 @@ export const LandingPage: React.FC = () => {
       {/* 1. SINGLE-TIER TOPBAR / HEADER */}
       <header className="sticky top-0 z-50 h-16 bg-slate-950/95 backdrop-blur-md border-b border-white/10 text-white flex items-center px-3 sm:px-6 lg:px-8 shadow-sm">
         <div className="w-full flex items-center justify-between gap-2 lg:gap-4">
-          {/* Bên trái: Logo TBD, vạch ngăn mỏng, chữ THƯ VIỆN SỐ màu teal-400 font-bold tracking-wider */}
-          <div 
-            onClick={() => {
-              setActiveTab('home');
-              scrollToSection('hero');
-            }}
-            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0"
-          >
-            <img
-              src="https://lms.tbd.edu.vn/pluginfile.php/1/theme_edumy/headerlogo1/1786323723/logo-TBD-white%20%282%29.png"
-              alt="Đại học Thái Bình Dương"
-              className="h-7 sm:h-8 lg:h-9 object-contain group-hover:opacity-90 transition-opacity"
-              referrerPolicy="no-referrer"
-            />
-            <div className="h-4 sm:h-5 w-px bg-white/20" />
-            <span className="text-xs sm:text-sm font-bold tracking-wider text-teal-400 uppercase select-none whitespace-nowrap">
-              THƯ VIỆN SỐ
-            </span>
-          </div>
+          {/* Bên trái: Logo TBD và khối menu điều hướng nằm cạnh nhau */}
+          <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+            {/* Logo TBD, vạch ngăn mỏng, chữ THƯ VIỆN SỐ */}
+            <div 
+              onClick={() => {
+                setActiveTab('home');
+                scrollToSection('hero');
+              }}
+              className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0"
+            >
+              <img
+                src="https://lms.tbd.edu.vn/pluginfile.php/1/theme_edumy/headerlogo1/1786323723/logo-TBD-white%20%282%29.png"
+                alt="Đại học Thái Bình Dương"
+                className="h-7 sm:h-8 lg:h-9 object-contain group-hover:opacity-90 transition-opacity"
+                referrerPolicy="no-referrer"
+              />
+              <div className="h-4 sm:h-5 w-px bg-white/20" />
+              <span className="text-xs sm:text-sm font-bold tracking-wider text-teal-400 uppercase select-none whitespace-nowrap">
+                THƯ VIỆN SỐ
+              </span>
+            </div>
 
-          {/* Ở giữa (chỉ hiện khi isAuthenticated()): Dãy tab điều hướng trên 1 hàng */}
-          {isAuthenticated() && (
-            <div className="flex-1 flex items-center justify-center min-w-0 px-1 sm:px-2">
-              <nav className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto hidden-scrollbar py-1 max-w-full">
-                {/* Nút Trang chủ */}
-                <button
-                  onClick={() => {
-                    setActiveTab('home');
-                    scrollToSection('hero');
-                  }}
-                  className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-medium text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-lg ${
-                    activeTab === 'home'
-                      ? 'bg-teal-600 text-white shadow-sm'
-                      : 'text-slate-300 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  Trang chủ
-                </button>
+            {/* Dãy tab điều hướng nằm ngay cạnh Logo TBD */}
+            <nav className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto hidden-scrollbar py-1">
+              {/* Nút Trang chủ - LUÔN LUÔN HIỂN THỊ ĐẦU TIÊN CẠNH LOGO */}
+              <button
+                onClick={() => {
+                  setActiveTab('home');
+                  scrollToSection('hero');
+                }}
+                className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-medium text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-lg ${
+                  activeTab === 'home'
+                    ? 'bg-teal-600 text-white shadow-sm'
+                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                Trang chủ
+              </button>
 
-                {/* Các tab chức năng theo vai trò với tên rút gọn chống gãy dòng */}
-                {roleConfig?.navItems?.map((item) => {
+              {/* Các tab chức năng theo vai trò với tên rút gọn chống gãy dòng - chỉ hiện khi isAuthenticated() */}
+              {isAuthenticated() &&
+                roleConfig?.navItems?.map((item) => {
                   const isActive = activeTab === item.id;
                   
                   // Rút gọn nhãn các tab dài để không bị tràn hoặc mất chữ
@@ -174,9 +175,8 @@ export const LandingPage: React.FC = () => {
                     </button>
                   );
                 })}
-              </nav>
-            </div>
-          )}
+            </nav>
+          </div>
 
           {/* Bên phải: Nút Đăng nhập hoặc Capsule người dùng rounded-full + Nút Đăng xuất rounded-full */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
