@@ -30,6 +30,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
+import { NotificationBadge } from '../../notifications/components/NotificationInbox';
 import { useAuthStore } from '../../auth/store/authStore';
 import { usePermission } from '../../../shared/hooks/usePermission';
 import { DashboardOverview } from '../../dashboard/components/DashboardOverview';
@@ -65,6 +67,7 @@ const HERO_IMAGES = [
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
   const { user, tenantCode, logout, isAuthenticated } = useAuthStore();
   const { roleConfig } = usePermission();
   const [activeTab, setActiveTab] = useState('home');
@@ -86,6 +89,20 @@ export const LandingPage: React.FC = () => {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  const SHORT_LABELS: Record<string, string> = {
+    users: 'Tài khoản',
+    catalog: 'Sách',
+    members: 'Độc giả',
+    circulation: 'Mượn - Trả',
+    policies: 'Chính sách',
+    workflows: 'Quy trình',
+    tenants: 'Thư viện',
+    audit: 'Nhật ký',
+    profile: 'Hồ sơ',
+    'my-loans': 'Đang mượn',
+    'my-holds': 'Đặt giữ',
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -128,18 +145,19 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Dãy tab điều hướng nằm ngay cạnh Logo TBD */}
-            <nav className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto hidden-scrollbar py-1">
+            <nav className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto hidden-scrollbar py-1">
               {/* Nút Trang chủ - LUÔN LUÔN HIỂN THỊ ĐẦU TIÊN CẠNH LOGO */}
               <button
                 onClick={() => {
                   setActiveTab('home');
                   scrollToSection('hero');
                 }}
-                className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-medium text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-lg ${
+                className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-medium text-xs px-2 sm:px-2.5 py-1 rounded-lg ${
                   activeTab === 'home'
                     ? 'bg-teal-600 text-white shadow-sm'
                     : 'text-slate-300 hover:text-white hover:bg-white/5'
                 }`}
+                title="Trang chủ"
               >
                 Trang chủ
               </button>
@@ -148,28 +166,18 @@ export const LandingPage: React.FC = () => {
               {isAuthenticated() &&
                 roleConfig?.navItems?.map((item) => {
                   const isActive = activeTab === item.id;
-                  
-                  // Rút gọn nhãn các tab dài để không bị tràn hoặc mất chữ
-                  let displayLabel = item.defaultLabel;
-                  if (item.defaultLabel === 'Thông báo / Quy trình' || item.id === 'notifications') {
-                    displayLabel = 'Quy trình';
-                  } else if (item.defaultLabel === 'Mượn / Trả sách' || item.id === 'loans') {
-                    displayLabel = 'Mượn - Trả';
-                  } else if (item.defaultLabel === 'Chính sách mượn / phạt' || item.id === 'policies') {
-                    displayLabel = 'Chính sách';
-                  } else if (item.defaultLabel === 'Hồ sơ & thẻ thư viện' || item.id === 'profile') {
-                    displayLabel = 'Hồ sơ thẻ';
-                  }
+                  const displayLabel = SHORT_LABELS[item.id] || item.defaultLabel;
 
                   return (
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
-                      className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-medium text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-lg ${
+                      className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-medium text-xs px-2 sm:px-2.5 py-1 rounded-lg ${
                         isActive
                           ? 'bg-teal-600 text-white shadow-sm'
                           : 'text-slate-300 hover:text-white hover:bg-white/5'
                       }`}
+                      title={item.defaultLabel}
                     >
                       {displayLabel}
                     </button>
@@ -178,8 +186,43 @@ export const LandingPage: React.FC = () => {
             </nav>
           </div>
 
-          {/* Bên phải: Nút Đăng nhập hoặc Capsule người dùng rounded-full + Nút Đăng xuất rounded-full */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          {/* Bên phải: Bộ chuyển ngôn ngữ (VN/EN), Chuông thông báo (khi đã login) + Nút Đăng nhập hoặc Capsule người dùng rounded-full + Nút Đăng xuất rounded-full */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Bộ chuyển ngôn ngữ VN / EN dạng pill capsule bo tròn */}
+            <div className="flex items-center bg-white/5 border border-white/10 p-0.5 rounded-full shadow-2xs">
+              <button
+                type="button"
+                onClick={() => i18n.changeLanguage('vi-VN')}
+                className={`px-2 py-0.5 rounded-full text-[11px] transition-all cursor-pointer ${
+                  i18n.language?.startsWith('vi')
+                    ? 'bg-teal-600 text-white font-bold shadow-xs'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+                title="Tiếng Việt"
+              >
+                VN
+              </button>
+              <button
+                type="button"
+                onClick={() => i18n.changeLanguage('en-US')}
+                className={`px-2 py-0.5 rounded-full text-[11px] transition-all cursor-pointer ${
+                  i18n.language?.startsWith('en')
+                    ? 'bg-teal-600 text-white font-bold shadow-xs'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+                title="English"
+              >
+                EN
+              </button>
+            </div>
+
+            {/* Chuông thông báo: chỉ hiện khi isAuthenticated() */}
+            {isAuthenticated() && (
+              <div className="text-slate-300 hover:text-white [&_button]:hover:bg-white/10 shrink-0 flex items-center">
+                <NotificationBadge />
+              </div>
+            )}
+
             {!isAuthenticated() ? (
               <Button
                 onClick={() => navigate('/login')}
