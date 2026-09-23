@@ -167,13 +167,34 @@ export const LandingPage: React.FC = () => {
               {isAuthenticated() && (() => {
                 const navItems = roleConfig?.navItems || [];
                 const MANAGEMENT_KEYS = ['users', 'catalog', 'members', 'tenants'];
+
+                // Tách các nhóm tab
+                const dashboardItem = navItems.find((item) => item.id === 'dashboard');
                 const managementItems = navItems.filter((item) => MANAGEMENT_KEYS.includes(item.id));
-                const nonManagementItems = navItems.filter((item) => !MANAGEMENT_KEYS.includes(item.id));
+                const remainingItems = navItems.filter(
+                  (item) => item.id !== 'dashboard' && !MANAGEMENT_KEYS.includes(item.id)
+                );
                 const isManagementActive = managementItems.some((item) => item.id === activeTab);
 
                 return (
                   <>
-                    {/* Dropdown Menu "Quản lý ▾" gộp các tab: users, catalog, members, tenants */}
+                    {/* 1. Nút "Tổng quan" (nếu có trong vai trò) nằm ngay sau "Trang chủ" */}
+                    {dashboardItem && (
+                      <button
+                        key={dashboardItem.id}
+                        onClick={() => setActiveTab(dashboardItem.id)}
+                        className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-medium text-xs px-2 sm:px-2.5 py-1 rounded-lg ${
+                          activeTab === dashboardItem.id
+                            ? 'bg-teal-600 text-white shadow-sm'
+                            : 'text-slate-300 hover:text-white hover:bg-white/5'
+                        }`}
+                        title={dashboardItem.defaultLabel}
+                      >
+                        {SHORT_LABELS[dashboardItem.id] || dashboardItem.defaultLabel}
+                      </button>
+                    )}
+
+                    {/* 2. Dropdown Menu "Quản lý ▾" gộp các tab: users, catalog, members, tenants */}
                     {managementItems.length > 0 && (
                       <div className="relative group shrink-0">
                         <button
@@ -214,8 +235,8 @@ export const LandingPage: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Các tab chức năng không thuộc nhóm Quản lý (Tổng quan, Mượn - Trả, Báo cáo, Chính sách, Quy trình,...) */}
-                    {nonManagementItems.map((item) => {
+                    {/* 3. Các tab chức năng còn lại (Mượn - Trả, Báo cáo, Chính sách, Quy trình,...) */}
+                    {remainingItems.map((item) => {
                       const isActive = activeTab === item.id;
                       const displayLabel = SHORT_LABELS[item.id] || item.defaultLabel;
 
