@@ -425,20 +425,141 @@ export const WorkflowManager: React.FC = () => {
               </Button>
             </div>
           ) : rules.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm">
-              <div className="w-14 h-14 bg-teal-50 text-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-3.5 border border-teal-100">
-                <Zap size={26} />
+            <div className="space-y-4">
+              {/* Tiêu đề phần gợi ý mẫu quy trình */}
+              <div className="bg-gradient-to-r from-teal-50/80 to-indigo-50/60 border border-teal-100/80 rounded-2xl p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-teal-600 text-white rounded-xl flex items-center justify-center shadow-xs shrink-0">
+                    <Zap size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-bold text-slate-800">
+                      Mẫu quy trình đề xuất sẵn cho Thư viện TBD
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Chọn nhanh mẫu kích hoạt tự động chuẩn để áp dụng ngay vào vận hành thông báo độc giả.
+                    </p>
+                  </div>
+                </div>
+
+                <Button 
+                  className="bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs rounded-xl shadow-xs self-start sm:self-auto shrink-0"
+                  onClick={() => setIsBuilderOpen(true)}
+                >
+                  <Plus size={14} className="mr-1.5"/> Tùy chỉnh quy trình mới
+                </Button>
               </div>
-              <h3 className="text-base font-bold text-slate-800">Chưa có quy trình tự động nào</h3>
-              <p className="text-sm text-slate-500 mt-1 max-w-md mx-auto">
-                Thiết lập các quy trình tự động gửi email hoặc thông báo nhắc nhở độc giả khi sắp tới hạn hoặc quá hạn trả sách.
-              </p>
-              <Button 
-                className="mt-5 bg-teal-600 hover:bg-teal-700 text-white font-semibold"
-                onClick={() => setIsBuilderOpen(true)}
-              >
-                <Plus size={16} className="mr-1.5"/> Tạo quy trình đầu tiên
-              </Button>
+
+              {/* Lưới 3 thẻ mẫu đề xuất */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                {/* Mẫu 1: Nhắc trả sách trước 3 ngày */}
+                <div className="border border-slate-200/90 rounded-2xl p-5 bg-white shadow-2xs hover:border-teal-500/40 hover:shadow-sm transition-all flex flex-col justify-between">
+                  <div>
+                    <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-3 border border-teal-100">
+                      <Mail size={20} />
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                      Nhắc trả sách trước 3 ngày
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                      Tự động gửi email thông báo ngày hết hạn mượn và hướng dẫn gia hạn trực tuyến.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      <span className="text-[10px] font-semibold bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 rounded-md">
+                        Sắp tới hạn
+                      </span>
+                      <span className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                        Trước 3 ngày
+                      </span>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={() => {
+                      setRuleName('Nhắc nhở trả sách trước 3 ngày');
+                      setTrigger('due_date');
+                      setCondition('3_days_before');
+                      setIsBuilderOpen(true);
+                    }}
+                    variant="outline"
+                    className="mt-4 w-full h-8 text-xs font-semibold text-teal-700 border-teal-200 hover:bg-teal-50 hover:text-teal-800 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Dùng mẫu này
+                  </Button>
+                </div>
+
+                {/* Mẫu 2: Cảnh báo quá hạn 1 ngày */}
+                <div className="border border-slate-200/90 rounded-2xl p-5 bg-white shadow-2xs hover:border-teal-500/40 hover:shadow-sm transition-all flex flex-col justify-between">
+                  <div>
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3 border border-amber-100">
+                      <AlertTriangle size={20} />
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                      Cảnh báo quá hạn 1 ngày
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                      Nhắc nhở độc giả hoàn trả sách và lưu ý mức tính phí phạt quá hạn theo quy định.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-md">
+                        Quá hạn mượn
+                      </span>
+                      <span className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                        Sau 1 ngày
+                      </span>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={() => {
+                      setRuleName('Cảnh báo sách quá hạn mượn 1 ngày');
+                      setTrigger('overdue');
+                      setCondition('1_day_after');
+                      setIsBuilderOpen(true);
+                    }}
+                    variant="outline"
+                    className="mt-4 w-full h-8 text-xs font-semibold text-amber-700 border-amber-200 hover:bg-amber-50 hover:text-amber-800 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Dùng mẫu này
+                  </Button>
+                </div>
+
+                {/* Mẫu 3: Chào mừng độc giả mới */}
+                <div className="border border-slate-200/90 rounded-2xl p-5 bg-white shadow-2xs hover:border-teal-500/40 hover:shadow-sm transition-all flex flex-col justify-between">
+                  <div>
+                    <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-3 border border-purple-100">
+                      <Sparkles size={20} />
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                      Chào mừng độc giả mới
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                      Gửi thư chào mừng và cẩm nang hướng dẫn tra cứu tài liệu số cho bạn đọc mới gia nhập.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      <span className="text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-md">
+                        Độc giả mới
+                      </span>
+                      <span className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                        Ngay lập tức
+                      </span>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={() => {
+                      setRuleName('Chào mừng bạn đọc mới gia nhập TBD');
+                      setTrigger('user_joined');
+                      setCondition('immediately');
+                      setIsBuilderOpen(true);
+                    }}
+                    variant="outline"
+                    className="mt-4 w-full h-8 text-xs font-semibold text-purple-700 border-purple-200 hover:bg-purple-50 hover:text-purple-800 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Dùng mẫu này
+                  </Button>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
