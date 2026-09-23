@@ -27,6 +27,7 @@ import {
   LogOut,
   ArrowLeft,
   Building2,
+  ChevronDown,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -145,7 +146,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Dãy tab điều hướng nằm ngay cạnh Logo TBD */}
-            <nav className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto hidden-scrollbar py-1">
+            <nav className="flex items-center gap-1 sm:gap-1.5 py-1">
               {/* Nút Trang chủ - LUÔN LUÔN HIỂN THỊ ĐẦU TIÊN CẠNH LOGO */}
               <button
                 onClick={() => {
@@ -162,27 +163,80 @@ export const LandingPage: React.FC = () => {
                 Trang chủ
               </button>
 
-              {/* Các tab chức năng theo vai trò với tên rút gọn chống gãy dòng - chỉ hiện khi isAuthenticated() */}
-              {isAuthenticated() &&
-                roleConfig?.navItems?.map((item) => {
-                  const isActive = activeTab === item.id;
-                  const displayLabel = SHORT_LABELS[item.id] || item.defaultLabel;
+              {/* Các tab chức năng khi đã đăng nhập */}
+              {isAuthenticated() && (() => {
+                const navItems = roleConfig?.navItems || [];
+                const MANAGEMENT_KEYS = ['users', 'catalog', 'members', 'tenants'];
+                const managementItems = navItems.filter((item) => MANAGEMENT_KEYS.includes(item.id));
+                const nonManagementItems = navItems.filter((item) => !MANAGEMENT_KEYS.includes(item.id));
+                const isManagementActive = managementItems.some((item) => item.id === activeTab);
 
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveTab(item.id)}
-                      className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-medium text-xs px-2 sm:px-2.5 py-1 rounded-lg ${
-                        isActive
-                          ? 'bg-teal-600 text-white shadow-sm'
-                          : 'text-slate-300 hover:text-white hover:bg-white/5'
-                      }`}
-                      title={item.defaultLabel}
-                    >
-                      {displayLabel}
-                    </button>
-                  );
-                })}
+                return (
+                  <>
+                    {/* Dropdown Menu "Quản lý ▾" gộp các tab: users, catalog, members, tenants */}
+                    {managementItems.length > 0 && (
+                      <div className="relative group shrink-0">
+                        <button
+                          type="button"
+                          className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-medium text-xs px-2 sm:px-2.5 py-1 rounded-lg flex items-center gap-1 ${
+                            isManagementActive
+                              ? 'bg-teal-600 text-white shadow-sm'
+                              : 'text-slate-300 hover:text-white hover:bg-white/5'
+                          }`}
+                          title="Menu quản lý"
+                        >
+                          <span>Quản lý</span>
+                          <ChevronDown size={13} className="transition-transform duration-200 group-hover:rotate-180 opacity-80" />
+                        </button>
+
+                        {/* Menu dropdown thả xuống khi hover */}
+                        <div className="absolute left-0 top-full pt-1.5 hidden group-hover:block z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                          <div className="bg-slate-900/95 border border-white/10 rounded-xl shadow-2xl py-1.5 min-w-[190px] backdrop-blur-md">
+                            {managementItems.map((item) => {
+                              const isActive = activeTab === item.id;
+                              return (
+                                <button
+                                  key={item.id}
+                                  onClick={() => setActiveTab(item.id)}
+                                  className={`w-full text-left px-3.5 py-2 text-xs transition-colors flex items-center justify-between cursor-pointer ${
+                                    isActive
+                                      ? 'bg-teal-600/30 text-teal-300 font-semibold border-l-2 border-teal-400'
+                                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                                  }`}
+                                >
+                                  <span>{item.defaultLabel}</span>
+                                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Các tab chức năng không thuộc nhóm Quản lý (Tổng quan, Mượn - Trả, Báo cáo, Chính sách, Quy trình,...) */}
+                    {nonManagementItems.map((item) => {
+                      const isActive = activeTab === item.id;
+                      const displayLabel = SHORT_LABELS[item.id] || item.defaultLabel;
+
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => setActiveTab(item.id)}
+                          className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-medium text-xs px-2 sm:px-2.5 py-1 rounded-lg ${
+                            isActive
+                              ? 'bg-teal-600 text-white shadow-sm'
+                              : 'text-slate-300 hover:text-white hover:bg-white/5'
+                          }`}
+                          title={item.defaultLabel}
+                        >
+                          {displayLabel}
+                        </button>
+                      );
+                    })}
+                  </>
+                );
+              })()}
             </nav>
           </div>
 
