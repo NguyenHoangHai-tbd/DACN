@@ -796,9 +796,77 @@ export const LandingPage: React.FC = () => {
         </>
       ) : (
         /* Workspace pane for functional tabs */
-        <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-250">
-          {/* Render Component Corresponding to activeTab */}
-          <div className="w-full">
+        <main className="flex-1 min-h-[calc(100vh-14rem)] max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 animate-in fade-in duration-200">
+          {/* Workspace Title & Breadcrumb Bar */}
+          {(() => {
+            const currentItem = roleConfig?.navItems?.find((item) => item.id === activeTab);
+            const activeTitle = currentItem?.defaultLabel || SHORT_LABELS[activeTab] || activeTab;
+
+            const DESCRIPTIONS: Record<string, string> = {
+              dashboard: 'Thống kê tổng quan chỉ số vận hành, lưu thông và dữ liệu học liệu thư viện',
+              catalog: 'Quản lý danh mục biểu ghi thư mục sách, phân loại, biên mục và kho tài liệu',
+              members: 'Quản lý hồ sơ độc giả, cấp đổi thẻ sinh viên/giảng viên và trạng thái thành viên',
+              circulation: 'Vận hành dịch vụ mượn - trả sách, gia hạn, thu tiền phạt và xử lý hàng đợi đặt giữ',
+              users: 'Phân quyền tài khoản quản trị, thủ thư và thiết lập quyền truy cập hệ thống',
+              tenants: 'Cấu hình và quản lý các thư viện chi nhánh trong hệ sinh thái trường học',
+              audit: 'Nhật ký kiểm toán hệ thống ghi lại lịch sử thao tác dữ liệu và bảo mật',
+              reports: 'Kết xuất báo cáo kiểm kê, lưu thông định kỳ và biểu đồ phân tích',
+              policies: 'Thiết lập quy định mượn trả sách, hạn mức số lượng và mức phạt vi phạm',
+              workflows: 'Cấu hình và kích hoạt các quy trình vận hành tự động trong thư viện',
+              'my-loans': 'Danh sách sách và học liệu bạn đang mượn cùng hạn trả dự kiến',
+              'my-holds': 'Danh sách sách bạn đã đặt giữ và theo dõi thứ tự hàng chờ nhận sách',
+              profile: 'Thông tin tài khoản độc giả cá nhân và mã QR thẻ thư viện số',
+            };
+
+            const activeDescription = DESCRIPTIONS[activeTab] || 'Phân hệ chức năng quản trị và vận hành thư viện số';
+
+            return (
+              <div className="mb-6 flex flex-col gap-3">
+                {/* Dòng trên: Breadcrumb nhỏ và nút ← Về trang chủ */}
+                <div className="flex items-center justify-between gap-4 text-xs">
+                  <div className="flex items-center gap-1.5 text-slate-500 font-medium">
+                    <button
+                      onClick={() => setActiveTab('home')}
+                      className="hover:text-teal-700 transition-colors cursor-pointer"
+                    >
+                      Trang chủ
+                    </button>
+                    <span className="text-slate-300">/</span>
+                    <span className="text-teal-700 font-semibold">{activeTitle}</span>
+                  </div>
+
+                  <button
+                    onClick={() => setActiveTab('home')}
+                    className="inline-flex items-center gap-1 text-slate-500 hover:text-teal-700 font-medium transition-colors cursor-pointer px-2.5 py-1 rounded-lg hover:bg-slate-100"
+                  >
+                    <ArrowLeft size={13} />
+                    <span>Về trang chủ</span>
+                  </button>
+                </div>
+
+                {/* Dòng dưới: Tiêu đề lớn in đậm, mô tả phụ và badge cơ sở */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/60">
+                  <div>
+                    <h1 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tight">
+                      {activeTitle}
+                    </h1>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                      {activeDescription}
+                    </p>
+                  </div>
+
+                  <div className="shrink-0 self-start sm:self-auto">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-800 border border-teal-200/70 shadow-2xs">
+                      🏛️ Trường ĐH Thái Bình Dương (TBD)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Khung thẻ chuẩn chứa component chức năng */}
+          <div className="w-full bg-white border border-slate-200/80 rounded-2xl shadow-xs p-6 sm:p-8 min-h-[500px]">
             {activeTab === 'dashboard' && <DashboardOverview />}
             {activeTab === 'catalog' && <BookList />}
             {activeTab === 'members' && <MemberList />}
