@@ -24,7 +24,8 @@ import {
   XCircle,
   Info,
   Layers,
-  ArrowRight
+  ArrowRight,
+  Search
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -243,6 +244,12 @@ export const MemberLoansView: React.FC = () => {
                   Hãy tra cứu đầu sách bạn yêu thích trong mục Tra cứu học liệu và đến quầy thư viện để hoàn tất thủ tục mượn.
                 </p>
               </div>
+              <Button
+                onClick={() => { window.location.hash = '#catalog'; }}
+                className="mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl h-9 px-4 shadow-xs flex items-center gap-1.5 mx-auto cursor-pointer"
+              >
+                <Search size={14} /> Khám phá & Tra cứu sách ngay
+              </Button>
             </div>
           ) : (
             <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
@@ -672,6 +679,12 @@ export const MemberHoldsView: React.FC = () => {
                   Khi tài liệu yêu thích đang hết bản sao sẵn có, hãy nhấn nút "Đặt giữ" tại trang Tra cứu để xếp hàng nhận sách ngay khi có bạn đọc trả lại.
                 </p>
               </div>
+              <Button
+                onClick={() => { window.location.hash = '#catalog'; }}
+                className="mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl h-9 px-4 shadow-xs flex items-center gap-1.5 mx-auto cursor-pointer"
+              >
+                <BookOpen size={14} /> Tìm sách đặt giữ
+              </Button>
             </div>
           ) : (
             <div className="grid gap-4 grid-cols-1">
