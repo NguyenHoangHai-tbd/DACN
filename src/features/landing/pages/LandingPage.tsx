@@ -102,31 +102,71 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-teal-600 selection:text-white hidden-scrollbar overflow-x-hidden">
-      {/* 1. HEADER (TIER 1) - Logo & Brand on left, User / Login on right */}
-      <header className="sticky top-0 z-50 bg-slate-950 h-16 border-b border-white/10 text-white shadow-xs transition-all flex items-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-center justify-between">
-          {/* Bên trái: Chỉ giữ Logo TBD, vạch ngăn và chữ THƯ VIỆN SỐ */}
+      {/* 1. SINGLE-TIER TOPBAR / HEADER (Google Stitch style) */}
+      <header className="sticky top-0 z-50 h-16 bg-slate-900/95 backdrop-blur-md border-b border-white/10 text-white shadow-sm flex items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-center justify-between gap-3 sm:gap-4">
+          {/* Bên trái: Logo TBD, vạch ngăn và chữ THƯ VIỆN SỐ */}
           <div 
             onClick={() => {
               setActiveTab('home');
               scrollToSection('hero');
             }}
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-3 cursor-pointer group shrink-0"
           >
             <img
               src="https://lms.tbd.edu.vn/pluginfile.php/1/theme_edumy/headerlogo1/1786323723/logo-TBD-white%20%282%29.png"
               alt="Đại học Thái Bình Dương"
-              className="h-8 sm:h-9 object-contain"
+              className="h-8 sm:h-9 object-contain group-hover:opacity-90 transition-opacity"
               referrerPolicy="no-referrer"
             />
-            <div className="h-5 w-px bg-white/20" />
-            <span className="text-sm sm:text-base font-bold tracking-wider text-teal-400 uppercase">
+            <div className="h-4 sm:h-5 w-px bg-white/20" />
+            <span className="text-xs sm:text-sm font-bold tracking-wider text-teal-400 uppercase select-none">
               THƯ VIỆN SỐ
             </span>
           </div>
 
-          {/* Bên phải: Chưa đăng nhập -> Nút Đăng nhập; Đã đăng nhập -> Avatar tròn, Tên user, Huy hiệu vai trò & Nút Đăng xuất */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Ở giữa: Dãy nút điều hướng dạng capsule pill mượt mà (chỉ hiện khi isAuthenticated()) */}
+          {isAuthenticated() && (
+            <div className="flex-1 flex items-center justify-center min-w-0 px-2">
+              <nav className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto hidden-scrollbar py-1 px-1.5 max-w-full">
+                {/* Nút Trang chủ */}
+                <button
+                  onClick={() => {
+                    setActiveTab('home');
+                    scrollToSection('hero');
+                  }}
+                  className={`transition-all select-none text-left focus:outline-none cursor-pointer shrink-0 ${
+                    activeTab === 'home'
+                      ? 'bg-teal-600 text-white font-semibold text-xs px-3 py-1.5 rounded-lg shadow-sm'
+                      : 'text-slate-300 hover:text-white hover:bg-white/10 text-xs px-3 py-1.5 rounded-lg'
+                  }`}
+                >
+                  Trang chủ
+                </button>
+
+                {/* Các tab chức năng theo vai trò */}
+                {roleConfig?.navItems?.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      className={`transition-all select-none text-left focus:outline-none cursor-pointer shrink-0 ${
+                        isActive
+                          ? 'bg-teal-600 text-white font-semibold text-xs px-3 py-1.5 rounded-lg shadow-sm'
+                          : 'text-slate-300 hover:text-white hover:bg-white/10 text-xs px-3 py-1.5 rounded-lg'
+                      }`}
+                    >
+                      {item.defaultLabel}
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+          )}
+
+          {/* Bên phải: Nút Đăng nhập hoặc Capsule người dùng + Đăng xuất */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {!isAuthenticated() ? (
               <Button
                 onClick={() => navigate('/login')}
@@ -136,23 +176,23 @@ export const LandingPage: React.FC = () => {
                 <span>Đăng nhập</span>
               </Button>
             ) : (
-              <div className="flex items-center gap-2 sm:gap-3">
-                {/* User Info Capsule: Avatar tròn, Tên user, Huy hiệu vai trò */}
-                <div className="flex items-center gap-2.5 bg-white/10 border border-white/15 px-3 py-1 rounded-xl">
-                  <div className="w-7 h-7 rounded-full bg-teal-500/30 border border-teal-400/40 text-teal-300 flex items-center justify-center font-bold text-xs uppercase shrink-0">
+              <div className="flex items-center gap-2 sm:gap-2.5">
+                {/* Capsule người dùng gọn (avatar tròn, tên, badge vai trò nhỏ) */}
+                <div className="flex items-center gap-2 bg-white/5 border border-white/10 hover:border-white/15 px-2.5 py-1 rounded-xl transition-colors">
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-teal-500/30 border border-teal-400/40 text-teal-300 flex items-center justify-center font-bold text-xs uppercase shrink-0">
                     {user?.username?.charAt(0) || 'U'}
                   </div>
                   <div className="hidden sm:flex flex-col text-left">
-                    <span className="text-xs font-bold text-white leading-tight truncate max-w-[130px]">
+                    <span className="text-xs font-bold text-white leading-tight truncate max-w-[110px]">
                       {user?.username || 'Tài khoản'}
                     </span>
-                    <span className="text-[10px] text-teal-300 font-medium leading-tight truncate max-w-[140px]">
+                    <span className="text-[10px] text-teal-300 font-medium leading-tight truncate max-w-[120px]">
                       {roleConfig?.defaultLabel || 'Người dùng'}
                     </span>
                   </div>
                 </div>
 
-                {/* Nút Đăng xuất gọn gàng */}
+                {/* Nút Đăng xuất icon LogOut đỏ nhạt */}
                 <Button
                   onClick={() => {
                     logout();
@@ -160,67 +200,18 @@ export const LandingPage: React.FC = () => {
                     toast.success('Đã đăng xuất thành công');
                   }}
                   variant="outline"
-                  className="h-8 sm:h-9 px-2.5 sm:px-3.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-200 border-rose-500/30 font-semibold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
+                  size="sm"
+                  className="h-8 sm:h-9 px-2.5 sm:px-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-200 border-rose-500/20 font-semibold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
                   title="Đăng xuất"
                 >
-                  <LogOut size={14} />
-                  <span className="hidden sm:inline text-xs">Đăng xuất</span>
+                  <LogOut size={14} className="text-rose-400" />
+                  <span className="hidden md:inline text-xs">Đăng xuất</span>
                 </Button>
               </div>
             )}
           </div>
         </div>
       </header>
-
-      {/* 2. SUB-NAV (TIER 2) - Chỉ hiện khi đã đăng nhập */}
-      {isAuthenticated() && (
-        <nav className="sticky top-16 z-40 bg-white border-b border-slate-200/90 shadow-2xs">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-3 overflow-x-auto hidden-scrollbar">
-            {/* Bên trái: Nút tab Trang chủ + các tab chức năng từ roleConfig.navItems */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                onClick={() => {
-                  setActiveTab('home');
-                  scrollToSection('hero');
-                }}
-                className={`transition-all select-none text-left focus:outline-none cursor-pointer shrink-0 ${
-                  activeTab === 'home'
-                    ? 'bg-teal-600 text-white font-bold rounded-xl px-3.5 py-1.5 shadow-xs text-xs sm:text-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl px-3 py-1.5 text-xs sm:text-sm font-semibold'
-                }`}
-              >
-                Trang chủ
-              </button>
-
-              {roleConfig?.navItems?.map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`transition-all select-none text-left focus:outline-none cursor-pointer shrink-0 ${
-                      isActive
-                        ? 'bg-teal-600 text-white font-bold rounded-xl px-3.5 py-1.5 shadow-xs text-xs sm:text-sm'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl px-3 py-1.5 text-xs sm:text-sm font-semibold'
-                    }`}
-                  >
-                    {item.defaultLabel}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Bên phải: Nhãn Phạm vi hoạt động nhỏ gọn */}
-            <div className="hidden md:flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 px-2.5 py-1 rounded-xl shrink-0">
-              <Building2 size={13} className="text-teal-600 shrink-0" />
-              <span className="text-[11px] text-slate-500 font-medium">Phạm vi:</span>
-              <span className="text-[11px] text-slate-800 font-bold truncate max-w-[150px]">
-                {tenantCode === 'global' ? 'Hệ thống tổng' : (tenantCode === 'hq' ? 'Hà Nội HQ' : tenantCode === 'lib-hcm' ? 'TP.HCM' : (tenantCode || 'Trường ĐH TBD'))}
-              </span>
-            </div>
-          </div>
-        </nav>
-      )}
 
       {/* BODY CONTENT: If activeTab === 'home', show Landing Page sections. If activeTab !== 'home', show corresponding functional component */}
       {activeTab === 'home' ? (
