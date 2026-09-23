@@ -563,7 +563,11 @@ export const LandingPage: React.FC = () => {
                     <Button
                       id="hero-quick-borrow-btn"
                       size="sm"
-                      onClick={() => navigate('/login')}
+                      onClick={() =>
+                        isAuthenticated()
+                          ? setActiveTab(roleConfig?.id === 'member' ? 'my-loans' : 'circulation')
+                          : navigate('/login')
+                      }
                       className="h-8 px-3.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                     >
                       <span>Mượn ngay</span>
@@ -780,16 +784,28 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Nút nhỏ: Đăng nhập khám phá */}
-            <Button
-              id="services-login-explore-btn"
-              onClick={() => navigate('/login')}
-              className="h-9 px-4 sm:px-5 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-sm flex items-center gap-2 transition-all active:scale-95 cursor-pointer group"
-            >
-              <User size={14} className="text-teal-400 group-hover:scale-110 transition-transform" />
-              <span>Đăng nhập khám phá</span>
-              <ArrowRight size={13} className="text-teal-400 group-hover:translate-x-0.5 transition-transform" />
-            </Button>
+            {/* Nút: Đăng nhập khám phá hoặc Vào không gian làm việc khi đã đăng nhập */}
+            {!isAuthenticated() ? (
+              <Button
+                id="services-login-explore-btn"
+                onClick={() => navigate('/login')}
+                className="h-9 px-4 sm:px-5 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-sm flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
+              >
+                <User size={14} className="text-teal-400" />
+                <span>Đăng nhập khám phá</span>
+                <ArrowRight size={13} className="text-teal-400" />
+              </Button>
+            ) : (
+              <Button
+                id="services-enter-workspace-btn"
+                onClick={() => setActiveTab(roleConfig?.defaultPath || 'dashboard')}
+                className="h-9 px-4 sm:px-5 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-sm flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
+              >
+                <Sparkles size={14} className="text-teal-200" />
+                <span>Vào không gian làm việc</span>
+                <ArrowRight size={13} className="text-teal-200" />
+              </Button>
+            )}
           </div>
         </div>
       </section>
