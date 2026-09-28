@@ -460,6 +460,115 @@ export const DashboardOverview: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Bảng Giao dịch mượn • trả vừa diễn ra tại quầy chuẩn Stitch */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 sm:p-6 mt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                  Lượt mượn • trả vừa diễn ra tại quầy
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Giao dịch RFID tự động và tại bàn thủ thư thời gian thực
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200/80 px-2.5 py-1 rounded-full self-start sm:self-auto">
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+                Trực tiếp • Quầy phục vụ
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-100 text-slate-400 font-semibold">
+                    <th className="pb-2.5 font-bold uppercase tracking-wider text-[10px]">Độc giả / MSSV</th>
+                    <th className="pb-2.5 font-bold uppercase tracking-wider text-[10px]">Tài liệu mượn</th>
+                    <th className="pb-2.5 font-bold uppercase tracking-wider text-[10px] hidden md:table-cell">Khoa</th>
+                    <th className="pb-2.5 font-bold uppercase tracking-wider text-[10px]">Thời gian</th>
+                    <th className="pb-2.5 font-bold uppercase tracking-wider text-[10px] text-right">Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  <tr className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-2.5 pr-2">
+                      <p className="font-bold text-slate-900">Nguyễn Văn Hùng</p>
+                      <p className="text-[10px] text-slate-400 font-mono">22CNTT01</p>
+                    </td>
+                    <td className="py-2.5 pr-2 max-w-[180px] truncate text-slate-700 font-medium">
+                      Hệ cơ sở dữ liệu phân tán
+                    </td>
+                    <td className="py-2.5 pr-2 hidden md:table-cell text-slate-500 text-[11px]">
+                      Khoa CNTT
+                    </td>
+                    <td className="py-2.5 pr-2 text-slate-500 text-[11px]">2 phút trước</td>
+                    <td className="py-2.5 text-right">
+                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200/80">
+                        Đang mượn
+                      </span>
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-2.5 pr-2">
+                      <p className="font-bold text-slate-900">Trần Thị Mai</p>
+                      <p className="text-[10px] text-slate-400 font-mono">23QTKD04</p>
+                    </td>
+                    <td className="py-2.5 pr-2 max-w-[180px] truncate text-slate-700 font-medium">
+                      Quản trị Tài chính Doanh nghiệp
+                    </td>
+                    <td className="py-2.5 pr-2 hidden md:table-cell text-slate-500 text-[11px]">
+                      Khoa Kinh tế
+                    </td>
+                    <td className="py-2.5 pr-2 text-slate-500 text-[11px]">8 phút trước</td>
+                    <td className="py-2.5 text-right">
+                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                        Đã trả đúng hạn
+                      </span>
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-2.5 pr-2">
+                      <p className="font-bold text-slate-900">Lê Hoàng Nam</p>
+                      <p className="text-[10px] text-slate-400 font-mono">21DULICH02</p>
+                    </td>
+                    <td className="py-2.5 pr-2 max-w-[180px] truncate text-slate-700 font-medium">
+                      Nghiệp vụ Bar & Pha chế Resort
+                    </td>
+                    <td className="py-2.5 pr-2 hidden md:table-cell text-slate-500 text-[11px]">
+                      Khoa Du lịch
+                    </td>
+                    <td className="py-2.5 pr-2 text-slate-500 text-[11px]">15 phút trước</td>
+                    <td className="py-2.5 text-right">
+                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/80">
+                        Đã gia hạn
+                      </span>
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-2.5 pr-2">
+                      <p className="font-bold text-slate-900">Phạm Quỳnh Như</p>
+                      <p className="text-[10px] text-slate-400 font-mono">24NN03</p>
+                    </td>
+                    <td className="py-2.5 pr-2 max-w-[180px] truncate text-slate-700 font-medium">
+                      Academic English for IELTS 7.0
+                    </td>
+                    <td className="py-2.5 pr-2 hidden md:table-cell text-slate-500 text-[11px]">
+                      Khoa Ngôn ngữ
+                    </td>
+                    <td className="py-2.5 pr-2 text-slate-500 text-[11px]">24 phút trước</td>
+                    <td className="py-2.5 text-right">
+                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200/80">
+                        Quá hạn 2 ngày
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         {/* CỘT PHẢI: Không gian AI & Tiện ích */}
