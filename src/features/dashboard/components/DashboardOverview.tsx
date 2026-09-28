@@ -462,92 +462,145 @@ export const DashboardOverview: React.FC = () => {
           </div>
         </div>
 
-        {/* Dynamic Panels / Top Readers & Server Health */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
-              <div>
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Trophy size={18} className="text-amber-500 shrink-0" />
-                  <span>{t('dashboard.top_readers_title', 'Độc giả tích cực')}</span>
-                </h3>
-                <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Lượt mượn cao nhất kỳ này</p>
+        {/* CỘT PHẢI: Không gian AI & Tiện ích */}
+        <div className="space-y-6">
+          {/* Thẻ Giám sát AI & Rủi ro (Dark Theme sang trọng) */}
+          <div className="bg-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-md border border-slate-800 relative overflow-hidden">
+            {/* Header thẻ AI */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center border border-teal-500/30">
+                  <Sparkles size={16} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white tracking-tight">Giám sát AI & Rủi ro</h3>
+                  <p className="text-[11px] text-slate-400">AI Sentinel Security v2.4</p>
+                </div>
               </div>
-              <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200/70 px-2 py-0.5 rounded-full shrink-0">
-                Top bạn đọc
+              <span className="text-[11px] font-bold text-teal-300 bg-teal-950/80 border border-teal-700/50 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
+                Rủi ro: 12/100 (Thấp)
               </span>
             </div>
 
-            <div className="space-y-2">
-              {!overview.topReaders || overview.topReaders.length === 0 ? (
-                <div className="text-center py-6 text-xs text-slate-400 font-medium">
-                  {t('dashboard.no_top_readers', 'Chưa có dữ liệu độc giả tích cực')}
-                </div>
-              ) : (
-                overview.topReaders.slice(0, 3).map((reader, i) => {
-                  const nameParts = reader.name ? reader.name.trim().split(' ') : [];
-                  const initials = nameParts.length > 0 ? nameParts[nameParts.length - 1].charAt(0).toUpperCase() : 'Đ';
-                  return (
-                    <div 
-                      key={reader.id} 
-                      className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-100/80 transition-colors border border-slate-100 bg-slate-50"
-                    >
-                      {/* Rank badge */}
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-black shrink-0 ${
-                        i === 0 
-                          ? 'bg-amber-400 text-amber-950 font-black' 
-                          : i === 1 
-                            ? 'bg-slate-200 text-slate-800 font-bold' 
-                            : 'bg-slate-100 text-slate-600 font-bold'
-                      }`}>
-                        {i + 1}
-                      </div>
+            {/* 2 Cảnh báo & Đề xuất AI */}
+            <div className="mt-3.5 space-y-2.5 text-xs">
+              <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/60">
+                <p className="font-semibold text-amber-300 flex items-center gap-1.5 mb-1">
+                  <AlertTriangle size={13} /> Phát hiện bảo mật
+                </p>
+                <p className="text-slate-300 text-[11px] leading-relaxed">
+                  2 lượt truy cập từ dải IP lạ vào hệ thống CSDL — Đã tự động kích hoạt xác thực OTP 2 lớp.
+                </p>
+              </div>
 
-                      {/* Avatar letter */}
-                      <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-300/60">
-                        {initials}
-                      </div>
-
-                      {/* Name */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-slate-900 truncate">{reader.name}</p>
-                      </div>
-
-                      {/* Book count tag */}
-                      <div className="font-mono text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200/80 px-2.5 py-0.5 rounded-lg shrink-0">
-                        {reader.borrowCount} <span className="text-[10px] text-teal-600 font-semibold uppercase">{t('dashboard.unit_books', 'sách')}</span>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+              <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/60">
+                <p className="font-semibold text-teal-300 flex items-center gap-1.5 mb-1">
+                  <Sparkles size={13} /> Đề xuất tối ưu kho sách
+                </p>
+                <p className="text-slate-300 text-[11px] leading-relaxed">
+                  Nhu cầu Khoa CNTT tăng 42.5%, đề xuất bổ sung thêm 30 bản e-book CSDL & Trí tuệ nhân tạo.
+                </p>
+              </div>
             </div>
+
+            {/* Nút hành động AI */}
+            <button
+              type="button"
+              className="mt-3.5 w-full py-2 px-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
+            >
+              <span>Duyệt đề xuất mua bản quyền</span>
+              <span>→</span>
+            </button>
           </div>
 
-          {/* Nửa dưới: Khối nhỏ "Tình trạng máy chủ" */}
-          <div className="mt-4 pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-500">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                <Server size={13} className="text-slate-400" />
-                <span>Tình trạng máy chủ</span>
-              </span>
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-teal-700 bg-teal-50 border border-teal-200/70 px-2 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-teal-600 animate-pulse" />
-                99.9% Uptime
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex items-center justify-between">
-                <span className="text-slate-600 font-medium text-[11px] truncate">API Server</span>
-                <span className="inline-flex items-center gap-1 text-teal-700 font-bold text-[10px] shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" /> Kết nối
+          {/* Dynamic Panels / Top Readers & Server Health */}
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+                    <Trophy size={18} className="text-amber-500 shrink-0" />
+                    <span>{t('dashboard.top_readers_title', 'Độc giả tích cực')}</span>
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Lượt mượn cao nhất kỳ này</p>
+                </div>
+                <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200/70 px-2 py-0.5 rounded-full shrink-0">
+                  Top bạn đọc
                 </span>
               </div>
-              <div className="bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex items-center justify-between">
-                <span className="text-slate-600 font-medium text-[11px] truncate">Realtime Hub</span>
-                <span className="inline-flex items-center gap-1 text-teal-700 font-bold text-[10px] shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" /> Đồng bộ
+
+              <div className="space-y-2">
+                {!overview.topReaders || overview.topReaders.length === 0 ? (
+                  <div className="text-center py-6 text-xs text-slate-400 font-medium">
+                    {t('dashboard.no_top_readers', 'Chưa có dữ liệu độc giả tích cực')}
+                  </div>
+                ) : (
+                  overview.topReaders.slice(0, 3).map((reader, i) => {
+                    const nameParts = reader.name ? reader.name.trim().split(' ') : [];
+                    const initials = nameParts.length > 0 ? nameParts[nameParts.length - 1].charAt(0).toUpperCase() : 'Đ';
+                    return (
+                      <div 
+                        key={reader.id} 
+                        className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-100/80 transition-colors border border-slate-100 bg-slate-50"
+                      >
+                        {/* Rank badge */}
+                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-black shrink-0 ${
+                          i === 0 
+                            ? 'bg-amber-400 text-amber-950 font-black' 
+                            : i === 1 
+                              ? 'bg-slate-200 text-slate-800 font-bold' 
+                              : 'bg-slate-100 text-slate-600 font-bold'
+                        }`}>
+                          {i + 1}
+                        </div>
+
+                        {/* Avatar letter */}
+                        <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-300/60">
+                          {initials}
+                        </div>
+
+                        {/* Name */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-slate-900 truncate">{reader.name}</p>
+                        </div>
+
+                        {/* Book count tag */}
+                        <div className="font-mono text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200/80 px-2.5 py-0.5 rounded-lg shrink-0">
+                          {reader.borrowCount} <span className="text-[10px] text-teal-600 font-semibold uppercase">{t('dashboard.unit_books', 'sách')}</span>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Nửa dưới: Khối nhỏ "Tình trạng máy chủ" */}
+            <div className="mt-4 pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-500">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <Server size={13} className="text-slate-400" />
+                  <span>Tình trạng máy chủ</span>
                 </span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-teal-700 bg-teal-50 border border-teal-200/70 px-2 py-0.5 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-600 animate-pulse" />
+                  99.9% Uptime
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex items-center justify-between">
+                  <span className="text-slate-600 font-medium text-[11px] truncate">API Server</span>
+                  <span className="inline-flex items-center gap-1 text-teal-700 font-bold text-[10px] shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" /> Kết nối
+                  </span>
+                </div>
+                <div className="bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex items-center justify-between">
+                  <span className="text-slate-600 font-medium text-[11px] truncate">Realtime Hub</span>
+                  <span className="inline-flex items-center gap-1 text-teal-700 font-bold text-[10px] shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" /> Đồng bộ
+                  </span>
+                </div>
               </div>
             </div>
           </div>
