@@ -299,73 +299,166 @@ export const DashboardOverview: React.FC = () => {
 
       {/* 3. Charts and Leaderboard */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-        {/* Biểu đồ Bar Chart: Xu hướng lưu thông mượn • trả trong tuần */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-            <div>
-              <h3 className="text-base font-bold text-slate-900 tracking-tight">
-                Xu hướng lưu thông mượn • trả trong tuần
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Thống kê giao dịch mượn mới, trả sách và gia hạn tự động
-              </p>
+        <div className="lg:col-span-2">
+          {/* Biểu đồ Bar Chart: Xu hướng lưu thông mượn • trả trong tuần */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                  Xu hướng lưu thông mượn • trả trong tuần
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Thống kê giao dịch mượn mới, trả sách và gia hạn tự động
+                </p>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-teal-50 text-teal-700 border border-teal-200/60 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-teal-600"></span> Mượn mới
+                </span>
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500"></span> Đã trả
+                </span>
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-slate-400"></span> Gia hạn
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-teal-50 text-teal-700 border border-teal-200/60 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-teal-600"></span> Mượn mới
-              </span>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-500"></span> Đã trả
-              </span>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-slate-400"></span> Gia hạn
-              </span>
+            <div className="h-[260px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={[
+                    { day: 'T2', checkouts: 42, returns: 35, renewals: 12 },
+                    { day: 'T3', checkouts: 58, returns: 48, renewals: 15 },
+                    { day: 'T4', checkouts: 65, returns: 52, renewals: 18 },
+                    { day: 'T5', checkouts: 71, returns: 60, renewals: 22 },
+                    { day: 'T6', checkouts: 85, returns: 74, renewals: 28 },
+                    { day: 'T7', checkouts: 49, returns: 40, renewals: 10 },
+                    { day: 'CN', checkouts: 25, returns: 18, renewals: 5 },
+                  ]}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                  barGap={6}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={8} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                  <Tooltip
+                    cursor={{ fill: '#f8fafc', opacity: 0.8 }}
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="bg-slate-900 text-white text-xs rounded-xl px-3 py-2 shadow-lg border border-slate-800">
+                            <p className="font-bold text-teal-300 mb-1">{`Thứ ${label}`}</p>
+                            {payload.map((entry, index) => (
+                              <div key={`item-${index}`} className="flex items-center justify-between gap-4 py-0.5">
+                                <span style={{ color: entry.color }} className="font-medium">
+                                  {entry.name}:
+                                </span>
+                                <span className="font-bold">{entry.value} lượt</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Bar dataKey="checkouts" name="Mượn mới" fill="#0d9488" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                  <Bar dataKey="returns" name="Đã trả" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                  <Bar dataKey="renewals" name="Gia hạn" fill="#94a3b8" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
-          <div className="h-[260px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={[
-                  { day: 'T2', checkouts: 42, returns: 35, renewals: 12 },
-                  { day: 'T3', checkouts: 58, returns: 48, renewals: 15 },
-                  { day: 'T4', checkouts: 65, returns: 52, renewals: 18 },
-                  { day: 'T5', checkouts: 71, returns: 60, renewals: 22 },
-                  { day: 'T6', checkouts: 85, returns: 74, renewals: 28 },
-                  { day: 'T7', checkouts: 49, returns: 40, renewals: 10 },
-                  { day: 'CN', checkouts: 25, returns: 18, renewals: 5 },
-                ]}
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                barGap={6}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={8} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
-                <Tooltip
-                  cursor={{ fill: '#f8fafc', opacity: 0.8 }}
-                  content={({ active, payload, label }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="bg-slate-900 text-white text-xs rounded-xl px-3 py-2 shadow-lg border border-slate-800">
-                          <p className="font-bold text-teal-300 mb-1">{`Thứ ${label}`}</p>
-                          {payload.map((entry, index) => (
-                            <div key={`item-${index}`} className="flex items-center justify-between gap-4 py-0.5">
-                              <span style={{ color: entry.color }} className="font-medium">
-                                {entry.name}:
-                              </span>
-                              <span className="font-bold">{entry.value} lượt</span>
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Bar dataKey="checkouts" name="Mượn mới" fill="#0d9488" radius={[4, 4, 0, 0]} maxBarSize={28} />
-                <Bar dataKey="returns" name="Đã trả" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={28} />
-                <Bar dataKey="renewals" name="Gia hạn" fill="#94a3b8" radius={[4, 4, 0, 0]} maxBarSize={28} />
-              </BarChart>
-            </ResponsiveContainer>
+
+          {/* Khối Phân bổ nhu cầu học liệu theo 4 Khoa đào tạo TBD */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 sm:p-6 mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                  Phân bổ nhu cầu học liệu theo các Khoa đào tạo
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Tỷ trọng độc giả khai thác giáo trình & tài liệu số tại Trường ĐH Thái Bình Dương
+                </p>
+              </div>
+              <span className="text-[11px] font-bold text-teal-700 bg-teal-50 border border-teal-200/70 px-2.5 py-1 rounded-full hidden sm:inline-block">
+                Học kỳ 1 • TBD
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Khoa 1: CNTT */}
+              <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/70">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">Khoa Công nghệ Thông tin</h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Trí tuệ nhân tạo, CSDL, Web</p>
+                  </div>
+                  <span className="text-sm font-black text-teal-700 font-sans">42.5%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-200/80 rounded-full mt-3 overflow-hidden">
+                  <div className="h-full bg-teal-600 rounded-full" style={{ width: '42.5%' }} />
+                </div>
+                <div className="mt-2.5 flex items-center justify-between text-[10px] text-slate-500 font-semibold">
+                  <span>1,620 lượt mượn</span>
+                  <span className="text-emerald-600 font-bold">+18.2%</span>
+                </div>
+              </div>
+
+              {/* Khoa 2: Kinh tế & QTKD */}
+              <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/70">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">Khoa Kinh tế & QTKD</h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Kinh tế số, Marketing, Tài chính</p>
+                  </div>
+                  <span className="text-sm font-black text-amber-700 font-sans">28.0%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-200/80 rounded-full mt-3 overflow-hidden">
+                  <div className="h-full bg-amber-500 rounded-full" style={{ width: '28%' }} />
+                </div>
+                <div className="mt-2.5 flex items-center justify-between text-[10px] text-slate-500 font-semibold">
+                  <span>1,068 lượt mượn</span>
+                  <span className="text-emerald-600 font-bold">+9.4%</span>
+                </div>
+              </div>
+
+              {/* Khoa 3: Du lịch - Khách sạn */}
+              <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/70">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">Khoa Du lịch - Khách sạn</h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Quản trị Resort, Lữ hành</p>
+                  </div>
+                  <span className="text-sm font-black text-blue-700 font-sans">18.2%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-200/80 rounded-full mt-3 overflow-hidden">
+                  <div className="h-full bg-blue-600 rounded-full" style={{ width: '18.2%' }} />
+                </div>
+                <div className="mt-2.5 flex items-center justify-between text-[10px] text-slate-500 font-semibold">
+                  <span>694 lượt mượn</span>
+                  <span className="text-emerald-600 font-bold">+14.1%</span>
+                </div>
+              </div>
+
+              {/* Khoa 4: Ngôn ngữ & VHQT */}
+              <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/70">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">Khoa Ngôn ngữ & VHQT</h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Tiếng Anh, Hàn, Văn hóa</p>
+                  </div>
+                  <span className="text-sm font-black text-purple-700 font-sans">11.3%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-200/80 rounded-full mt-3 overflow-hidden">
+                  <div className="h-full bg-purple-600 rounded-full" style={{ width: '11.3%' }} />
+                </div>
+                <div className="mt-2.5 flex items-center justify-between text-[10px] text-slate-500 font-semibold">
+                  <span>431 lượt mượn</span>
+                  <span className="text-slate-500 font-bold">Ổn định</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
