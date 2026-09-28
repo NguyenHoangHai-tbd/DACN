@@ -562,94 +562,79 @@ export const DashboardOverview: React.FC = () => {
             </div>
           </div>
 
-          {/* Dynamic Panels / Top Readers & Server Health */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 flex flex-col justify-between">
+          {/* Top 3 sách mượn nhiều nhất chuẩn Stitch */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 sm:p-6 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
                 <div>
                   <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
                     <Trophy size={18} className="text-amber-500 shrink-0" />
-                    <span>{t('dashboard.top_readers_title', 'Độc giả tích cực')}</span>
+                    <span>Top sách mượn nhiều nhất</span>
                   </h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Lượt mượn cao nhất kỳ này</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Tài liệu học thuật được quan tâm nhất</p>
                 </div>
                 <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200/70 px-2 py-0.5 rounded-full shrink-0">
-                  Top bạn đọc
+                  Tháng này
                 </span>
               </div>
 
-              <div className="space-y-2">
-                {!overview.topReaders || overview.topReaders.length === 0 ? (
-                  <div className="text-center py-6 text-xs text-slate-400 font-medium">
-                    {t('dashboard.no_top_readers', 'Chưa có dữ liệu độc giả tích cực')}
+              <div className="space-y-3">
+                {[
+                  {
+                    rank: 1,
+                    title: 'Giáo trình Trí tuệ Nhân tạo & Machine Learning',
+                    author: 'Khoa CNTT • NXB ĐHQG',
+                    borrows: 142,
+                  },
+                  {
+                    rank: 2,
+                    title: 'Kinh tế số & Quản trị Kinh doanh Hiện đại',
+                    author: 'Khoa Kinh tế • Tái bản 2024',
+                    borrows: 118,
+                  },
+                  {
+                    rank: 3,
+                    title: 'Nghiệp vụ Quản trị Khách sạn & Resort Biển',
+                    author: 'Khoa Du lịch • NXB Thống kê',
+                    borrows: 96,
+                  },
+                ].map((book) => (
+                  <div
+                    key={book.rank}
+                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all border border-slate-100/80 bg-slate-50/50"
+                  >
+                    <div
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${
+                        book.rank === 1
+                          ? 'bg-amber-400 text-amber-950'
+                          : book.rank === 2
+                          ? 'bg-slate-200 text-slate-800'
+                          : 'bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      {book.rank}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-900 truncate">{book.title}</p>
+                      <p className="text-[10px] text-slate-400 truncate">{book.author}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="font-mono text-xs font-bold text-teal-700">{book.borrows}</span>
+                      <span className="text-[10px] text-slate-400 block font-medium">lượt</span>
+                    </div>
                   </div>
-                ) : (
-                  overview.topReaders.slice(0, 3).map((reader, i) => {
-                    const nameParts = reader.name ? reader.name.trim().split(' ') : [];
-                    const initials = nameParts.length > 0 ? nameParts[nameParts.length - 1].charAt(0).toUpperCase() : 'Đ';
-                    return (
-                      <div 
-                        key={reader.id} 
-                        className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-100/80 transition-colors border border-slate-100 bg-slate-50"
-                      >
-                        {/* Rank badge */}
-                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-black shrink-0 ${
-                          i === 0 
-                            ? 'bg-amber-400 text-amber-950 font-black' 
-                            : i === 1 
-                              ? 'bg-slate-200 text-slate-800 font-bold' 
-                              : 'bg-slate-100 text-slate-600 font-bold'
-                        }`}>
-                          {i + 1}
-                        </div>
-
-                        {/* Avatar letter */}
-                        <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-300/60">
-                          {initials}
-                        </div>
-
-                        {/* Name */}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-slate-900 truncate">{reader.name}</p>
-                        </div>
-
-                        {/* Book count tag */}
-                        <div className="font-mono text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200/80 px-2.5 py-0.5 rounded-lg shrink-0">
-                          {reader.borrowCount} <span className="text-[10px] text-teal-600 font-semibold uppercase">{t('dashboard.unit_books', 'sách')}</span>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
+                ))}
               </div>
             </div>
 
-            {/* Nửa dưới: Khối nhỏ "Tình trạng máy chủ" */}
-            <div className="mt-4 pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-500">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                  <Server size={13} className="text-slate-400" />
-                  <span>Tình trạng máy chủ</span>
-                </span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-teal-700 bg-teal-50 border border-teal-200/70 px-2 py-0.5 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-600 animate-pulse" />
-                  99.9% Uptime
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex items-center justify-between">
-                  <span className="text-slate-600 font-medium text-[11px] truncate">API Server</span>
-                  <span className="inline-flex items-center gap-1 text-teal-700 font-bold text-[10px] shrink-0">
-                    <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" /> Kết nối
-                  </span>
-                </div>
-                <div className="bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex items-center justify-between">
-                  <span className="text-slate-600 font-medium text-[11px] truncate">Realtime Hub</span>
-                  <span className="inline-flex items-center gap-1 text-teal-700 font-bold text-[10px] shrink-0">
-                    <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" /> Đồng bộ
-                  </span>
-                </div>
-              </div>
+            <div className="mt-4 pt-3 border-t border-slate-100 text-center">
+              <a
+                href="#catalog"
+                className="text-xs font-bold text-teal-700 hover:text-teal-800 inline-flex items-center gap-1 group py-1"
+              >
+                <span>Khám phá kho sách thư viện số</span>
+                <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+              </a>
             </div>
           </div>
         </div>
