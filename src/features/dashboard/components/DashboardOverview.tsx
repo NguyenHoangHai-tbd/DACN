@@ -514,6 +514,54 @@ export const DashboardOverview: React.FC = () => {
             </button>
           </div>
 
+          {/* Lưới 4 Thao tác nhanh tại quầy */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5">
+            <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">
+              Thao tác nhanh tại quầy
+            </h3>
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                className="p-3 rounded-xl border border-slate-100 bg-slate-50/80 hover:bg-teal-50 hover:border-teal-200/80 hover:text-teal-700 transition-all flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <BookUp size={16} />
+                </div>
+                <span className="text-xs font-bold text-slate-800 group-hover:text-teal-700">Mượn sách mới</span>
+              </button>
+
+              <button
+                type="button"
+                className="p-3 rounded-xl border border-slate-100 bg-slate-50/80 hover:bg-amber-50 hover:border-amber-200/80 hover:text-amber-700 transition-all flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <RefreshCw size={16} />
+                </div>
+                <span className="text-xs font-bold text-slate-800 group-hover:text-amber-700">Trả / Quét mã</span>
+              </button>
+
+              <button
+                type="button"
+                className="p-3 rounded-xl border border-slate-100 bg-slate-50/80 hover:bg-blue-50 hover:border-blue-200/80 hover:text-blue-700 transition-all flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <BookOpen size={16} />
+                </div>
+                <span className="text-xs font-bold text-slate-800 group-hover:text-blue-700">Biên mục sách</span>
+              </button>
+
+              <button
+                type="button"
+                className="p-3 rounded-xl border border-slate-100 bg-slate-50/80 hover:bg-emerald-50 hover:border-emerald-200/80 hover:text-emerald-700 transition-all flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Users size={16} />
+                </div>
+                <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Thêm bạn đọc</span>
+              </button>
+            </div>
+          </div>
+
           {/* Dynamic Panels / Top Readers & Server Health */}
           <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 flex flex-col justify-between">
             <div>
