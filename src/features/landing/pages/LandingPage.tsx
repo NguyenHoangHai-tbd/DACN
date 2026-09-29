@@ -874,19 +874,25 @@ export const LandingPage: React.FC = () => {
             }
 
             return (
-              <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/60">
-                <div>
-                  <h1 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tight">
-                    {activeTitle}
-                  </h1>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                    {activeDescription}
-                  </p>
+              <div className="mb-6 bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 text-white flex items-center justify-center shrink-0 shadow-sm shadow-teal-700/20">
+                    <BookOpen size={22} />
+                  </div>
+                  <div>
+                    <h1 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tight">
+                      {activeTitle}
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-0.5 font-normal">
+                      {activeDescription}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="shrink-0 self-start sm:self-auto">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-800 border border-teal-200/70 shadow-2xs">
-                    🏛️ Trường ĐH Thái Bình Dương (TBD)
+                <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-teal-50 text-teal-800 border border-teal-200/80 shadow-2xs">
+                    <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
+                    ĐH Thái Bình Dương • Trực tuyến
                   </span>
                 </div>
               </div>
