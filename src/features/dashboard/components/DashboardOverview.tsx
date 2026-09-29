@@ -131,21 +131,21 @@ export const DashboardOverview: React.FC = () => {
       {/* 1. Header Banner chuẩn Stitch */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
         <div>
-          <h1 className="font-black text-2xl text-slate-900 tracking-tight">
+          <h1 className="font-black text-2xl sm:text-3xl text-slate-900 tracking-tight">
             Tổng Quan Thư Viện Số
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Thống kê chỉ số vận hành, lưu thông học liệu và giám sát hệ thống thời gian thực.
           </p>
         </div>
 
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">
-          {/* Cụm nút lọc thời gian dạng pill capsule */}
+          {/* Cụm nút lọc thời gian dạng pill capsule - chữ to rõ text-sm */}
           <div className="bg-slate-100/90 border border-slate-200/80 p-1 rounded-xl flex items-center gap-1 shadow-2xs">
             <button
               type="button"
               onClick={() => setTimeRange('today')}
-              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-lg text-sm transition-all cursor-pointer whitespace-nowrap ${
                 timeRange === 'today'
                   ? 'bg-white text-teal-800 font-bold shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 font-medium'
@@ -156,7 +156,7 @@ export const DashboardOverview: React.FC = () => {
             <button
               type="button"
               onClick={() => setTimeRange('7d')}
-              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-lg text-sm transition-all cursor-pointer whitespace-nowrap ${
                 timeRange === '7d'
                   ? 'bg-white text-teal-800 font-bold shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 font-medium'
@@ -167,7 +167,7 @@ export const DashboardOverview: React.FC = () => {
             <button
               type="button"
               onClick={() => setTimeRange('30d')}
-              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-lg text-sm transition-all cursor-pointer whitespace-nowrap ${
                 timeRange === '30d' || timeRange === 'semester'
                   ? 'bg-white text-teal-800 font-bold shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 font-medium'
@@ -177,19 +177,19 @@ export const DashboardOverview: React.FC = () => {
             </button>
           </div>
 
-          {/* Nút Xuất báo cáo ▾ */}
+          {/* Nút Xuất báo cáo ▾ text-sm */}
           <Button
             onClick={() => exportMutation.mutate()}
             disabled={exportMutation.isPending}
-            className="h-9 px-4 bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs rounded-xl shadow-sm flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shrink-0"
+            className="h-10 px-4 bg-teal-700 hover:bg-teal-800 text-white font-bold text-sm rounded-xl shadow-sm flex items-center gap-2 cursor-pointer transition-all active:scale-95 shrink-0"
           >
             {exportMutation.isPending ? (
-              <Loader2 size={13} className="animate-spin text-white" />
+              <Loader2 size={15} className="animate-spin text-white" />
             ) : (
-              <Download size={13} className="text-white" />
+              <Download size={15} className="text-white" />
             )}
             <span>Xuất báo cáo</span>
-            <ChevronDown size={13} className="opacity-80" />
+            <ChevronDown size={14} className="opacity-80" />
           </Button>
         </div>
       </div>
@@ -199,7 +199,7 @@ export const DashboardOverview: React.FC = () => {
         {/* Thẻ 1: Tổng đầu sách & học liệu */}
         <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs hover:shadow-sm transition-all flex flex-col justify-between group">
           <div className="flex items-start justify-between gap-3">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               TỔNG ĐẦU SÁCH & HỌC LIỆU
             </span>
             <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 border border-teal-100/80 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
@@ -211,10 +211,10 @@ export const DashboardOverview: React.FC = () => {
               <span className="text-3xl font-black text-slate-900 tracking-tight font-sans">
                 {overview.kpis.totalBooks ? kpiFormatter.format(overview.kpis.totalBooks) : '52,840'}
               </span>
-              <span className="text-xs text-slate-500 font-semibold">tài liệu</span>
+              <span className="text-sm text-slate-500 font-semibold">tài liệu</span>
             </div>
             <div className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-              <TrendingUp size={13} />
+              <TrendingUp size={14} />
               <span>+12.4% so với học kỳ trước</span>
             </div>
           </div>
@@ -223,7 +223,7 @@ export const DashboardOverview: React.FC = () => {
         {/* Thẻ 2: Lượt mượn đang kích hoạt */}
         <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs hover:shadow-sm transition-all flex flex-col justify-between group">
           <div className="flex items-start justify-between gap-3">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               LƯỢT MƯỢN ĐANG KÍCH HOẠT
             </span>
             <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 border border-purple-100/80 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
@@ -235,7 +235,7 @@ export const DashboardOverview: React.FC = () => {
               <span className="text-3xl font-black text-slate-900 tracking-tight font-sans">
                 {overview.kpis.activeLoans ? kpiFormatter.format(overview.kpis.activeLoans) : '1,428'}
               </span>
-              <span className="text-xs text-slate-500 font-semibold">cuốn</span>
+              <span className="text-sm text-slate-500 font-semibold">cuốn</span>
             </div>
             <div className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-slate-600">
               <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
@@ -247,7 +247,7 @@ export const DashboardOverview: React.FC = () => {
         {/* Thẻ 3: Độc giả tích cực */}
         <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs hover:shadow-sm transition-all flex flex-col justify-between group">
           <div className="flex items-start justify-between gap-3">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               ĐỘC GIẢ TÍCH CỰC
             </span>
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100/80 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
@@ -259,13 +259,13 @@ export const DashboardOverview: React.FC = () => {
               <span className="text-3xl font-black text-slate-900 tracking-tight font-sans">
                 {overview.kpis.totalMembers ? kpiFormatter.format(overview.kpis.totalMembers) : '3,890'}
               </span>
-              <span className="text-xs text-slate-500 font-semibold">bạn đọc</span>
+              <span className="text-sm text-slate-500 font-semibold">bạn đọc</span>
             </div>
             <div className="mt-2.5 flex items-center gap-2">
-              <span className="text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200/80 px-2 py-0.5 rounded-md">
+              <span className="text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200/80 px-2 py-0.5 rounded-md">
                 SV: 3,420
               </span>
-              <span className="text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200/80 px-2 py-0.5 rounded-md">
+              <span className="text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200/80 px-2 py-0.5 rounded-md">
                 GV: 470
               </span>
             </div>
@@ -275,7 +275,7 @@ export const DashboardOverview: React.FC = () => {
         {/* Thẻ 4: Cảnh báo sách quá hạn */}
         <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs hover:shadow-sm transition-all flex flex-col justify-between group">
           <div className="flex items-start justify-between gap-3">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               CẢNH BÁO SÁCH QUÁ HẠN
             </span>
             <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-100/80 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
@@ -287,10 +287,10 @@ export const DashboardOverview: React.FC = () => {
               <span className="text-3xl font-black text-amber-700 tracking-tight font-sans">
                 {overview.kpis.overdueLoans ?? '24'}
               </span>
-              <span className="text-xs text-slate-500 font-semibold">tài liệu</span>
+              <span className="text-sm text-slate-500 font-semibold">tài liệu</span>
             </div>
             <div className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-              <TrendingDown size={13} />
+              <TrendingDown size={14} />
               <span>↓ -18.0% giảm so với tháng trước</span>
             </div>
           </div>
