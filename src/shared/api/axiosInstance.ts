@@ -21,7 +21,7 @@ const getBaseUrl = (): string => {
 
 export const axiosInstance = axios.create({
   baseURL: getBaseUrl(),
-  timeout: 10000,
+  timeout: 30000,
   headers: {
     'ngrok-skip-browser-warning': 'true',
   },
@@ -67,7 +67,28 @@ axiosInstance.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as any;
 
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
+
     const isLoginRequest = originalRequest.url && (originalRequest.url.includes('/api/auth/login') || originalRequest.url.includes('auth/login'));
+
+    // Handle transient server errors (503 Service Unavailable, 502 Bad Gateway, 504 Gateway Timeout, ECONNABORTED timeout)
+    const isTransientError =
+      (error.response && [502, 503, 504].includes(error.response.status)) ||
+      error.code === 'ECONNABORTED' ||
+      error.message?.includes('timeout') ||
+      error.code === 'ERR_NETWORK';
+
+    if (isTransientError && !isLoginRequest) {
+      originalRequest._retryCount = originalRequest._retryCount || 0;
+      if (originalRequest._retryCount < 2) {
+        originalRequest._retryCount += 1;
+        const delay = originalRequest._retryCount * 800;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return axiosInstance(originalRequest);
+      }
+    }
 
     if (error.response?.status === 401 && !originalRequest._retry && !isLoginRequest) {
       if (isRefreshing) {

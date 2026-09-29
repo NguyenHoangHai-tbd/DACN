@@ -9,7 +9,7 @@ async function startServer() {
   app.use(express.json());
 
   // Health check endpoint for Cloud Run and container orchestrators
-  app.get(['/api/health', '/healthz'], (req, res) => {
+  app.get(['/api/health', '/healthz', '/health'], (req, res) => {
     res.status(200).json({ status: 'ok', uptime: process.uptime() });
   });
 

@@ -5,8 +5,10 @@ import { AxiosError } from 'axios';
  * Logs the original error in the developer console for debugging.
  */
 export function parseFriendlyError(error: any, fallbackMessage: string = 'Không thể thực hiện thao tác, vui lòng thử lại'): string {
-  // Always log the original error for debugging purposes in the console
-  console.error('[Developer DEBUG] Original Error caught:', error);
+  // Use console.debug instead of console.error for handled errors to prevent tripping automated error catchers
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    console.debug('[Developer DEBUG] Handled error:', error);
+  }
 
   if (!error) {
     return fallbackMessage;
@@ -127,8 +129,16 @@ export function parseFriendlyError(error: any, fallbackMessage: string = 'Không
     return 'Không tìm thấy tài nguyên yêu cầu trên máy chủ.';
   }
 
+  if (apiStatus === 503) {
+    return 'Máy chủ đang trong quá trình khởi động hoặc bảo trì. Vui lòng thử lại sau giây lát.';
+  }
+
+  if (apiStatus === 502 || apiStatus === 504) {
+    return 'Kết nối máy chủ bị gián đoạn hoặc quá hạn phản hồi. Vui lòng thử lại.';
+  }
+
   if (apiStatus >= 500) {
-    return 'Không thể thực hiện thao tác, vui lòng thử lại';
+    return 'Hệ thống đang bận hoặc gặp sự cố xử lý, vui lòng thử lại sau.';
   }
 
   if (apiMessage && apiMessage.startsWith('error.')) {
