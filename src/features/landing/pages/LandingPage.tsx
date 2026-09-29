@@ -172,7 +172,7 @@ export const LandingPage: React.FC = () => {
                 referrerPolicy="no-referrer"
               />
               <div className="h-4 sm:h-5 w-px bg-white/20" />
-              <span className="text-xs sm:text-sm font-bold tracking-wider text-teal-400 uppercase select-none whitespace-nowrap">
+              <span className="text-sm sm:text-base font-bold tracking-wider text-teal-400 uppercase select-none whitespace-nowrap">
                 THƯ VIỆN SỐ
               </span>
             </div>
@@ -185,7 +185,7 @@ export const LandingPage: React.FC = () => {
                   setActiveTab('home');
                   scrollToSection('hero');
                 }}
-                className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-medium text-xs px-2 sm:px-2.5 py-1 rounded-lg ${
+                className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-semibold text-sm px-3 py-1.5 rounded-lg ${
                   activeTab === 'home'
                     ? 'bg-teal-600 text-white shadow-sm'
                     : 'text-slate-300 hover:text-white hover:bg-white/5'
@@ -215,7 +215,7 @@ export const LandingPage: React.FC = () => {
                       <button
                         key={dashboardItem.id}
                         onClick={() => setActiveTab(dashboardItem.id)}
-                        className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-medium text-xs px-2 sm:px-2.5 py-1 rounded-lg ${
+                        className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-semibold text-sm px-3 py-1.5 rounded-lg ${
                           activeTab === dashboardItem.id
                             ? 'bg-teal-600 text-white shadow-sm'
                             : 'text-slate-300 hover:text-white hover:bg-white/5'
@@ -231,7 +231,7 @@ export const LandingPage: React.FC = () => {
                       <div className="relative group shrink-0">
                         <button
                           type="button"
-                          className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-medium text-xs px-2 sm:px-2.5 py-1 rounded-lg flex items-center gap-1 ${
+                          className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-semibold text-sm px-3 py-1.5 rounded-lg flex items-center gap-1 ${
                             isManagementActive
                               ? 'bg-teal-600 text-white shadow-sm'
                               : 'text-slate-300 hover:text-white hover:bg-white/5'
@@ -251,7 +251,7 @@ export const LandingPage: React.FC = () => {
                                 <button
                                   key={item.id}
                                   onClick={() => setActiveTab(item.id)}
-                                  className={`w-full text-left px-3.5 py-2 text-xs transition-colors flex items-center justify-between cursor-pointer ${
+                                  className={`w-full text-left px-3.5 py-2 text-sm transition-colors flex items-center justify-between cursor-pointer ${
                                     isActive
                                       ? 'bg-teal-600/30 text-teal-300 font-semibold border-l-2 border-teal-400'
                                       : 'text-slate-300 hover:text-white hover:bg-white/10'
@@ -276,7 +276,7 @@ export const LandingPage: React.FC = () => {
                         <button
                           key={item.id}
                           onClick={() => setActiveTab(item.id)}
-                          className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-medium text-xs px-2 sm:px-2.5 py-1 rounded-lg ${
+                          className={`transition-colors select-none text-left focus:outline-none cursor-pointer shrink-0 whitespace-nowrap font-semibold text-sm px-3 py-1.5 rounded-lg ${
                             isActive
                               ? 'bg-teal-600 text-white shadow-sm'
                               : 'text-slate-300 hover:text-white hover:bg-white/5'
