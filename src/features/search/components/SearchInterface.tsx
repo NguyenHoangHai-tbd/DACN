@@ -156,97 +156,61 @@ export const SearchInterface: React.FC = () => {
 
   return (
     <div className="w-full flex flex-col bg-slate-50 min-h-full overflow-x-hidden">
-      {/* 1. HERO SEARCH BANNER (Harmonized with LandingPage Slate/Teal aesthetic) */}
-      <div className="p-4 sm:p-6 lg:p-8">
-        <div className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white rounded-3xl p-5 sm:p-7 lg:p-8 border border-white/10 shadow-xl overflow-hidden">
-          {/* Decorative Teal glow aura */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-          <div className="absolute bottom-0 left-0 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -ml-16 -mb-16" />
-
-          <div className="relative z-10 max-w-4xl">
-            {/* Tagline Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-teal-300 text-xs sm:text-sm font-semibold mb-3.5 shadow-xs">
-              <Sparkles size={14} className="text-teal-400" />
-              <span>Nền Tảng Thư Viện Số TBD • Tra Cứu Học Liệu</span>
+      {/* 1. Thanh tìm kiếm gọn gàng, tiết kiệm diện tích màn hình */}
+      <div className="p-4 sm:p-5">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+                Tra Cứu Học Liệu &amp; Sách Số
+              </h2>
             </div>
-
-            {/* Title & Description */}
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight mb-2">
-              Kho Tri Thức &amp; <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-emerald-300 to-teal-400">Tài Liệu Số</span>
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl mb-6">
-              Tra cứu nhanh hàng ngàn đầu sách chuyên ngành, giáo trình, ấn phẩm nghiên cứu hoặc tìm kiếm nâng cao bằng trí tuệ nhân tạo.
+            <p className="text-xs sm:text-sm text-slate-500">
+              Tìm kiếm giáo trình, ấn phẩm hoặc tra cứu ngữ nghĩa AI
             </p>
+          </div>
 
-            {/* Unified Search Input Container */}
-            <div className="w-full max-w-3xl">
-              <div className="relative flex flex-col sm:flex-row items-stretch sm:items-center bg-white rounded-2xl sm:rounded-full border border-white/20 shadow-2xl p-1.5 sm:p-2 gap-2 text-left transition-all focus-within:ring-2 focus-within:ring-teal-400">
-                <div className="relative flex-1 flex items-center min-w-0">
-                  <Search
-                    size={20}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none shrink-0"
-                  />
-                  <Input
-                    value={query}
-                    onChange={(e) => {
-                      setQuery(e.target.value);
-                      if (aiSearchMutation.isSuccess) {
-                        aiSearchMutation.reset();
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && query.trim().length > 2) {
-                        handleAiSearch();
-                      }
-                    }}
-                    placeholder={t('book.search.placeholder', 'Tìm theo tên sách, tác giả, ISBN, thể loại...')}
-                    className="w-full h-11 sm:h-12 pl-12 pr-10 bg-transparent text-slate-900 placeholder:text-slate-400 border-none shadow-none text-sm sm:text-base font-medium focus-visible:ring-0 focus-visible:ring-offset-0"
-                  />
-                  {query && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setQuery('');
-                        aiSearchMutation.reset();
-                      }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
-                      title="Xóa tìm kiếm"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
-                </div>
-
-                {/* Search action button group */}
-                <div className="flex items-center gap-2 shrink-0">
-                  <Button
-                    type="button"
-                    onClick={handleAiSearch}
-                    disabled={aiSearchMutation.isPending || query.trim().length < 3}
-                    title={query.trim().length < 3 ? 'Nhập từ 3 ký tự để tìm kiếm AI' : 'Tìm kiếm theo ngữ nghĩa với AI'}
-                    className="flex-1 sm:flex-none h-11 sm:h-12 px-4 sm:px-5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl sm:rounded-full text-xs sm:text-sm transition-all shadow-md shadow-teal-950/20 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer"
-                  >
-                    {aiSearchMutation.isPending ? (
-                      <Loader2 className="animate-spin text-white" size={16} />
-                    ) : (
-                      <Sparkles size={16} className="text-teal-200" />
-                    )}
-                    <span>{t('book.search.ai_search_button', 'AI Ngữ nghĩa')}</span>
-                  </Button>
-                </div>
-              </div>
-
-              {/* Helper text below search input */}
-              <div className="flex items-center justify-between mt-2.5 px-2 text-[11px] sm:text-xs text-slate-400">
-                <span className="flex items-center gap-1.5">
-                  <BookOpen size={13} className="text-teal-400" />
-                  Hệ thống tự động tra cứu khi nhập từ khóa
-                </span>
-                {query.trim().length > 0 && query.trim().length < 3 && (
-                  <span className="text-amber-400 font-medium">Nhập thêm ký tự để kích hoạt AI</span>
-                )}
-              </div>
+          {/* Ô tìm kiếm nhỏ gọn thanh thoát */}
+          <div className="flex-1 max-w-xl flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1 gap-2 focus-within:ring-2 focus-within:ring-teal-500/20 focus-within:border-teal-500 transition-all">
+            <div className="relative flex-1 flex items-center min-w-0">
+              <Search size={18} className="absolute left-3 text-slate-400 pointer-events-none" />
+              <Input
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  if (aiSearchMutation.isSuccess) aiSearchMutation.reset();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && query.trim().length > 2) handleAiSearch();
+                }}
+                placeholder="Tìm theo tên sách, tác giả, ISBN, thể loại..."
+                className="w-full h-9 pl-9 pr-8 bg-transparent text-slate-900 placeholder:text-slate-400 border-none shadow-none text-sm font-medium focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => { setQuery(''); aiSearchMutation.reset(); }}
+                  className="absolute right-2 p-1 text-slate-400 hover:text-slate-600 rounded-full cursor-pointer"
+                >
+                  <X size={15} />
+                </button>
+              )}
             </div>
+
+            <Button
+              type="button"
+              onClick={handleAiSearch}
+              disabled={aiSearchMutation.isPending || query.trim().length < 3}
+              className="h-9 px-3.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg text-xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+            >
+              {aiSearchMutation.isPending ? (
+                <Loader2 className="animate-spin" size={14} />
+              ) : (
+                <Sparkles size={14} className="text-teal-200" />
+              )}
+              <span>AI Ngữ nghĩa</span>
+            </Button>
           </div>
         </div>
       </div>
