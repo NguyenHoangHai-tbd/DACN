@@ -51,19 +51,13 @@ export const LoginForm: React.FC = () => {
 
   const mutation = useMutation({
     mutationFn: (data: LoginFormData) => {
-      const apiData = { ...data };
-      if (apiData.tenantCode === 'global') {
-        apiData.tenantCode = 'hq'; // Map 'global' System view to default 'hq' (tenant-1) in backend
-      }
-      return authService.login(apiData);
+      return authService.login(data);
     },
     onSuccess: (data, variables) => {
       const apiRole = data.user.roles?.[0] || (data.user as any).role;
       const uiRole = normalizeUiRole(apiRole);
       
-      // Store 'global' as selected scope for superadmin, otherwise use submitted scope
-      const storedTenantCode = uiRole === 'super_admin' ? 'global' : variables.tenantCode;
-      setAuth(data.accessToken, data.refreshToken, data.user, storedTenantCode);
+      setAuth(data.accessToken, data.refreshToken, data.user, variables.tenantCode);
       
       useRoleStore.getState().setRole(uiRole);
       
