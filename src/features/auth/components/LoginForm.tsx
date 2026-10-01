@@ -81,7 +81,7 @@ export const LoginForm: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-900 antialiased selection:bg-teal-600 selection:text-white">
-      <div className="w-full max-w-4xl lg:max-w-5xl bg-white rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
+      <div className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
         {/* Cột 1: Khối trực quan thương hiệu TBD (Chiếm 5/12 cột bên trái, ẩn trên mobile) */}
         <div className="hidden lg:flex lg:col-span-5 relative flex-col justify-between p-8 xl:p-10 overflow-hidden text-white">
           {/* Nền ảnh trường TBD + lớp gradient tối */}
