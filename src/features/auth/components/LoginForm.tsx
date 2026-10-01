@@ -226,7 +226,22 @@ export const LoginForm: React.FC = () => {
                 )}
               </div>
 
-              {/* 4. Nút đăng nhập */}
+              {/* Hàng Ghi nhớ & Quên mật khẩu */}
+              <div className="flex items-center justify-between text-xs pt-1 pb-1">
+                <label className="flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900 select-none">
+                  <input type="checkbox" defaultChecked className="rounded border-slate-300 text-teal-600 focus:ring-teal-500 w-4 h-4 cursor-pointer" />
+                  <span className="font-medium">Ghi nhớ đăng nhập</span>
+                </label>
+                <a 
+                  href="#help" 
+                  onClick={(e) => { e.preventDefault(); toast.info('Vui lòng liên hệ quầy thư viện (thuvien@tbd.edu.vn) để được hỗ trợ cấp lại mật khẩu.'); }} 
+                  className="text-teal-600 hover:text-teal-700 font-semibold transition-colors cursor-pointer"
+                >
+                  Quên mật khẩu?
+                </a>
+              </div>
+
+              {/* 3. Nút đăng nhập */}
               <Button 
                 type="submit" 
                 className="w-full h-11 bg-teal-600 hover:bg-teal-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-md shadow-teal-950/20 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 text-sm mt-3" 
