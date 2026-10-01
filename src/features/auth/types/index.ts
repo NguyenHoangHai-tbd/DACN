@@ -2,6 +2,7 @@ export interface UserProfile {
   id: string;
   username: string;
   tenantId: string;
+  tenantKey: string;
   roles: string[];
   branchIds: string[];
 }

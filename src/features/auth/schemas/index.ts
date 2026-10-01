@@ -3,7 +3,6 @@ import { z } from 'zod';
 export const loginSchema = z.object({
   username: z.string().min(1, 'common.validation.required'),
   password: z.string().min(1, 'common.validation.required'),
-  tenantCode: z.string().min(1, 'common.validation.required'),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;

@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Loader2, Building, User, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Loader2, User, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 import { loginSchema, LoginFormData } from '../schemas';
 import { authService } from '../services/authService';
@@ -35,7 +35,6 @@ export const LoginForm: React.FC = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      tenantCode: 'hq',
       username: '',
       password: '',
     }
@@ -53,11 +52,12 @@ export const LoginForm: React.FC = () => {
     mutationFn: (data: LoginFormData) => {
       return authService.login(data);
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (data) => {
       const apiRole = data.user.roles?.[0] || (data.user as any).role;
       const uiRole = normalizeUiRole(apiRole);
       
-      setAuth(data.accessToken, data.refreshToken, data.user, variables.tenantCode);
+      const storedTenantCode = uiRole === 'super_admin' ? 'global' : (data.user.tenantKey || '');
+      setAuth(data.accessToken, data.refreshToken, data.user, storedTenantCode);
       
       useRoleStore.getState().setRole(uiRole);
       
@@ -173,34 +173,7 @@ export const LoginForm: React.FC = () => {
                 </Alert>
               )}
 
-              {/* 1. Phạm vi đăng nhập */}
-              <div className="space-y-1.5">
-                <Label htmlFor="tenantCode" className="text-xs font-bold text-slate-700 uppercase tracking-wide">
-                  Phạm vi đăng nhập
-                </Label>
-                <div className="relative">
-                  <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
-                  <select 
-                    id="tenantCode" 
-                    {...register('tenantCode')} 
-                    className="w-full h-11 px-3 pl-10 pr-8 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm font-medium text-slate-900 transition-all cursor-pointer"
-                  >
-                    <option value="global">Hệ thống tổng</option>
-                    <option value="hq">Hà Nội HQ</option>
-                    <option value="lib-hcm">Thư viện TP.HCM</option>
-                  </select>
-                </div>
-                {errors.tenantCode && (
-                  <p className="text-xs text-rose-600 font-medium">
-                    {t(errors.tenantCode.message || '', 'Vui lòng chọn phạm vi đăng nhập')}
-                  </p>
-                )}
-                <p className="text-[11px] text-slate-500 leading-relaxed italic">
-                  Super Admin dùng Hệ thống tổng. Các tài khoản còn lại dùng thư viện/khu vực được phân công.
-                </p>
-              </div>
-
-              {/* 2. Tên đăng nhập / Mã thẻ */}
+              {/* 1. Tên đăng nhập / Mã thẻ */}
               <div className="space-y-1.5">
                 <Label htmlFor="username" className="text-xs font-bold text-slate-700 uppercase tracking-wide">
                   Tên đăng nhập / Mã thẻ
@@ -222,7 +195,7 @@ export const LoginForm: React.FC = () => {
                 )}
               </div>
 
-              {/* 3. Mật khẩu */}
+              {/* 2. Mật khẩu */}
               <div className="space-y-1.5">
                 <Label htmlFor="password" className="text-xs font-bold text-slate-700 uppercase tracking-wide">
                   Mật khẩu
