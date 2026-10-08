@@ -28,16 +28,26 @@ export const DashboardOverview: React.FC = () => {
   });
 
   const exportMutation = useMutation({
-    mutationFn: () => dashboardService.exportReport('summary', timeRange),
-    onSuccess: (data) => {
-      toast.success(t('dashboard.export_success', 'Đã xuất báo cáo tổng quan thành công'));
-      // simulate download
-      if (data && data.url) {
-        window.open(data.url, '_blank');
+    mutationFn: () => dashboardService.exportReport(timeRange),
+    onSuccess: (blob: Blob) => {
+      if (!blob || !(blob instanceof Blob)) {
+        toast.error('Không nhận được tệp báo cáo từ hệ thống');
+        return;
       }
+      const todayStr = new Date().toISOString().split('T')[0];
+      const fileName = `bao-cao-luu-thong-${todayStr}.csv`;
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success(t('dashboard.export_success', 'Đã xuất báo cáo lưu thông thành công'));
     },
     onError: (error: any) => {
-      toast.error(parseFriendlyError(error, t('dashboard.export_error', 'Lỗi khi xuất báo cáo.')));
+      toast.error(parseFriendlyError(error, t('dashboard.export_error', 'Lỗi khi xuất báo cáo lưu thông.')));
     }
   });
 
@@ -173,7 +183,7 @@ export const DashboardOverview: React.FC = () => {
                   : 'text-slate-600 hover:text-slate-900 font-medium'
               }`}
             >
-              Học kỳ 1 (2025 - 2026)
+              30 ngày qua
             </button>
           </div>
 
@@ -592,8 +602,8 @@ export const DashboardOverview: React.FC = () => {
               </span>
             </div>
 
-            {/* 2 Cảnh báo & Đề xuất AI */}
-            <div className="mt-3.5 space-y-2.5 text-xs">
+            {/* Cảnh báo AI */}
+            <div className="mt-3.5 text-xs">
               <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/60">
                 <p className="font-semibold text-amber-300 flex items-center gap-1.5 mb-1">
                   <AlertTriangle size={13} /> Phát hiện bảo mật
@@ -602,72 +612,6 @@ export const DashboardOverview: React.FC = () => {
                   2 lượt truy cập từ dải IP lạ vào hệ thống CSDL — Đã tự động kích hoạt xác thực OTP 2 lớp.
                 </p>
               </div>
-
-              <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/60">
-                <p className="font-semibold text-teal-300 flex items-center gap-1.5 mb-1">
-                  <Sparkles size={13} /> Đề xuất tối ưu kho sách
-                </p>
-                <p className="text-slate-300 text-[11px] leading-relaxed">
-                  Nhu cầu Khoa CNTT tăng 42.5%, đề xuất bổ sung thêm 30 bản e-book CSDL & Trí tuệ nhân tạo.
-                </p>
-              </div>
-            </div>
-
-            {/* Nút hành động AI */}
-            <button
-              type="button"
-              className="mt-3.5 w-full py-2 px-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
-            >
-              <span>Duyệt đề xuất mua bản quyền</span>
-              <span>→</span>
-            </button>
-          </div>
-
-          {/* Lưới 4 Thao tác nhanh tại quầy */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5">
-            <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">
-              Thao tác nhanh tại quầy
-            </h3>
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                className="p-3 rounded-xl border border-slate-100 bg-slate-50/80 hover:bg-teal-50 hover:border-teal-200/80 hover:text-teal-700 transition-all flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer"
-              >
-                <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <BookUp size={16} />
-                </div>
-                <span className="text-xs font-bold text-slate-800 group-hover:text-teal-700">Mượn sách mới</span>
-              </button>
-
-              <button
-                type="button"
-                className="p-3 rounded-xl border border-slate-100 bg-slate-50/80 hover:bg-amber-50 hover:border-amber-200/80 hover:text-amber-700 transition-all flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer"
-              >
-                <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <RefreshCw size={16} />
-                </div>
-                <span className="text-xs font-bold text-slate-800 group-hover:text-amber-700">Trả / Quét mã</span>
-              </button>
-
-              <button
-                type="button"
-                className="p-3 rounded-xl border border-slate-100 bg-slate-50/80 hover:bg-blue-50 hover:border-blue-200/80 hover:text-blue-700 transition-all flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer"
-              >
-                <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <BookOpen size={16} />
-                </div>
-                <span className="text-xs font-bold text-slate-800 group-hover:text-blue-700">Biên mục sách</span>
-              </button>
-
-              <button
-                type="button"
-                className="p-3 rounded-xl border border-slate-100 bg-slate-50/80 hover:bg-emerald-50 hover:border-emerald-200/80 hover:text-emerald-700 transition-all flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer"
-              >
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Users size={16} />
-                </div>
-                <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Thêm bạn đọc</span>
-              </button>
             </div>
           </div>
 

@@ -11,8 +11,21 @@ export const dashboardService = {
     const res = await axiosInstance.get<ApiResponse<DashboardInsight>>('/ai/dashboard-insights', { params: { timeRange } });
     return res.data.data;
   },
-  exportReport: async (type: string, timeRange: string): Promise<{ url: string }> => {
-    const res = await axiosInstance.post<ApiResponse<{ url: string }>>('/reports/export', { type, timeRange });
-    return res.data.data;
+  exportReport: async (timeRange: string = '30d'): Promise<Blob> => {
+    const res = await axiosInstance.post(
+      '/reports/export',
+      {
+        datasetId: 'ds-circulation',
+        filters: {
+          dateRange: timeRange,
+          branchId: null,
+          groupBy: 'date',
+        },
+      },
+      {
+        responseType: 'blob',
+      }
+    );
+    return res.data;
   }
 };

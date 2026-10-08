@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { BookCoverImage } from './BookCoverImage';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bookService } from '../services/bookService';
@@ -43,7 +43,11 @@ import {
 } from '@/components/ui/dialog';
 import { Book } from '../types';
 
-export const BookList: React.FC = () => {
+export interface BookListProps {
+  initialQuery?: string;
+}
+
+export const BookList: React.FC<BookListProps> = ({ initialQuery = '' }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { hasPermission, isLibrarian } = usePermission();
@@ -52,11 +56,17 @@ export const BookList: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [selectedDetailBook, setSelectedDetailBook] = useState<Book | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAiMode, setIsAiMode] = useState(false);
   const [bookToDelete, setBookToDelete] = useState<{ id: string; title: string } | null>(null);
+
+  useEffect(() => {
+    if (initialQuery !== undefined) {
+      setSearchQuery(initialQuery);
+    }
+  }, [initialQuery]);
 
   const { data: books, isLoading, isError, refetch } = useQuery({
     queryKey: ['books'],

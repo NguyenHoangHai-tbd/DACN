@@ -70,7 +70,7 @@ export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { i18n } = useTranslation();
   const { user, tenantCode, logout, isAuthenticated } = useAuthStore();
-  const { roleConfig } = usePermission();
+  const { roleConfig, isSuperAdmin } = usePermission();
   const [activeTab, setActiveTab] = useState('home');
   const [circSubTab, setCircSubTab] = useState<'panel' | 'loans' | 'holds' | 'fines'>('panel');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -140,14 +140,25 @@ export const LandingPage: React.FC = () => {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setShowSearchNotice(true);
-    toast.info('Vui lòng đăng nhập hệ thống để tra cứu đầy đủ và đặt mượn sách!', {
-      action: {
-        label: 'Đăng nhập',
-        onClick: () => navigate('/login'),
-      },
-      duration: 6000,
-    });
+    if (isAuthenticated()) {
+      setShowSearchNotice(false);
+      const hasCatalog = isSuperAdmin || Boolean(roleConfig?.navItems?.some((item) => item.id === 'catalog'));
+      if (hasCatalog) {
+        setActiveTab('catalog');
+      } else {
+        setActiveTab('search');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      setShowSearchNotice(true);
+      toast.info('Vui lòng đăng nhập hệ thống để tra cứu đầy đủ và đặt mượn sách!', {
+        action: {
+          label: 'Đăng nhập',
+          onClick: () => navigate('/login'),
+        },
+        duration: 6000,
+      });
+    }
   };
 
   return (
@@ -902,7 +913,7 @@ export const LandingPage: React.FC = () => {
           {/* Khung chứa component chức năng */}
           <div className="w-full min-h-[500px]">
             {activeTab === 'dashboard' && <DashboardOverview />}
-            {activeTab === 'catalog' && <BookList />}
+            {activeTab === 'catalog' && <BookList initialQuery={searchQuery} />}
             {activeTab === 'members' && <MemberList />}
             {activeTab === 'circulation' && (
               <div className="flex flex-col w-full transition-all">
@@ -967,7 +978,7 @@ export const LandingPage: React.FC = () => {
             {activeTab === 'tenants' && <TenantList />}
             {activeTab === 'audit' && <AuditLogList />}
             {activeTab === 'reports' && <ReportBuilder />}
-            {activeTab === 'search' && <SearchInterface />}
+            {activeTab === 'search' && <SearchInterface initialQuery={searchQuery} />}
             {activeTab === 'policies' && <PolicyManager />}
             {activeTab === 'workflows' && <WorkflowManager />}
             {activeTab === 'scanner' && <BarcodeScanner />}

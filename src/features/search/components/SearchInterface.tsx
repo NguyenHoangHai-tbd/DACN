@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { BookCoverImage } from '../../books/components/BookCoverImage';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -34,9 +34,13 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 
-export const SearchInterface: React.FC = () => {
+export interface SearchInterfaceProps {
+  initialQuery?: string;
+}
+
+export const SearchInterface: React.FC<SearchInterfaceProps> = ({ initialQuery = '' }) => {
   const { t } = useTranslation();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery);
   const debouncedQuery = useDebounce(query, 500);
   const [selectedBook, setSelectedBook] = useState<any | null>(null);
   const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'available' | 'unavailable'>('all');
@@ -45,6 +49,12 @@ export const SearchInterface: React.FC = () => {
 
   const currentRole = useRoleStore(state => state.currentRole);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (initialQuery !== undefined) {
+      setQuery(initialQuery);
+    }
+  }, [initialQuery]);
 
   // Standard search - always enabled so books load immediately by default or whenever query changes
   const { data: standardResults, isLoading: isSearchLoading, isError: isSearchError, refetch } = useQuery({
