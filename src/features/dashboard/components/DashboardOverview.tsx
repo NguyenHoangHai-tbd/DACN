@@ -139,14 +139,19 @@ export const DashboardOverview: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* 1. Header Banner chuẩn Stitch */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
-        <div>
-          <h1 className="font-black text-2xl sm:text-3xl text-slate-900 tracking-tight">
-            Tổng Quan Thư Viện Số
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Thống kê chỉ số vận hành, lưu thông học liệu và giám sát hệ thống thời gian thực.
-          </p>
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 text-white flex items-center justify-center shrink-0 shadow-sm shadow-teal-700/20">
+            <Activity size={22} />
+          </div>
+          <div>
+            <h1 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tight">
+              Tổng quan thư viện số
+            </h1>
+            <p className="text-sm text-slate-500 mt-0.5 font-normal">
+              Thống kê chỉ số vận hành, lưu thông học liệu và giám sát hệ thống thời gian thực.
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">

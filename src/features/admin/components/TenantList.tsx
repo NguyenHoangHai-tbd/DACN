@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminService } from '../services/adminService';
+import { adminService, UpdateTenantPayload } from '../services/adminService';
 import { Tenant } from '../types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +22,8 @@ import {
   ShieldAlert, 
   Search, 
   AlertTriangle, 
-  RefreshCw 
+  RefreshCw,
+  Trash2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -41,34 +42,58 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useAuthStore } from '../../auth/store/authStore';
 
 export const TenantList: React.FC = () => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
+  // Current session user context to prevent locking/deleting own tenant
+  const user = useAuthStore(state => state.user);
+  const currentTenantCode = useAuthStore(state => state.tenantCode);
+
+  const isCurrentSessionTenant = (tenant: Tenant): boolean => {
+    if (!tenant) return false;
+    if (user?.tenantId && (tenant.id === user.tenantId || tenant.code === user.tenantId)) return true;
+    if (user?.tenantKey && user.tenantKey !== 'global' && tenant.code === user.tenantKey) return true;
+    if (currentTenantCode && currentTenantCode !== 'global' && tenant.code === currentTenantCode) return true;
+    return false;
+  };
+
   // Search filter
   const [searchTerm, setSearchTerm] = useState('');
 
-  // State local cho Dialog Thêm / Sửa
+  // State cho Dialog Thêm / Sửa
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
 
-  // State local cho Chi tiết Dialog
+  // State cho Chi tiết Dialog
   const [isOpenDetailDialog, setIsOpenDetailDialog] = useState(false);
   const [detailTenant, setDetailTenant] = useState<Tenant | null>(null);
+
+  // State cho Dialog Xác nhận Xóa
+  const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
+  const [tenantToDelete, setTenantToDelete] = useState<Tenant | null>(null);
 
   const handleOpenDetail = (tenant: Tenant) => {
     setDetailTenant(tenant);
     setIsOpenDetailDialog(true);
   };
 
+  const handleOpenDelete = (tenant: Tenant) => {
+    if (isCurrentSessionTenant(tenant)) {
+      toast.warning('Không thể xóa thư viện thuộc phiên làm việc hiện tại của bạn.');
+      return;
+    }
+    setTenantToDelete(tenant);
+    setIsOpenDeleteDialog(true);
+  };
+
   // Form states
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
   const [status, setStatus] = useState('Active');
-  const [tenantAdmin, setTenantAdmin] = useState('');
-  const [librarian, setLibrarian] = useState('');
   const [validationError, setValidationError] = useState('');
 
   // Fetch tenants
@@ -76,21 +101,6 @@ export const TenantList: React.FC = () => {
     queryKey: ['tenants'],
     queryFn: adminService.getTenants
   });
-
-  // Fetch users for dropdown assignment when dialog is open
-  const { data: users } = useQuery({
-    queryKey: ['users'],
-    queryFn: adminService.getUsers,
-    enabled: isOpenDialog,
-  });
-
-  const tenantAdminsList = users?.filter(
-    u => u.role === 'TenantAdmin' || u.role === 'Tenant_Admin' || u.role === 'tenant_admin'
-  ) || [];
-
-  const librariansList = users?.filter(
-    u => u.role === 'Librarian' || u.role === 'librarian'
-  ) || [];
 
   // Filtered tenants
   const filteredTenants = useMemo(() => {
@@ -107,7 +117,7 @@ export const TenantList: React.FC = () => {
 
   // Mutation create tenant
   const createMutation = useMutation({
-    mutationFn: adminService.createTenant,
+    mutationFn: (data: { code: string; name: string; status: string }) => adminService.createTenant(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tenants'] });
       toast.success('Thêm thư viện thành công');
@@ -115,14 +125,15 @@ export const TenantList: React.FC = () => {
       resetForm();
     },
     onError: (err: any) => {
-      const msg = err.response?.data?.message || 'Có lỗi xảy ra khi thêm thư viện';
+      const msg = err.response?.data?.message || err.message || 'Có lỗi xảy ra khi thêm thư viện';
       toast.error(msg);
+      setValidationError(msg);
     }
   });
 
   // Mutation update tenant
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { name: string; status: string; tenantAdmin?: string; librarian?: string } }) =>
+    mutationFn: ({ id, data }: { id: string; data: UpdateTenantPayload }) =>
       adminService.updateTenant(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tenants'] });
@@ -131,25 +142,48 @@ export const TenantList: React.FC = () => {
       resetForm();
     },
     onError: (err: any) => {
-      const msg = err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật thư viện';
+      const msg = err.response?.data?.message || err.message || 'Có lỗi xảy ra khi cập nhật thư viện';
+      toast.error(msg);
+      setValidationError(msg);
+    }
+  });
+
+  // Mutation toggle status (Khóa / Mở khóa)
+  const toggleStatusMutation = useMutation({
+    mutationFn: ({ tenant, nextStatus }: { tenant: Tenant; nextStatus: string }) =>
+      adminService.updateTenant(tenant.id, {
+        key: tenant.code,
+        name: tenant.name,
+        plan: (tenant as any).plan || 'Standard',
+        defaultLocale: (tenant as any).defaultLocale || 'vi',
+        primaryColor: (tenant as any).primaryColor || '#0d9488',
+        isActive: nextStatus === 'Active',
+      }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['tenants'] });
+      if (variables.nextStatus === 'Active') {
+        toast.success(`Đã mở khóa thư viện "${variables.tenant.name}"`);
+      } else {
+        toast.success(`Đã khóa thư viện "${variables.tenant.name}"`);
+      }
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || err.message || 'Có lỗi xảy ra khi đổi trạng thái thư viện';
       toast.error(msg);
     }
   });
 
-  // Mutation toggle tenant status (Khóa / Mở khóa)
-  const toggleStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string }) =>
-      adminService.updateTenantStatus(id, status),
-    onSuccess: (data) => {
+  // Mutation delete tenant
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => adminService.deleteTenant(id),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tenants'] });
-      if (data.status === 'Active') {
-        toast.success('Đã mở khóa thư viện');
-      } else {
-        toast.success('Đã khóa thư viện');
-      }
+      toast.success('Xóa thư viện thành công');
+      setIsOpenDeleteDialog(false);
+      setTenantToDelete(null);
     },
     onError: (err: any) => {
-      const msg = err.response?.data?.message || 'Có lỗi xảy ra khi đổi trạng thái thư viện';
+      const msg = err.response?.data?.message || err.message || 'Có lỗi xảy ra khi xóa thư viện';
       toast.error(msg);
     }
   });
@@ -158,8 +192,6 @@ export const TenantList: React.FC = () => {
     setCode('');
     setName('');
     setStatus('Active');
-    setTenantAdmin('');
-    setLibrarian('');
     setValidationError('');
     setSelectedTenant(null);
   };
@@ -176,15 +208,17 @@ export const TenantList: React.FC = () => {
     setCode(tenant.code);
     setName(tenant.name);
     setStatus(tenant.status === 'Active' ? 'Active' : 'Inactive');
-    setTenantAdmin(tenant.tenantAdmin || '');
-    setLibrarian(tenant.librarian || '');
     setDialogMode('edit');
     setIsOpenDialog(true);
   };
 
   const handleToggleStatus = (tenant: Tenant) => {
+    if (isCurrentSessionTenant(tenant)) {
+      toast.warning('Không thể khóa thư viện thuộc phiên làm việc hiện tại của bạn.');
+      return;
+    }
     const nextStatus = tenant.status === 'Active' ? 'Inactive' : 'Active';
-    toggleStatusMutation.mutate({ id: tenant.id, status: nextStatus });
+    toggleStatusMutation.mutate({ tenant, nextStatus });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -202,7 +236,7 @@ export const TenantList: React.FC = () => {
     }
 
     if (dialogMode === 'create') {
-      // Validate trùng mã
+      // Validate trùng mã phía client
       const isDuplicate = tenants?.some(
         t => String(t?.code || '').trim().toLowerCase() === String(code || '').trim().toLowerCase()
       );
@@ -215,18 +249,18 @@ export const TenantList: React.FC = () => {
         code: code.trim(),
         name: name.trim(),
         status,
-        tenantAdmin: tenantAdmin,
-        librarian: librarian
       });
     } else {
       if (!selectedTenant) return;
       updateMutation.mutate({
         id: selectedTenant.id,
         data: {
+          key: selectedTenant.code,
           name: name.trim(),
-          status,
-          tenantAdmin: tenantAdmin,
-          librarian: librarian
+          plan: (selectedTenant as any).plan || 'Standard',
+          defaultLocale: (selectedTenant as any).defaultLocale || 'vi',
+          primaryColor: (selectedTenant as any).primaryColor || '#0d9488',
+          isActive: status === 'Active',
         }
       });
     }
@@ -345,110 +379,135 @@ export const TenantList: React.FC = () => {
         </div>
       ) : (
         <>
-          {/* Mobile Card View (< md) to completely avoid horizontal scroll issues */}
+          {/* Mobile Card View (< md) */}
           <div className="block md:hidden divide-y divide-slate-100">
-            {filteredTenants.map(tenant => (
-              <div key={tenant.id} className="p-4 space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h4 className="font-bold text-sm text-slate-900 leading-snug">{tenant.name}</h4>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className="text-[11px] text-slate-500">Mã:</span>
-                      <code className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold">
-                        {tenant.code}
-                      </code>
+            {filteredTenants.map(tenant => {
+              const isLockedOrCurrent = isCurrentSessionTenant(tenant);
+              return (
+                <div key={tenant.id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-sm text-slate-900 leading-snug">{tenant.name}</h4>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="text-[11px] text-slate-500">Mã:</span>
+                        <code className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold">
+                          {tenant.code}
+                        </code>
+                        {isLockedOrCurrent && (
+                          <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-blue-50 text-blue-700 border-blue-200">
+                            Phiên hiện tại
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={`shrink-0 text-[10px] px-2 py-0.5 font-semibold rounded-md border ${
+                        tenant.status === 'Active'
+                          ? 'bg-teal-50 text-teal-700 border-teal-200/80'
+                          : 'bg-amber-50 text-amber-700 border-amber-200/80'
+                      }`}
+                    >
+                      {tenant.status === 'Active' ? 'Hoạt động' : 'Tạm khóa'}
+                    </Badge>
+                  </div>
+
+                  {/* Responsible staff info from backend */}
+                  <div className="grid grid-cols-2 gap-2 text-[11px] bg-slate-50/70 p-2.5 rounded-xl border border-slate-100">
+                    <div>
+                      <span className="text-slate-400 text-[10px] block">Admin:</span>
+                      {tenant.tenantAdmin ? (
+                        <span className="font-semibold text-teal-700 truncate block">@{tenant.tenantAdmin}</span>
+                      ) : (
+                        <span className="text-slate-400 italic text-[10px]">Chưa phân công</span>
+                      )}
+                    </div>
+                    <div>
+                      <span className="text-slate-400 text-[10px] block">Thủ thư:</span>
+                      {tenant.librarian ? (
+                        <span className="font-semibold text-sky-700 truncate block">@{tenant.librarian}</span>
+                      ) : (
+                        <span className="text-slate-400 italic text-[10px]">Chưa phân công</span>
+                      )}
                     </div>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className={`shrink-0 text-[10px] px-2 py-0.5 font-semibold rounded-md border ${
-                      tenant.status === 'Active'
-                        ? 'bg-teal-50 text-teal-700 border-teal-200/80'
-                        : 'bg-amber-50 text-amber-700 border-amber-200/80'
-                    }`}
-                  >
-                    {tenant.status === 'Active' ? 'Hoạt động' : 'Tạm khóa'}
-                  </Badge>
-                </div>
 
-                {/* Responsible */}
-                <div className="grid grid-cols-2 gap-2 text-[11px] bg-slate-50/70 p-2.5 rounded-xl border border-slate-100">
-                  <div>
-                    <span className="text-slate-400 text-[10px] block">Admin:</span>
-                    {tenant.tenantAdmin ? (
-                      <span className="font-semibold text-teal-700 truncate block">@{tenant.tenantAdmin}</span>
-                    ) : (
-                      <span className="text-slate-400 italic text-[10px]">Chưa phân công</span>
-                    )}
+                  {/* Metrics */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-teal-50 text-teal-700 text-[10px] font-semibold border border-teal-100/80">
+                      Sách: {tenant.totalBooks ?? 0}
+                    </span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 text-[10px] font-semibold border border-sky-100/80">
+                      Độc giả: {tenant.totalMembers ?? 0}
+                    </span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-semibold border border-indigo-100/80">
+                      Mượn: {tenant.activeLoans ?? 0}
+                    </span>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold border ${
+                      (tenant.overdueLoans ?? 0) > 0 
+                        ? 'bg-rose-50 text-rose-700 border-rose-200/80 font-bold'
+                        : 'bg-slate-100 text-slate-600 border-slate-200/60'
+                    }`}>
+                      Quá hạn: {tenant.overdueLoans ?? 0}
+                    </span>
                   </div>
-                  <div>
-                    <span className="text-slate-400 text-[10px] block">Thủ thư:</span>
-                    {tenant.librarian ? (
-                      <span className="font-semibold text-sky-700 truncate block">@{tenant.librarian}</span>
-                    ) : (
-                      <span className="text-slate-400 italic text-[10px]">Chưa phân công</span>
-                    )}
+
+                  {/* Mobile Actions */}
+                  <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-slate-100 flex-wrap">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleOpenDetail(tenant)}
+                      className="h-8 px-2 text-xs text-teal-700 hover:text-teal-800 hover:bg-teal-50 rounded-lg font-medium cursor-pointer"
+                    >
+                      <Eye size={13} className="mr-1" /> Chi tiết
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleOpenEdit(tenant)}
+                      className="h-8 px-2 text-xs text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium cursor-pointer"
+                    >
+                      <Edit2 size={13} className="mr-1" /> Sửa
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleToggleStatus(tenant)}
+                      disabled={toggleStatusMutation.isPending || isLockedOrCurrent}
+                      className={`h-8 px-2 text-xs font-medium rounded-lg cursor-pointer ${
+                        isLockedOrCurrent
+                          ? 'opacity-40 cursor-not-allowed text-slate-400'
+                          : tenant.status === 'Active'
+                          ? 'text-amber-700 hover:text-amber-800 hover:bg-amber-50'
+                          : 'text-teal-700 hover:text-teal-800 hover:bg-teal-50'
+                      }`}
+                      title={isLockedOrCurrent ? 'Không thể khóa thư viện của phiên đăng nhập hiện tại' : undefined}
+                    >
+                      {tenant.status === 'Active' ? (
+                        <><Lock size={13} className="mr-1" /> Khóa</>
+                      ) : (
+                        <><Unlock size={13} className="mr-1" /> Mở khóa</>
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleOpenDelete(tenant)}
+                      disabled={deleteMutation.isPending || isLockedOrCurrent}
+                      className={`h-8 px-2 text-xs font-medium rounded-lg cursor-pointer ${
+                        isLockedOrCurrent
+                          ? 'opacity-40 cursor-not-allowed text-slate-400'
+                          : 'text-rose-600 hover:text-rose-700 hover:bg-rose-50'
+                      }`}
+                      title={isLockedOrCurrent ? 'Không thể xóa thư viện của phiên đăng nhập hiện tại' : 'Xóa thư viện'}
+                    >
+                      <Trash2 size={13} className="mr-1" /> Xóa
+                    </Button>
                   </div>
                 </div>
-
-                {/* Metrics */}
-                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-teal-50 text-teal-700 text-[10px] font-semibold border border-teal-100/80">
-                    Sách: {tenant.totalBooks ?? 0}
-                  </span>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 text-[10px] font-semibold border border-sky-100/80">
-                    Độc giả: {tenant.totalMembers ?? 0}
-                  </span>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-semibold border border-indigo-100/80">
-                    Mượn: {tenant.activeLoans ?? 0}
-                  </span>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold border ${
-                    (tenant.overdueLoans ?? 0) > 0 
-                      ? 'bg-rose-50 text-rose-700 border-rose-200/80 font-bold'
-                      : 'bg-slate-100 text-slate-600 border-slate-200/60'
-                  }`}>
-                    Quá hạn: {tenant.overdueLoans ?? 0}
-                  </span>
-                </div>
-
-                {/* Mobile Actions */}
-                <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-slate-100">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleOpenDetail(tenant)}
-                    className="h-8 px-2.5 text-xs text-teal-700 hover:text-teal-800 hover:bg-teal-50 rounded-lg font-medium cursor-pointer"
-                  >
-                    <Eye size={13} className="mr-1" /> Chi tiết
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleOpenEdit(tenant)}
-                    className="h-8 px-2.5 text-xs text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium cursor-pointer"
-                  >
-                    <Edit2 size={13} className="mr-1" /> Sửa
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleToggleStatus(tenant)}
-                    disabled={toggleStatusMutation.isPending}
-                    className={`h-8 px-2.5 text-xs font-medium rounded-lg cursor-pointer ${
-                      tenant.status === 'Active'
-                        ? 'text-amber-700 hover:text-amber-800 hover:bg-amber-50'
-                        : 'text-teal-700 hover:text-teal-800 hover:bg-teal-50'
-                    }`}
-                  >
-                    {tenant.status === 'Active' ? (
-                      <><Lock size={13} className="mr-1" /> Khóa</>
-                    ) : (
-                      <><Unlock size={13} className="mr-1" /> Mở khóa</>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Desktop Table View (>= md) */}
@@ -456,140 +515,168 @@ export const TenantList: React.FC = () => {
             <Table className="min-w-full w-full">
               <TableHeader className="bg-slate-50/80 border-b border-slate-200/80">
                 <TableRow>
-                  <TableHead className="font-bold text-slate-700 uppercase text-[11px] w-[28%] tracking-wider">
+                  <TableHead className="font-bold text-slate-700 uppercase text-[11px] w-[26%] tracking-wider">
                     Thư viện / khu vực
                   </TableHead>
-                  <TableHead className="font-bold text-slate-700 uppercase text-[11px] w-[22%] tracking-wider">
+                  <TableHead className="font-bold text-slate-700 uppercase text-[11px] w-[21%] tracking-wider">
                     Người phụ trách
                   </TableHead>
                   <TableHead className="font-bold text-slate-700 uppercase text-[11px] w-[13%] tracking-wider text-center">
                     Trạng thái
                   </TableHead>
-                  <TableHead className="font-bold text-slate-700 uppercase text-[11px] w-[20%] tracking-wider">
+                  <TableHead className="font-bold text-slate-700 uppercase text-[11px] w-[19%] tracking-wider">
                     Tổng quan
                   </TableHead>
-                  <TableHead className="font-bold text-slate-700 uppercase text-[11px] w-[17%] tracking-wider text-right pr-6">
+                  <TableHead className="font-bold text-slate-700 uppercase text-[11px] w-[21%] tracking-wider text-right pr-6">
                     Thao tác
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTenants.map(tenant => (
-                  <TableRow key={tenant.id} className="hover:bg-slate-50/70 transition-colors text-xs border-b border-slate-100">
-                    {/* Cột 1: Thư viện / khu vực */}
-                    <TableCell className="py-3.5 pl-6">
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-bold text-slate-900 text-sm tracking-tight">{tenant.name}</span>
-                        <span className="text-[11px] text-slate-500 mt-0.5">
-                          Mã: <code className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold">{tenant.code}</code>
-                        </span>
-                      </div>
-                    </TableCell>
-
-                    {/* Cột 2: Người phụ trách */}
-                    <TableCell className="py-3.5">
-                      <div className="flex flex-col gap-1 text-[11px]">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-slate-400 text-[10px] font-medium w-12">Admin:</span>
-                          {tenant.tenantAdmin ? (
-                            <span className="font-semibold text-teal-800 bg-teal-50 border border-teal-100/80 rounded-md px-1.5 py-0.5 text-[10px]">
-                              @{tenant.tenantAdmin}
-                            </span>
-                          ) : (
-                            <span className="text-slate-400 italic text-[10px]">Chưa phân công</span>
-                          )}
+                {filteredTenants.map(tenant => {
+                  const isLockedOrCurrent = isCurrentSessionTenant(tenant);
+                  return (
+                    <TableRow key={tenant.id} className="hover:bg-slate-50/70 transition-colors text-xs border-b border-slate-100">
+                      {/* Cột 1: Thư viện / khu vực */}
+                      <TableCell className="py-3.5 pl-6">
+                        <div className="flex flex-col min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-slate-900 text-sm tracking-tight">{tenant.name}</span>
+                            {isLockedOrCurrent && (
+                              <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-blue-50 text-blue-700 border-blue-200">
+                                Phiên hiện tại
+                              </Badge>
+                            )}
+                          </div>
+                          <span className="text-[11px] text-slate-500 mt-0.5">
+                            Mã: <code className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold">{tenant.code}</code>
+                          </span>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-slate-400 text-[10px] font-medium w-12">Thủ thư:</span>
-                          {tenant.librarian ? (
-                            <span className="font-semibold text-sky-800 bg-sky-50 border border-sky-100/80 rounded-md px-1.5 py-0.5 text-[10px]">
-                              @{tenant.librarian}
-                            </span>
-                          ) : (
-                            <span className="text-slate-400 italic text-[10px]">Chưa phân công</span>
-                          )}
+                      </TableCell>
+
+                      {/* Cột 2: Người phụ trách */}
+                      <TableCell className="py-3.5">
+                        <div className="flex flex-col gap-1 text-[11px]">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-slate-400 text-[10px] font-medium w-12">Admin:</span>
+                            {tenant.tenantAdmin ? (
+                              <span className="font-semibold text-teal-800 bg-teal-50 border border-teal-100/80 rounded-md px-1.5 py-0.5 text-[10px]">
+                                @{tenant.tenantAdmin}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 italic text-[10px]">Chưa phân công</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-slate-400 text-[10px] font-medium w-12">Thủ thư:</span>
+                            {tenant.librarian ? (
+                              <span className="font-semibold text-sky-800 bg-sky-50 border border-sky-100/80 rounded-md px-1.5 py-0.5 text-[10px]">
+                                @{tenant.librarian}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 italic text-[10px]">Chưa phân công</span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
+                      </TableCell>
 
-                    {/* Cột 3: Trạng thái */}
-                    <TableCell className="text-center py-3.5">
-                      <Badge
-                        variant="outline"
-                        className={`text-[10px] px-2 py-0.5 font-semibold rounded-md border ${
-                          tenant.status === 'Active'
-                            ? 'bg-teal-50 text-teal-700 border-teal-200/80'
-                            : 'bg-amber-50 text-amber-700 border-amber-200/80'
-                        }`}
-                      >
-                        {tenant.status === 'Active' ? 'Hoạt động' : 'Tạm khóa'}
-                      </Badge>
-                    </TableCell>
-
-                    {/* Cột 4: Tổng quan */}
-                    <TableCell className="py-3.5">
-                      <div className="flex flex-wrap gap-1 max-w-[210px]">
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-teal-50 text-teal-700 text-[10px] font-semibold border border-teal-100/80">
-                          Sách: {tenant.totalBooks ?? 0}
-                        </span>
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-sky-50 text-sky-700 text-[10px] font-semibold border border-sky-100/80">
-                          Độc giả: {tenant.totalMembers ?? 0}
-                        </span>
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-semibold border border-indigo-100/80">
-                          Mượn: {tenant.activeLoans ?? 0}
-                        </span>
-                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold border ${
-                          (tenant.overdueLoans ?? 0) > 0 
-                            ? 'bg-rose-50 text-rose-700 border-rose-200/80 font-bold'
-                            : 'bg-slate-100 text-slate-600 border-slate-200/60'
-                        }`}>
-                          Quá hạn: {tenant.overdueLoans ?? 0}
-                        </span>
-                      </div>
-                    </TableCell>
-
-                    {/* Cột 5: Thao tác */}
-                    <TableCell className="text-right py-3.5 pr-6 whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleOpenDetail(tenant)}
-                          className="h-8 text-teal-700 hover:text-teal-800 hover:bg-teal-50 px-2 text-xs font-semibold rounded-lg cursor-pointer"
-                        >
-                          <Eye size={13} className="mr-1" /> Chi tiết
-                        </Button>
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleOpenEdit(tenant)}
-                          className="h-8 text-slate-700 hover:text-slate-900 hover:bg-slate-100 px-2 text-xs font-semibold rounded-lg cursor-pointer"
-                        >
-                          <Edit2 size={13} className="mr-1" /> Sửa
-                        </Button>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleToggleStatus(tenant)}
-                          disabled={toggleStatusMutation.isPending}
-                          className={`h-8 px-2 text-xs font-semibold rounded-lg cursor-pointer ${
+                      {/* Cột 3: Trạng thái */}
+                      <TableCell className="text-center py-3.5">
+                        <Badge
+                          variant="outline"
+                          className={`text-[10px] px-2 py-0.5 font-semibold rounded-md border ${
                             tenant.status === 'Active'
-                              ? 'text-amber-700 hover:text-amber-800 hover:bg-amber-50'
-                              : 'text-teal-700 hover:text-teal-800 hover:bg-teal-50'
+                              ? 'bg-teal-50 text-teal-700 border-teal-200/80'
+                              : 'bg-amber-50 text-amber-700 border-amber-200/80'
                           }`}
                         >
-                          {tenant.status === 'Active' ? (
-                            <><Lock size={13} className="mr-1" /> Khóa</>
-                          ) : (
-                            <><Unlock size={13} className="mr-1" /> Mở khóa</>
-                          )}
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                          {tenant.status === 'Active' ? 'Hoạt động' : 'Tạm khóa'}
+                        </Badge>
+                      </TableCell>
+
+                      {/* Cột 4: Tổng quan */}
+                      <TableCell className="py-3.5">
+                        <div className="flex flex-wrap gap-1 max-w-[210px]">
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-teal-50 text-teal-700 text-[10px] font-semibold border border-teal-100/80">
+                            Sách: {tenant.totalBooks ?? 0}
+                          </span>
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-sky-50 text-sky-700 text-[10px] font-semibold border border-sky-100/80">
+                            Độc giả: {tenant.totalMembers ?? 0}
+                          </span>
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-semibold border border-indigo-100/80">
+                            Mượn: {tenant.activeLoans ?? 0}
+                          </span>
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold border ${
+                            (tenant.overdueLoans ?? 0) > 0 
+                              ? 'bg-rose-50 text-rose-700 border-rose-200/80 font-bold'
+                              : 'bg-slate-100 text-slate-600 border-slate-200/60'
+                          }`}>
+                            Quá hạn: {tenant.overdueLoans ?? 0}
+                          </span>
+                        </div>
+                      </TableCell>
+
+                      {/* Cột 5: Thao tác */}
+                      <TableCell className="text-right py-3.5 pr-6 whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenDetail(tenant)}
+                            className="h-8 text-teal-700 hover:text-teal-800 hover:bg-teal-50 px-2 text-xs font-semibold rounded-lg cursor-pointer"
+                          >
+                            <Eye size={13} className="mr-1" /> Chi tiết
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenEdit(tenant)}
+                            className="h-8 text-slate-700 hover:text-slate-900 hover:bg-slate-100 px-2 text-xs font-semibold rounded-lg cursor-pointer"
+                          >
+                            <Edit2 size={13} className="mr-1" /> Sửa
+                          </Button>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleToggleStatus(tenant)}
+                            disabled={toggleStatusMutation.isPending || isLockedOrCurrent}
+                            className={`h-8 px-2 text-xs font-semibold rounded-lg cursor-pointer ${
+                              isLockedOrCurrent
+                                ? 'opacity-40 cursor-not-allowed text-slate-400'
+                                : tenant.status === 'Active'
+                                ? 'text-amber-700 hover:text-amber-800 hover:bg-amber-50'
+                                : 'text-teal-700 hover:text-teal-800 hover:bg-teal-50'
+                            }`}
+                            title={isLockedOrCurrent ? 'Không thể khóa thư viện của phiên đăng nhập hiện tại' : undefined}
+                          >
+                            {tenant.status === 'Active' ? (
+                              <><Lock size={13} className="mr-1" /> Khóa</>
+                            ) : (
+                              <><Unlock size={13} className="mr-1" /> Mở khóa</>
+                            )}
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenDelete(tenant)}
+                            disabled={deleteMutation.isPending || isLockedOrCurrent}
+                            className={`h-8 px-2 text-xs font-semibold rounded-lg cursor-pointer ${
+                              isLockedOrCurrent
+                                ? 'opacity-40 cursor-not-allowed text-slate-400'
+                                : 'text-rose-600 hover:text-rose-700 hover:bg-rose-50'
+                            }`}
+                            title={isLockedOrCurrent ? 'Không thể xóa thư viện của phiên đăng nhập hiện tại' : 'Xóa thư viện'}
+                          >
+                            <Trash2 size={13} className="mr-1" /> Xóa
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
@@ -628,7 +715,7 @@ export const TenantList: React.FC = () => {
                 className="bg-slate-50 border-slate-200/80 rounded-xl text-xs h-9 focus-visible:ring-teal-500"
               />
               {dialogMode === 'edit' && (
-                <p className="text-[10px] text-slate-400">Không cho phép thay đổi Mã đối với thư viện đã tồn tại.</p>
+                <p className="text-[10px] text-slate-400">Mã thư viện không thể thay đổi sau khi tạo.</p>
               )}
             </div>
 
@@ -645,43 +732,42 @@ export const TenantList: React.FC = () => {
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="tenant-admin" className="text-xs font-bold text-slate-700 uppercase">
-                Tenant Admin phụ trách
-              </Label>
-              <Select value={tenantAdmin || 'unassigned'} onValueChange={(val) => setTenantAdmin(val === 'unassigned' ? '' : val)}>
-                <SelectTrigger className="border-slate-200/80 bg-white rounded-xl text-xs h-9 focus:ring-teal-500">
-                  <SelectValue placeholder="Chưa phân công" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-slate-200 shadow-md">
-                  <SelectItem value="unassigned">Chưa phân công</SelectItem>
-                  {tenantAdminsList.map(u => (
-                    <SelectItem key={u.id} value={u.username}>
-                      @{u.username} (Email: {u.email})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Ghi chú Người phụ trách theo dữ liệu backend trả */}
+            {dialogMode === 'edit' && selectedTenant && (
+              <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl space-y-2 text-xs">
+                <div className="flex items-center gap-1.5 text-slate-700 font-semibold">
+                  <Users size={14} className="text-teal-600" />
+                  <span>Người phụ trách (Hệ thống ghi nhận)</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
+                  <div>
+                    <span className="text-slate-400 block text-[10px]">Admin phụ trách:</span>
+                    {selectedTenant.tenantAdmin ? (
+                      <span className="font-semibold text-teal-700">@{selectedTenant.tenantAdmin}</span>
+                    ) : (
+                      <span className="italic text-slate-400">Chưa phân công</span>
+                    )}
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px]">Thủ thư phụ trách:</span>
+                    {selectedTenant.librarian ? (
+                      <span className="font-semibold text-sky-700">@{selectedTenant.librarian}</span>
+                    ) : (
+                      <span className="italic text-slate-400">Chưa phân công</span>
+                    )}
+                  </div>
+                </div>
+                <p className="text-[10px] text-slate-400 italic pt-1 border-t border-slate-200/60 leading-tight">
+                  * Việc phân công nhân sự quản lý được quản trị trực tiếp tại mục Phân quyền tài khoản.
+                </p>
+              </div>
+            )}
 
-            <div className="space-y-1.5">
-              <Label htmlFor="tenant-librarian" className="text-xs font-bold text-slate-700 uppercase">
-                Thủ thư phụ trách
-              </Label>
-              <Select value={librarian || 'unassigned'} onValueChange={(val) => setLibrarian(val === 'unassigned' ? '' : val)}>
-                <SelectTrigger className="border-slate-200/80 bg-white rounded-xl text-xs h-9 focus:ring-teal-500">
-                  <SelectValue placeholder="Chưa phân công" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-slate-200 shadow-md">
-                  <SelectItem value="unassigned">Chưa phân công</SelectItem>
-                  {librariansList.map(u => (
-                    <SelectItem key={u.id} value={u.username}>
-                      @{u.username} (Email: {u.email})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {dialogMode === 'create' && (
+              <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-500 leading-relaxed">
+                💡 <strong>Lưu ý:</strong> Tài khoản Tenant Admin và Thủ thư phụ trách sẽ được gán sau khi tạo thư viện tại mục <em>Quản lý tài khoản & Phân quyền</em>.
+              </div>
+            )}
 
             <div className="space-y-1.5">
               <Label htmlFor="tenant-status" className="text-xs font-bold text-slate-700 uppercase">
@@ -719,6 +805,65 @@ export const TenantList: React.FC = () => {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Xác nhận Xóa Thư viện */}
+      <Dialog open={isOpenDeleteDialog} onOpenChange={setIsOpenDeleteDialog}>
+        <DialogContent className="sm:max-w-[420px] rounded-2xl p-6">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2.5 text-rose-600 font-bold text-base">
+              <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+                <Trash2 size={18} />
+              </div>
+              <span>Xác nhận xóa thư viện</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          {tenantToDelete && (
+            <div className="py-3 space-y-3">
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Bạn có chắc chắn muốn xóa thư viện <strong className="text-slate-900 font-bold">{tenantToDelete.name}</strong> (mã: <code className="bg-slate-100 text-slate-800 px-1 py-0.5 rounded font-mono text-[11px] font-semibold">{tenantToDelete.code}</code>) không?
+              </p>
+              <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-xl text-xs text-amber-800 flex items-start gap-2">
+                <AlertTriangle size={15} className="shrink-0 text-amber-600 mt-0.5" />
+                <span className="leading-snug">
+                  Hành động này sẽ xóa dữ liệu cấu hình của thư viện trên hệ thống và không thể hoàn tác.
+                </span>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="pt-2 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={deleteMutation.isPending}
+              onClick={() => {
+                setIsOpenDeleteDialog(false);
+                setTenantToDelete(null);
+              }}
+              className="border-slate-200 text-slate-700 font-semibold text-xs rounded-xl h-9 cursor-pointer"
+            >
+              Hủy
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() => {
+                if (tenantToDelete) {
+                  deleteMutation.mutate(tenantToDelete.id);
+                }
+              }}
+              className="bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-xl h-9 px-4 cursor-pointer shadow-xs"
+            >
+              {deleteMutation.isPending && (
+                <Loader2 size={14} className="animate-spin mr-1.5" />
+              )}
+              Xác nhận xóa
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -864,4 +1009,3 @@ export const TenantList: React.FC = () => {
     </div>
   );
 };
-
