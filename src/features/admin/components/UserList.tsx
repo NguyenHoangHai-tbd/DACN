@@ -30,6 +30,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { User } from '../types';
 import { useRoleStore } from '../../../shared/store/roleStore';
 import { useAuthStore } from '../../auth/store/authStore';
+import { parseFriendlyError } from '@/shared/utils/errorParser';
 
 const getFriendlyRoleLabel = (role: string) => {
   if (role === 'SuperAdmin') return 'Super Admin - Quản trị hệ thống';
@@ -60,11 +61,18 @@ export const UserList: React.FC = () => {
     queryFn: adminService.getUsers,
     enabled: hasUserManage
   });
+  const { data: branches = [] } = useQuery({ queryKey: ['branches'], queryFn: adminService.getBranches, enabled: hasUserManage });
+  const { data: tenants = [] } = useQuery({ queryKey: ['tenants'], queryFn: adminService.getTenants, enabled: hasUserManage && currentRole === 'super_admin' });
+  const tenantName = (tenantId: string) => {
+    const tenant = tenants.find(item => item.id === tenantId);
+    return tenant ? `${tenant.name} (${tenant.code})` : tenantId || 'Chưa xác định';
+  };
 
   // Dialog state
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [role, setRole] = useState('');
   const [status, setStatus] = useState('');
+  const [branchIds, setBranchIds] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
   // Search, Filter & Pagination states
@@ -75,7 +83,7 @@ export const UserList: React.FC = () => {
   const pageSize = 10;
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { role: string; status: string } }) =>
+    mutationFn: ({ id, data }: { id: string; data: { role: string; status: string; branchIds: string[] } }) =>
       adminService.updateUser(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -84,13 +92,10 @@ export const UserList: React.FC = () => {
       setIsOpen(false);
     },
     onError: (error: any) => {
-      const serverMessage = error?.response?.data?.message;
-      if (serverMessage === 'Bạn không có quyền phân quyền tài khoản này' || error?.response?.status === 403) {
+      if (error?.response?.status === 403) {
         toast.error(t('admin.user.no_permission', 'Bạn không có quyền phân quyền tài khoản này'));
-      } else if (serverMessage === 'Vai trò không hợp lệ' || error?.response?.status === 400) {
-        toast.error(t('admin.user.invalid_role', 'Vai trò không hợp lệ'));
       } else {
-        toast.error(t('admin.user.update_failed', 'Cập nhật phân quyền thất bại!'));
+        toast.error(parseFriendlyError(error, t('admin.user.update_failed', 'Cập nhật phân quyền thất bại!')));
       }
     }
   });
@@ -106,14 +111,19 @@ export const UserList: React.FC = () => {
     setSelectedUser(user);
     setRole(user.role);
     setStatus(user.status);
+    setBranchIds(user.branchIds ?? []);
     setIsOpen(true);
   };
 
   const handleSave = () => {
     if (!selectedUser) return;
+    if (role !== 'SuperAdmin' && role !== 'TenantAdmin' && branchIds.length === 0) {
+      toast.error('Hãy chọn ít nhất một chi nhánh cho vai trò này.');
+      return;
+    }
     updateMutation.mutate({
       id: selectedUser.id,
-      data: { role, status }
+      data: { role, status, branchIds }
     });
   };
 
@@ -427,7 +437,7 @@ export const UserList: React.FC = () => {
                       {currentRole === 'super_admin' && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-medium border border-slate-200/60">
                           <Building2 size={11} className="text-slate-400" />
-                          {user.tenantId === 'tenant-1' ? 'Hà Nội HQ (hq)' : user.tenantId === 'tenant-2' ? 'TP.HCM (lib-hcm)' : user.tenantId}
+                          {tenantName(user.tenantId)}
                         </span>
                       )}
                     </div>
@@ -523,7 +533,7 @@ export const UserList: React.FC = () => {
                           <div className="flex items-center gap-1.5">
                             <Building2 size={13} className="text-slate-400 shrink-0" />
                             <span className="font-medium text-slate-700 text-xs">
-                              {user.tenantId === 'tenant-1' ? 'Hà Nội HQ (hq)' : user.tenantId === 'tenant-2' ? 'TP.HCM (lib-hcm)' : user.tenantId}
+                              {tenantName(user.tenantId)}
                             </span>
                           </div>
                         </TableCell>
@@ -652,7 +662,7 @@ export const UserList: React.FC = () => {
                     <div className="flex justify-between items-center text-xs pt-1 border-t border-slate-200/60">
                       <span className="text-slate-500 font-medium">Thư viện:</span>
                       <span className="text-teal-700 font-semibold">
-                        {selectedUser.tenantId === 'tenant-1' ? 'Hà Nội HQ' : 'TP.HCM (lib-hcm)'}
+                        {tenantName(selectedUser.tenantId)}
                       </span>
                     </div>
                   )}
@@ -681,6 +691,26 @@ export const UserList: React.FC = () => {
                       : "Vai trò quyết định phạm vi menu và các chức năng hệ thống tài khoản được phép thực thi."}
                   </p>
                 </div>
+
+                {role !== 'SuperAdmin' && role !== 'TenantAdmin' && (
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Chi nhánh được phép truy cập</Label>
+                    <div className="max-h-36 overflow-y-auto rounded-xl border border-slate-200 p-2 space-y-1">
+                      {branches.filter(branch => !branch.tenantId || branch.tenantId === selectedUser.tenantId).map(branch => (
+                        <label key={branch.id} className="flex items-center gap-2 p-1.5 text-xs cursor-pointer rounded-lg hover:bg-slate-50">
+                          <input type="checkbox" checked={branchIds.includes(branch.id)}
+                            onChange={event => setBranchIds(previous => event.target.checked
+                              ? [...previous, branch.id]
+                              : previous.filter(id => id !== branch.id))} />
+                          <span>{branch.name} ({branch.code})</span>
+                        </label>
+                      ))}
+                      {!branches.some(branch => !branch.tenantId || branch.tenantId === selectedUser.tenantId) && (
+                        <p className="text-xs text-amber-700 p-1">Thư viện này chưa có chi nhánh. Hãy tạo chi nhánh trước khi cấp vai trò này.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Status Selection */}
                 <div className="space-y-1.5">

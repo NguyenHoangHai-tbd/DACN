@@ -15,10 +15,14 @@ export interface Tenant {
 export interface User {
   id: string;
   username: string;
+  fullName?: string;
   email: string;
   role: string;
   status: string;
   tenantId: string;
+  branchIds?: string[];
+  locale?: string;
+  isActive?: boolean;
 }
 
 export interface Branch {

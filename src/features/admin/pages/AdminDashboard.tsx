@@ -136,29 +136,17 @@ export const AdminDashboard: React.FC = () => {
     staleTime: 30000,
   });
 
-  const defaultTenants = [
-    { code: 'hq', displayName: 'Hà Nội HQ (hq)' },
-    { code: 'lib-hcm', displayName: 'TP.HCM (lib-hcm)' }
-  ];
-
-  const tenantsList = tenantsData && tenantsData.length > 0
-    ? tenantsData.map(tenant => {
-        let displayName = `${tenant.name} (${tenant.code})`;
-        if (tenant.code === 'hq') {
-          displayName = 'Hà Nội HQ (hq)';
-        } else if (tenant.code === 'lib-hcm') {
-          displayName = 'TP.HCM (lib-hcm)';
-        }
-        return { code: tenant.code, displayName };
-      })
-    : defaultTenants;
+  const tenantsList = (tenantsData ?? []).map(tenant => ({
+    code: tenant.code,
+    displayName: `${tenant.name} (${tenant.code})`,
+  }));
 
   const currentTenantObj = tenantsList.find(t => t.code === tenantCode);
   const displayTenantName = tenantCode === 'global'
     ? 'Hệ thống tổng'
-    : (currentTenantObj 
-        ? currentTenantObj.displayName.split(' (')[0] 
-        : (tenantCode === 'hq' ? 'Hà Nội HQ' : tenantCode === 'lib-hcm' ? 'TP.HCM' : 'Toàn hệ thống'));
+    : (currentTenantObj
+        ? currentTenantObj.displayName.split(' (')[0]
+        : tenantCode || 'Chưa xác định');
 
   const [activeTab, setActiveTab] = useState(() => {
     const deprecatedTabs = ['ai-admin', 'predictions', 'ocr', 'monitoring', 'integrations', 'branding', 'transfers', 'inventory'];

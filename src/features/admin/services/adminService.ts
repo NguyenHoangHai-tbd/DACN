@@ -119,7 +119,12 @@ export const adminService = {
 
   getUsers: async (): Promise<User[]> => {
     const res = await axiosInstance.get<ApiResponse<User[]>>('/users');
-    return res.data.data;
+    return (res.data.data ?? []).map(user => ({
+      ...user,
+      username: user.username || (user as User & { userName?: string }).userName || user.email,
+      status: user.isActive === false ? 'Inactive' : 'Active',
+      branchIds: user.branchIds ?? [],
+    }));
   },
   getBranches: async (): Promise<Branch[]> => {
     const res = await axiosInstance.get<ApiResponse<Branch[]>>('/branches');
@@ -137,8 +142,18 @@ export const adminService = {
     const res = await axiosInstance.patch<ApiResponse<Branch>>(`/branches/${id}/status`, { status });
     return res.data.data;
   },
-  updateUser: async (id: string, data: { role: string; status: string }): Promise<User> => {
-    const res = await axiosInstance.put<ApiResponse<User>>(`/users/${id}`, data);
+  updateUser: async (id: string, data: { role: string; status: string; branchIds: string[] }): Promise<User> => {
+    const currentRes = await axiosInstance.get<ApiResponse<User>>(`/users/${id}`);
+    const current = currentRes.data.data;
+    const res = await axiosInstance.put<ApiResponse<User>>(`/users/${id}`, {
+      fullName: current.fullName || current.username || current.email,
+      email: current.email,
+      password: null,
+      role: data.role,
+      branchIds: data.role === 'SuperAdmin' || data.role === 'TenantAdmin' ? [] : data.branchIds,
+      locale: current.locale || 'vi',
+      isActive: data.status === 'Active',
+    });
     return res.data.data;
   },
   suggestRoles: async (data: AiRoleSuggestionRequest): Promise<AiRoleSuggestionResponse> => {
