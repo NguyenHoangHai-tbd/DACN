@@ -117,13 +117,16 @@ export const UserList: React.FC = () => {
 
   const handleSave = () => {
     if (!selectedUser) return;
-    if (role !== 'SuperAdmin' && role !== 'TenantAdmin' && branchIds.length === 0) {
-      toast.error('Hãy chọn ít nhất một chi nhánh cho vai trò này.');
+    const needsBranch = role !== 'SuperAdmin' && role !== 'TenantAdmin';
+    const tenantBranches = branches.filter(branch => !branch.tenantId || branch.tenantId === selectedUser.tenantId);
+    const resolvedBranchIds = branchIds.length > 0 ? branchIds : tenantBranches.slice(0, 1).map(branch => branch.id);
+    if (needsBranch && resolvedBranchIds.length === 0) {
+      toast.error('Thư viện này chưa có chi nhánh để cấp vai trò.');
       return;
     }
     updateMutation.mutate({
       id: selectedUser.id,
-      data: { role, status, branchIds }
+      data: { role, status, branchIds: needsBranch ? resolvedBranchIds : [] }
     });
   };
 
@@ -691,26 +694,6 @@ export const UserList: React.FC = () => {
                       : "Vai trò quyết định phạm vi menu và các chức năng hệ thống tài khoản được phép thực thi."}
                   </p>
                 </div>
-
-                {role !== 'SuperAdmin' && role !== 'TenantAdmin' && (
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Chi nhánh được phép truy cập</Label>
-                    <div className="max-h-36 overflow-y-auto rounded-xl border border-slate-200 p-2 space-y-1">
-                      {branches.filter(branch => !branch.tenantId || branch.tenantId === selectedUser.tenantId).map(branch => (
-                        <label key={branch.id} className="flex items-center gap-2 p-1.5 text-xs cursor-pointer rounded-lg hover:bg-slate-50">
-                          <input type="checkbox" checked={branchIds.includes(branch.id)}
-                            onChange={event => setBranchIds(previous => event.target.checked
-                              ? [...previous, branch.id]
-                              : previous.filter(id => id !== branch.id))} />
-                          <span>{branch.name} ({branch.code})</span>
-                        </label>
-                      ))}
-                      {!branches.some(branch => !branch.tenantId || branch.tenantId === selectedUser.tenantId) && (
-                        <p className="text-xs text-amber-700 p-1">Thư viện này chưa có chi nhánh. Hãy tạo chi nhánh trước khi cấp vai trò này.</p>
-                      )}
-                    </div>
-                  </div>
-                )}
 
                 {/* Status Selection */}
                 <div className="space-y-1.5">
