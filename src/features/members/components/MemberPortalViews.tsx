@@ -267,6 +267,7 @@ export const MemberLoansView: React.FC = () => {
                     <div className="flex gap-3.5">
                       <BookCoverImage 
                         src={loan.coverUrl} 
+                        isbn={loan.isbn}
                         title={loan.bookTitle} 
                         className="w-16 h-22 sm:w-20 sm:h-28 rounded-xl shadow-xs border border-slate-100 shrink-0" 
                       />
@@ -406,6 +407,7 @@ export const MemberLoansView: React.FC = () => {
                   <div className="flex gap-3">
                     <BookCoverImage 
                       src={loan.coverUrl} 
+                      isbn={loan.isbn}
                       title={loan.bookTitle} 
                       className="w-14 h-20 rounded-lg shadow-xs border border-slate-100 shrink-0" 
                     />
@@ -743,6 +745,7 @@ export const MemberHoldsView: React.FC = () => {
                     <div className="flex gap-3.5 sm:gap-4 items-start">
                       <BookCoverImage 
                         src={hold.coverUrl} 
+                        isbn={hold.isbn}
                         title={hold.bookTitle} 
                         className="w-16 h-22 sm:w-18 sm:h-26 rounded-xl shadow-xs border border-slate-100 shrink-0"
                       />

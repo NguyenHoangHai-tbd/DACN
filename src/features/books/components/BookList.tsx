@@ -456,6 +456,8 @@ export const BookList: React.FC<BookListProps> = ({ initialQuery = '' }) => {
                             <div className="flex items-start gap-3">
                               <BookCoverImage 
                                 src={book.coverUrl} 
+                                isbn={book.isbn}
+                                category={book.category}
                                 title={book.title} 
                                 className="w-10 h-14 rounded-lg shadow-xs border border-slate-200/70 shrink-0 mt-0.5 object-cover" 
                               />
@@ -560,6 +562,8 @@ export const BookList: React.FC<BookListProps> = ({ initialQuery = '' }) => {
                       <div className="flex items-start gap-3">
                         <BookCoverImage 
                           src={book.coverUrl} 
+                          isbn={book.isbn}
+                          category={book.category}
                           title={book.title} 
                           className="w-14 h-20 rounded-lg shadow-xs border border-slate-200/80 shrink-0 object-cover" 
                         />
@@ -705,6 +709,8 @@ export const BookList: React.FC<BookListProps> = ({ initialQuery = '' }) => {
                 <div className="shrink-0 shadow-xs rounded-xl overflow-hidden border border-slate-200/80 bg-slate-50">
                   <BookCoverImage 
                     src={selectedDetailBook.coverUrl} 
+                    isbn={selectedDetailBook.isbn}
+                    category={selectedDetailBook.category}
                     title={selectedDetailBook.title} 
                     className="w-24 h-36 sm:w-28 sm:h-40 rounded-xl object-cover" 
                   />

@@ -182,45 +182,73 @@ export const SearchInterface: React.FC<SearchInterfaceProps> = ({ initialQuery =
           </div>
 
           {/* Ô tìm kiếm nhỏ gọn thanh thoát */}
-          <div className="flex-1 max-w-xl flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1 gap-2 focus-within:ring-2 focus-within:ring-teal-500/20 focus-within:border-teal-500 transition-all">
-            <div className="relative flex-1 flex items-center min-w-0">
-              <Search size={18} className="absolute left-3 text-slate-400 pointer-events-none" />
-              <Input
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  if (aiSearchMutation.isSuccess) aiSearchMutation.reset();
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && query.trim().length > 2) handleAiSearch();
-                }}
-                placeholder="Tìm theo tên sách, tác giả, ISBN, thể loại..."
-                className="w-full h-9 pl-9 pr-8 bg-transparent text-slate-900 placeholder:text-slate-400 border-none shadow-none text-sm font-medium focus-visible:ring-0 focus-visible:ring-offset-0"
-              />
-              {query && (
-                <button
-                  type="button"
-                  onClick={() => { setQuery(''); aiSearchMutation.reset(); }}
-                  className="absolute right-2 p-1 text-slate-400 hover:text-slate-600 rounded-full cursor-pointer"
-                >
-                  <X size={15} />
-                </button>
-              )}
+          <div className="flex-1 max-w-xl flex flex-col gap-2">
+            <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1 gap-2 focus-within:ring-2 focus-within:ring-teal-500/20 focus-within:border-teal-500 transition-all">
+              <div className="relative flex-1 flex items-center min-w-0">
+                <Search size={18} className="absolute left-3 text-slate-400 pointer-events-none" />
+                <Input
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    if (aiSearchMutation.isSuccess) aiSearchMutation.reset();
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && query.trim().length >= 2) handleAiSearch();
+                  }}
+                  placeholder="Tìm theo tên sách, tác giả, ISBN, thể loại hoặc nhập câu hỏi..."
+                  className="w-full h-9 pl-9 pr-8 bg-transparent text-slate-900 placeholder:text-slate-400 border-none shadow-none text-sm font-medium focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
+                {query && (
+                  <button
+                    type="button"
+                    onClick={() => { setQuery(''); aiSearchMutation.reset(); }}
+                    className="absolute right-2 p-1 text-slate-400 hover:text-slate-600 rounded-full cursor-pointer"
+                  >
+                    <X size={15} />
+                  </button>
+                )}
+              </div>
+
+              <Button
+                type="button"
+                onClick={handleAiSearch}
+                disabled={aiSearchMutation.isPending || query.trim().length < 2}
+                className="h-9 px-3.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg text-xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs disabled:opacity-50"
+              >
+                {aiSearchMutation.isPending ? (
+                  <Loader2 className="animate-spin" size={14} />
+                ) : (
+                  <Sparkles size={14} className="text-teal-200" />
+                )}
+                <span>AI Ngữ nghĩa</span>
+              </Button>
             </div>
 
-            <Button
-              type="button"
-              onClick={handleAiSearch}
-              disabled={aiSearchMutation.isPending || query.trim().length < 3}
-              className="h-9 px-3.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg text-xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
-            >
-              {aiSearchMutation.isPending ? (
-                <Loader2 className="animate-spin" size={14} />
-              ) : (
-                <Sparkles size={14} className="text-teal-200" />
-              )}
-              <span>AI Ngữ nghĩa</span>
-            </Button>
+            {/* Gợi ý tìm kiếm AI nhanh */}
+            <div className="flex flex-wrap items-center gap-1.5 px-0.5">
+              <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1 shrink-0">
+                <Sparkles size={11} className="text-teal-600" /> Gợi ý AI:
+              </span>
+              {[
+                'Trí tuệ nhân tạo (AI)',
+                'Clean Code & Mã sạch',
+                'Kiến trúc Domain-Driven Design',
+                'Tiểu thuyết Mắt biếc',
+                'Kiếm hiệp Kim Dung'
+              ].map((chip) => (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => {
+                    setQuery(chip);
+                    aiSearchMutation.mutate(chip);
+                  }}
+                  className="text-[11px] font-medium text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100/90 border border-teal-200/70 px-2 py-0.5 rounded-lg transition-colors cursor-pointer"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -378,6 +406,67 @@ export const SearchInterface: React.FC<SearchInterfaceProps> = ({ initialQuery =
           </div>
         )}
 
+        {/* AI Loading State */}
+        {aiSearchMutation.isPending && (
+          <div className="bg-gradient-to-r from-teal-50/80 via-emerald-50/40 to-teal-50/80 border border-teal-200 rounded-3xl p-8 sm:p-10 text-center shadow-xs mb-8 flex flex-col items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center mb-3 shadow-xs animate-bounce">
+              <Sparkles size={24} className="text-teal-100" />
+            </div>
+            <h3 className="text-base font-bold text-slate-800">AI đang đối chiếu ngữ nghĩa...</h3>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-md">
+              Hệ thống đang trích xuất chủ đề, thể loại và đánh giá mức độ tương thích của học liệu với yêu cầu &ldquo;{query}&rdquo;.
+            </p>
+            <div className="flex items-center gap-2 mt-4 text-xs font-semibold text-teal-700 bg-white px-3 py-1.5 rounded-full border border-teal-200/60 shadow-2xs">
+              <Loader2 size={13} className="animate-spin text-teal-600" />
+              <span>Đang tính toán độ phù hợp và trích xuất lý do</span>
+            </div>
+          </div>
+        )}
+
+        {/* AI Empty Results State */}
+        {aiSearchMutation.isSuccess && (!aiSearchMutation.data || aiSearchMutation.data.length === 0) && (
+          <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-10 text-center shadow-xs mb-8">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-3 border border-amber-100">
+              <Info size={24} />
+            </div>
+            <h4 className="font-bold text-base text-slate-900">
+              Không tìm thấy sách phù hợp ngữ nghĩa với &ldquo;{query}&rdquo;
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">
+              Bạn có thể thử tra cứu với các chủ đề gợi ý hoặc quay về danh sách sách tiêu chuẩn:
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+              {[
+                'Trí tuệ nhân tạo (AI)',
+                'Clean Code & Mã sạch',
+                'Kiến trúc Domain-Driven Design',
+                'Tiểu thuyết Mắt biếc',
+                'Kiếm hiệp Kim Dung'
+              ].map((chip) => (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => {
+                    setQuery(chip);
+                    aiSearchMutation.mutate(chip);
+                  }}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 transition-colors cursor-pointer"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => aiSearchMutation.reset()}
+              className="mt-5 border-slate-200 text-slate-700 text-xs font-semibold cursor-pointer"
+            >
+              Trở về danh sách sách tiêu chuẩn
+            </Button>
+          </div>
+        )}
+
         {/* AI Results Section */}
         {aiSearchMutation.isSuccess && hasAiResults && (
           <div className="space-y-4 mb-8">
@@ -401,7 +490,7 @@ export const SearchInterface: React.FC<SearchInterfaceProps> = ({ initialQuery =
                   variant="outline"
                   size="sm"
                   onClick={() => aiSearchMutation.reset()}
-                  className="border-teal-200 hover:bg-teal-100 text-teal-800 text-xs font-semibold self-start sm:self-auto"
+                  className="border-teal-200 hover:bg-teal-100 text-teal-800 text-xs font-semibold self-start sm:self-auto cursor-pointer"
                 >
                   <X size={14} className="mr-1.5" /> Trở về tra cứu tiêu chuẩn
                 </Button>
@@ -424,10 +513,17 @@ export const SearchInterface: React.FC<SearchInterfaceProps> = ({ initialQuery =
                         <div className="flex gap-3.5 mb-3">
                           <BookCoverImage
                             src={result.book.coverUrl}
+                            isbn={result.book.isbn}
+                            category={result.book.category}
                             title={result.book.title}
                             className="w-18 h-24 sm:w-20 sm:h-28 rounded-xl shadow-xs border border-slate-100 shrink-0 group-hover:scale-105 transition-transform"
                           />
                           <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1 mb-1">
+                              <Badge className="bg-teal-600/90 hover:bg-teal-700 text-white font-bold text-[10px] px-2 py-0.5 rounded-md shadow-2xs">
+                                Độ phù hợp {Math.round(result.confidence * 100)}%
+                              </Badge>
+                            </div>
                             <h4 className="font-bold text-slate-900 text-sm sm:text-base leading-snug group-hover:text-teal-700 transition-colors line-clamp-2 mb-1">
                               {result.book.title}
                             </h4>
@@ -567,6 +663,8 @@ export const SearchInterface: React.FC<SearchInterfaceProps> = ({ initialQuery =
                       <div className="flex gap-3.5 mb-3.5">
                         <BookCoverImage
                           src={book.coverUrl}
+                          isbn={book.isbn}
+                          category={book.category}
                           title={book.title}
                           className="w-18 h-24 sm:w-20 sm:h-28 rounded-xl shadow-xs border border-slate-100 shrink-0 group-hover:scale-105 transition-transform"
                         />
@@ -725,6 +823,8 @@ export const SearchInterface: React.FC<SearchInterfaceProps> = ({ initialQuery =
               <div className="flex justify-center shrink-0">
                 <BookCoverImage
                   src={selectedBook.coverUrl}
+                  isbn={selectedBook.isbn}
+                  category={selectedBook.category}
                   title={selectedBook.title}
                   className="w-28 h-40 sm:w-32 sm:h-44 rounded-2xl shadow-md border border-slate-200 object-cover"
                 />

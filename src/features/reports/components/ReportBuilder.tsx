@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { reportService } from '../services/reportService';
@@ -29,6 +29,17 @@ import { toast } from 'sonner';
 import { ReportFilter } from '../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { SearchableSelect } from '@/shared/components/SearchableSelect';
+import axios from 'axios';
+
+const reportError = (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    const message = error.response?.data?.message;
+    if (typeof message === 'string' && message.trim()) return message;
+    if (error.response?.status === 401) return 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+    if (error.response?.status === 403) return 'Tài khoản không có quyền xem báo cáo này.';
+  }
+  return 'Không thể kết nối hoặc tạo báo cáo. Vui lòng thử lại.';
+};
 
 export const ReportBuilder: React.FC = () => {
   const { t } = useTranslation();
@@ -40,6 +51,7 @@ export const ReportBuilder: React.FC = () => {
   });
 
   const [hasRun, setHasRun] = useState(true);
+  const printWindow = useRef<Window | null>(null);
 
   const { data: datasets = [] } = useQuery({
     queryKey: ['reportDatasets'],
@@ -63,6 +75,7 @@ export const ReportBuilder: React.FC = () => {
     data: previewData,
     isLoading: loadingPreview,
     isError: isPreviewError,
+    error: previewError,
     refetch: runPreview,
     isFetching: isFetchingPreview
   } = useQuery({
@@ -75,33 +88,45 @@ export const ReportBuilder: React.FC = () => {
     mutationFn: (format: 'excel' | 'pdf' | 'csv') => reportService.exportReport(selectedDataset, filters, format),
     onSuccess: (res, variables) => {
       const formatLabel = variables === 'excel' ? 'Excel' : variables === 'pdf' ? 'PDF' : 'CSV';
-      toast.success(`Đã xuất báo cáo ${formatLabel} thành công`);
-      if (res.url) {
-        window.open(res.url, '_blank');
+      toast.success(variables === 'pdf' ? 'Đã mở bản in; chọn “Save as PDF” trong hộp thoại in.' : `Đã tải báo cáo ${formatLabel}.`);
+      if (res.printable) {
+        if (printWindow.current && !printWindow.current.closed) {
+          printWindow.current.location.href = res.url;
+          printWindow.current = null;
+        } else {
+          toast.error('Trình duyệt đã chặn cửa sổ in. Hãy cho phép pop-up rồi thử lại.');
+        }
+      } else {
+        const anchor = document.createElement('a');
+        anchor.href = res.url;
+        anchor.download = res.fileName;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
       }
+      window.setTimeout(() => URL.revokeObjectURL(res.url), 10_000);
     },
-    onError: () => toast.error(t('reports.toast_export_err', 'Lỗi khi xuất báo cáo'))
+    onError: (error) => {
+      printWindow.current?.close();
+      printWindow.current = null;
+      toast.error(reportError(error));
+    }
   });
 
-  const handleRunReport = () => {
+  const handleRunReport = async () => {
     if (!selectedDataset) {
       toast.error(t('reports.toast_select_dataset', 'Vui lòng chọn Dataset'));
       return;
     }
     setHasRun(true);
-    runPreview().then((res) => {
-      if (res.isError) {
-        toast.error(t('reports.toast_run_err', 'Không thể tạo báo cáo'));
-      } else {
-        toast.success(t('reports.toast_run_success', 'Đã cập nhật báo cáo thành công'));
-      }
-    }).catch(() => {
-      toast.error(t('reports.toast_run_err', 'Không thể tạo báo cáo'));
-    });
+    const result = await runPreview();
+    if (result.isError) toast.error(reportError(result.error));
+    else toast.success(t('reports.toast_run_success', 'Đã cập nhật báo cáo thành công'));
   };
 
   const handleExport = (format: 'excel' | 'pdf' | 'csv') => {
     if (!selectedDataset) return;
+    if (format === 'pdf') printWindow.current = window.open('', '_blank');
     exportMutation.mutate(format);
   };
 
@@ -133,7 +158,7 @@ export const ReportBuilder: React.FC = () => {
             size="sm"
             className="h-9 px-3 text-xs font-semibold border-slate-200/80 text-slate-700 hover:text-teal-700 hover:bg-teal-50 rounded-xl cursor-pointer disabled:opacity-50"
             onClick={() => handleExport('excel')}
-            disabled={!previewData || previewData.rows.length === 0 || exportMutation.isPending}
+            disabled={!previewData || isPreviewError || exportMutation.isPending}
           >
             {exportMutation.isPending && exportMutation.variables === 'excel' ? (
               <RotateCw size={13} className="animate-spin mr-1.5 text-teal-600" />
@@ -148,7 +173,7 @@ export const ReportBuilder: React.FC = () => {
             size="sm"
             className="h-9 px-3 text-xs font-semibold border-slate-200/80 text-slate-700 hover:text-teal-700 hover:bg-teal-50 rounded-xl cursor-pointer disabled:opacity-50"
             onClick={() => handleExport('pdf')}
-            disabled={!previewData || previewData.rows.length === 0 || exportMutation.isPending}
+            disabled={!previewData || isPreviewError || exportMutation.isPending}
           >
             {exportMutation.isPending && exportMutation.variables === 'pdf' ? (
               <RotateCw size={13} className="animate-spin mr-1.5 text-teal-600" />
@@ -163,7 +188,7 @@ export const ReportBuilder: React.FC = () => {
             size="sm"
             className="h-9 px-3 text-xs font-semibold border-slate-200/80 text-slate-700 hover:text-teal-700 hover:bg-teal-50 rounded-xl cursor-pointer disabled:opacity-50"
             onClick={() => handleExport('csv')}
-            disabled={!previewData || previewData.rows.length === 0 || exportMutation.isPending}
+            disabled={!previewData || isPreviewError || exportMutation.isPending}
           >
             {exportMutation.isPending && exportMutation.variables === 'csv' ? (
               <RotateCw size={13} className="animate-spin mr-1.5 text-teal-600" />
@@ -318,7 +343,7 @@ export const ReportBuilder: React.FC = () => {
               </div>
               <h4 className="font-bold text-base text-slate-900">Không thể tạo dữ liệu báo cáo</h4>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Máy chủ gặp sự cố khi xử lý dữ liệu cho bộ lọc đã chọn hoặc thời gian phản hồi quá hạn.
+                {reportError(previewError)}
               </p>
               <Button
                 onClick={handleRunReport}
