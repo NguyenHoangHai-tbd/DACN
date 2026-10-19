@@ -64,7 +64,9 @@ const escapeCsv = (value: unknown): string => {
 
 export const auditService = {
   getLogs: async (params?: AuditFilters): Promise<AuditLog[]> => {
-    const res = await axiosInstance.get<ApiResponse<BackendAuditLog[]>>('/audit-logs');
+    const res = await axiosInstance.get<ApiResponse<BackendAuditLog[]>>('/audit-logs', {
+      params: { _refresh: Date.now() },
+    });
     const logs = (res.data.data ?? []).map(normalizeLog);
     const search = params?.search?.trim().toLowerCase();
     return logs.filter(log =>

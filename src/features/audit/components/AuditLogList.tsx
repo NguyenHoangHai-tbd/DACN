@@ -50,6 +50,15 @@ export const AuditLogList: React.FC = () => {
     enabled: !!selectedLogId
   });
 
+  const handleRefresh = async () => {
+    try {
+      const result = await refetch({ throwOnError: true });
+      toast.success(`Đã tải lại ${result.data?.length ?? 0} bản ghi nhật ký theo bộ lọc hiện tại.`);
+    } catch {
+      toast.error('Không thể làm mới nhật ký. Vui lòng thử lại.');
+    }
+  };
+
   const exportMutation = useMutation({
     mutationFn: () => auditService.exportLogs({ search, entity: entityFilter, action: actionFilter }),
     onSuccess: (data) => {
@@ -168,12 +177,12 @@ export const AuditLogList: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => refetch()}
+            onClick={handleRefresh}
             disabled={isFetching}
             className="h-9 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50 border-slate-200/80 rounded-xl cursor-pointer"
           >
             <RotateCw size={14} className={`mr-1.5 ${isFetching ? 'animate-spin text-teal-600' : 'text-slate-500'}`} />
-            Làm mới
+            {isFetching ? 'Đang tải...' : 'Làm mới'}
           </Button>
 
           <Button 
