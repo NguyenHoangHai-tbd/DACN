@@ -35,6 +35,20 @@ import { BookCoverImage } from '../../books/components/BookCoverImage';
 import { QRCodeSVG } from 'qrcode.react';
 
 // ============================================================================
+// HELPER: SAFE DATE FORMATTER (Guards against invalid/missing dates)
+// ============================================================================
+export const formatDateSafe = (dateVal: any, fallback: string = '—'): string => {
+  if (!dateVal) return fallback;
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return fallback;
+  return d.toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+};
+
+// ============================================================================
 // 1. MEMBER LOANS COMPONENT (Sách đang mượn & Lịch sử lưu hành)
 // ============================================================================
 export const MemberLoansView: React.FC = () => {
@@ -55,11 +69,47 @@ export const MemberLoansView: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axiosInstance.get('/member/loans');
-      if (res.data && res.data.success) {
-        setLoans(res.data.data || []);
+      // Fetch loans and catalog books in parallel to enrich author, isbn and coverUrl
+      const [loansRes, booksRes] = await Promise.allSettled([
+        axiosInstance.get('/member/loans'),
+        axiosInstance.get('/books')
+      ]);
+
+      const booksMap: Record<string, any> = {};
+      if (booksRes.status === 'fulfilled' && booksRes.value.data?.success) {
+        const booksList = Array.isArray(booksRes.value.data.data) ? booksRes.value.data.data : [];
+        booksList.forEach((b: any) => {
+          if (b.title) booksMap[b.title.trim().toLowerCase()] = b;
+          if (b.id) booksMap[b.id] = b;
+        });
+      }
+
+      if (loansRes.status === 'fulfilled' && loansRes.value.data?.success) {
+        const rawLoans = loansRes.value.data.data || [];
+        const enriched = rawLoans.map((loan: any) => {
+          const titleKey = (loan.bookTitle || '').trim().toLowerCase();
+          const matched = booksMap[titleKey] || (loan.bookId ? booksMap[loan.bookId] : null);
+
+          const checkoutDate = loan.loanedAt || loan.checkoutDate || loan.createdAt;
+          const dueDate = loan.dueAt || loan.dueDate;
+          const returnDate = loan.returnedAt || loan.returnDate;
+
+          return {
+            ...loan,
+            author: loan.author || matched?.author || (loan.bookTitle?.includes('Test') ? 'Ban biên tập Thư viện' : 'Nhiều tác giả'),
+            isbn: loan.isbn || matched?.isbn || loan.barcode || 'N/A',
+            coverUrl: loan.coverUrl || matched?.coverUrl || '',
+            category: loan.category || matched?.category || '',
+            checkoutDate,
+            dueDate,
+            returnDate,
+          };
+        });
+        setLoans(enriched);
+      } else if (loansRes.status === 'fulfilled') {
+        setError(loansRes.value.data?.message || 'Không thể tải danh sách mượn sách');
       } else {
-        setError(res.data?.message || 'Không thể tải danh sách mượn sách');
+        throw loansRes.reason;
       }
     } catch (err: any) {
       console.error('Error fetching member loans:', err);
@@ -76,10 +126,21 @@ export const MemberLoansView: React.FC = () => {
   const handleRenew = async (loanId: string) => {
     try {
       setRenewingId(loanId);
-      const res = await axiosInstance.post(`/loans/${loanId}/renew`);
-      if (res.data && res.data.success) {
+      // Primary member renewal endpoint in backend .NET
+      let res;
+      try {
+        res = await axiosInstance.post(`/member/loans/${loanId}/renew`);
+      } catch (primaryErr: any) {
+        if (primaryErr?.response?.status === 404 || primaryErr?.response?.status === 501) {
+          res = await axiosInstance.post('/circulation/renewals', { loanId });
+        } else {
+          throw primaryErr;
+        }
+      }
+
+      if (res.data && (res.data.success || res.status === 200)) {
         toast.success(t('circulation.renew_success', 'Gia hạn thành công theo chính sách mượn hiện tại'));
-        fetchLoans();
+        await fetchLoans();
         queryClient.invalidateQueries({ queryKey: ['memberLoans'] });
         queryClient.invalidateQueries({ queryKey: ['dashboardOverview'] });
         queryClient.invalidateQueries({ queryKey: ['activeLoans'] });
@@ -299,10 +360,10 @@ export const MemberLoansView: React.FC = () => {
                           {loan.bookTitle}
                         </h4>
                         <p className="text-xs font-medium text-slate-500 truncate">
-                          Tác giả: {loan.author || 'Đang cập nhật'}
+                          Tác giả: {loan.author || 'Nhiều tác giả'}
                         </p>
                         <p className="text-[11px] text-slate-400 font-mono">
-                          ISBN: {loan.isbn || 'N/A'}
+                          ISBN: {loan.isbn || loan.barcode || 'N/A'}
                         </p>
                         
                         {/* Dates grid */}
@@ -311,13 +372,13 @@ export const MemberLoansView: React.FC = () => {
                             <Calendar size={12} /> Ngày mượn:
                           </div>
                           <div className="text-slate-800 font-medium">
-                            {new Date(loan.checkoutDate).toLocaleDateString('vi-VN')}
+                            {formatDateSafe(loan.checkoutDate || loan.loanedAt)}
                           </div>
                           <div className="flex items-center gap-1 text-slate-400">
                             <Clock size={12} /> Hạn trả:
                           </div>
                           <div className={`font-bold ${isOverdue ? 'text-rose-600' : 'text-teal-700'}`}>
-                            {new Date(loan.dueDate).toLocaleDateString('vi-VN')}
+                            {formatDateSafe(loan.dueDate || loan.dueAt)}
                           </div>
 
                           {loan.fineAmount > 0 && (
@@ -418,17 +479,17 @@ export const MemberLoansView: React.FC = () => {
                       <h4 className="font-bold text-slate-800 text-xs sm:text-sm leading-snug truncate" title={loan.bookTitle}>
                         {loan.bookTitle}
                       </h4>
-                      <p className="text-[11px] text-slate-500 truncate">Tác giả: {loan.author || 'N/A'}</p>
+                      <p className="text-[11px] text-slate-500 truncate">Tác giả: {loan.author || 'Nhiều tác giả'}</p>
                       
                       <div className="pt-2 mt-1 border-t border-slate-100 text-[11px] text-slate-500 space-y-0.5">
                         <div className="flex justify-between">
                           <span className="text-slate-400">Mượn:</span>
-                          <span className="font-medium text-slate-700">{new Date(loan.checkoutDate).toLocaleDateString('vi-VN')}</span>
+                          <span className="font-medium text-slate-700">{formatDateSafe(loan.checkoutDate || loan.loanedAt)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-slate-400">Đã trả:</span>
                           <span className="font-bold text-emerald-700">
-                            {loan.returnDate ? new Date(loan.returnDate).toLocaleDateString('vi-VN') : 'Đã ghi nhận'}
+                            {formatDateSafe(loan.returnDate || loan.returnedAt, 'Đã ghi nhận')}
                           </span>
                         </div>
                       </div>
@@ -465,7 +526,7 @@ export const MemberLoansView: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Hạn trả gốc:</span>
-                  <span className="font-semibold text-slate-700">{new Date(selectedLoanForFine.dueDate).toLocaleDateString('vi-VN')}</span>
+                  <span className="font-semibold text-slate-700">{formatDateSafe(selectedLoanForFine.dueDate || selectedLoanForFine.dueAt)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Số ngày quá hạn:</span>
@@ -586,11 +647,44 @@ export const MemberHoldsView: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axiosInstance.get('/member/holds');
-      if (res.data && res.data.success) {
-        setHolds(res.data.data || []);
+      const [holdsRes, booksRes] = await Promise.allSettled([
+        axiosInstance.get('/member/holds'),
+        axiosInstance.get('/books')
+      ]);
+
+      const booksMap: Record<string, any> = {};
+      if (booksRes.status === 'fulfilled' && booksRes.value.data?.success) {
+        const booksList = Array.isArray(booksRes.value.data.data) ? booksRes.value.data.data : [];
+        booksList.forEach((b: any) => {
+          if (b.title) booksMap[b.title.trim().toLowerCase()] = b;
+          if (b.id) booksMap[b.id] = b;
+        });
+      }
+
+      if (holdsRes.status === 'fulfilled' && holdsRes.value.data?.success) {
+        const rawHolds = holdsRes.value.data.data || [];
+        const enriched = rawHolds.map((hold: any) => {
+          const titleKey = (hold.bookTitle || '').trim().toLowerCase();
+          const matched = booksMap[titleKey] || (hold.bookId ? booksMap[hold.bookId] : null);
+
+          const holdDate = hold.requestedAt || hold.holdDate || hold.createdAt;
+          const expiryDate = hold.expiresAt || hold.expiryDate;
+
+          return {
+            ...hold,
+            holdDate,
+            expiryDate,
+            author: hold.author || matched?.author || 'Thư viện TBD',
+            isbn: hold.isbn || matched?.isbn || 'N/A',
+            coverUrl: hold.coverUrl || matched?.coverUrl || '',
+            category: hold.category || matched?.category || '',
+          };
+        });
+        setHolds(enriched);
+      } else if (holdsRes.status === 'fulfilled') {
+        setError(holdsRes.value.data?.message || 'Không thể tải danh sách đặt giữ');
       } else {
-        setError(res.data?.message || 'Không thể tải danh sách đặt giữ');
+        throw holdsRes.reason;
       }
     } catch (err: any) {
       console.error('Error fetching member holds:', err);
@@ -762,10 +856,10 @@ export const MemberHoldsView: React.FC = () => {
                         
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2 text-xs text-slate-600 font-medium pt-1">
                           <span className="flex items-center gap-1 text-slate-500">
-                            <Calendar size={12} className="text-slate-400" /> Ngày đặt: <strong className="text-slate-800">{new Date(hold.holdDate).toLocaleDateString('vi-VN')}</strong>
+                            <Calendar size={12} className="text-slate-400" /> Ngày đặt: <strong className="text-slate-800">{formatDateSafe(hold.holdDate)}</strong>
                           </span>
                           <span className="flex items-center gap-1 text-slate-500">
-                            <Clock size={12} className="text-slate-400" /> Hạn giữ chỗ: <strong className="text-slate-800">{new Date(hold.expiryDate).toLocaleDateString('vi-VN')}</strong>
+                            <Clock size={12} className="text-slate-400" /> Hạn giữ chỗ: <strong className="text-slate-800">{formatDateSafe(hold.expiryDate, 'Chờ có sách')}</strong>
                           </span>
                         </div>
 
@@ -865,13 +959,13 @@ export const MemberProfileView: React.FC = () => {
   }
 
   const fullName = profile?.fullName || 'Độc giả Thư viện';
-  const memberCode = profile?.memberCode || 'U002';
+  const memberCode = profile?.memberCode || profile?.code || 'U002';
   const email = profile?.email || 'member@example.com';
   const phone = profile?.phone || '0987654321';
-  const memberType = profile?.memberType || 'Student';
+  const memberType = profile?.memberType || (String(memberCode).toUpperCase().startsWith('GV') ? 'Giảng viên' : 'Sinh viên');
   const status = profile?.status || 'Active';
-  const joinDate = profile?.joinDate ? new Date(profile.joinDate).toLocaleDateString('vi-VN') : '15/02/2025';
-  const expiryDate = profile?.expiryDate ? new Date(profile.expiryDate).toLocaleDateString('vi-VN') : '15/02/2026';
+  const joinDate = formatDateSafe(profile?.joinedAt || profile?.joinDate, '15/02/2025');
+  const expiryDate = formatDateSafe(profile?.expiryDate, 'Không giới hạn');
   const cardNumberValue = profile?.cardNumber || profile?.libraryCardNumber || memberCode;
 
   return (

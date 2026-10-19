@@ -96,7 +96,13 @@ export const resolveCoverUrl = (src?: string, isbn?: string, title?: string, cat
     return CATEGORY_COVERS.literature;
   }
 
-  return undefined;
+  // Common library/test books fallback
+  if (normalizedTitle.includes('flow') || normalizedTitle.includes('test') || normalizedTitle.includes('borrow')) {
+    return CATEGORY_COVERS.software;
+  }
+
+  // Universal authentic library book cover fallback
+  return CATEGORY_COVERS.general;
 };
 
 export const BookCoverImage: React.FC<BookCoverImageProps> = ({ 

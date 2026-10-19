@@ -24,11 +24,35 @@ export function parseFriendlyError(error: any, fallbackMessage: string = 'Không
   }
 
   // Handle Axios response errors
-  const apiMessage = error.response?.data?.message;
+  const resData = error.response?.data;
+  const apiMessage = typeof resData === 'string'
+    ? resData
+    : (resData?.message || resData?.detail || resData?.title || resData?.error);
   const apiStatus = error.response?.status;
 
   if (apiMessage) {
     const msg = String(apiMessage);
+
+    // Map common loan renewal & circulation errors
+    if (msg.includes('Only active, non-overdue loans can be renewed')) {
+      return 'Chỉ có thể gia hạn các cuốn sách đang mượn và còn trong hạn (chưa quá hạn).';
+    }
+
+    if (msg.includes('Renewal limit reached')) {
+      return 'Bạn đã đạt giới hạn số lần gia hạn cho cuốn sách này (tối đa 1 lần).';
+    }
+
+    if (msg.includes('Chưa tích hợp thanh toán trực tuyến') || msg.includes('không tự đánh dấu đã thanh toán')) {
+      return 'Vui lòng nộp phạt trực tiếp tại quầy thủ thư. Hệ thống thanh toán trực tuyến đang được nâng cấp.';
+    }
+
+    if (msg.includes('Loan not found for the current member')) {
+      return 'Phiếu mượn này không thuộc quyền sở hữu của bạn.';
+    }
+
+    if (msg.includes('Member profile not found')) {
+      return 'Không tìm thấy hồ sơ độc giả liên kết với tài khoản này.';
+    }
 
     // Map common error keys/identifiers to user-friendly Vietnamese messages
     if (

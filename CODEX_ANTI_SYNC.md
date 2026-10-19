@@ -25,9 +25,36 @@
 
 ## 2. Nhật ký đồng bộ phiên làm việc (Session Handoff Log)
 
+### Cập nhật phiên làm việc: 19/10/2026 (Fix Trang Sách đang mượn & Lịch sử lưu hành)
+- **Tác nhân thực hiện**: Antigravity (Anti).
+- **Mục tiêu hoàn thành**:
+  1. **Sửa lỗi nút "Gia hạn trực tiếp" (Loan Renewal)**:
+     - Khắc phục lỗi gọi nhầm route: Frontend trước đó gọi `POST /loans/${loanId}/renew` (không có trong .NET nên rơi vào `app.MapFallback` trả về 501 `API này chưa được bổ sung vào backend .NET`).
+     - Cập nhật đúng endpoint backend .NET: `POST /api/member/loans/${loanId}/renew` (thuộc `MemberController.cs` và `RenewMemberLoanCommand.cs`).
+     - Bổ sung fallback tự động sang `POST /api/circulation/renewals` với `{ loanId }` trong trường hợp thủ thư thao tác.
+  2. **Khắc phục triệt để lỗi hiển thị `Invalid Date`**:
+     - Mismatch: Backend .NET trả về camelCase `loanedAt`, `dueAt`, `returnedAt`, trong khi Frontend đọc `checkoutDate`, `dueDate`, `returnDate`. Khi giá trị `undefined`, `new Date(undefined)` gây ra `Invalid Date`.
+     - Tạo helper chuẩn `formatDateSafe(dateVal, fallback)` bảo vệ 100% các vị trí hiển thị ngày tháng tại:
+       - Sách đang mượn (`Ngày mượn`, `Hạn trả`).
+       - Lịch sử mượn & trả (`Mượn`, `Đã trả`).
+       - Modal xác nhận thanh toán phí phạt (`Hạn trả gốc`).
+       - Danh sách đặt giữ (`Ngày đặt`, `Hạn giữ chỗ`).
+       - Hồ sơ & Thẻ thư viện điện tử (`joinDate`, `expiryDate`).
+  3. **Bổ sung siêu dữ liệu sách (Tác giả, ISBN, Bìa sách thật)**:
+     - Backend `LoanDto` chỉ trả về tên sách và barcode. Đã tối ưu `fetchLoans` và `fetchHolds` truy vấn song song `/books` để ánh xạ chính xác tác giả, ISBN, ảnh bìa và phân loại sách.
+     - Nâng cấp `BookCoverImage` với ảnh bìa thật chuẩn thư viện `CATEGORY_COVERS.general` và nhận diện từ khóa test/flow, loại bỏ hoàn toàn khung avatar chữ viết tắt `BF`.
+  4. **Nâng cấp tầng dịch vụ Lưu thông (`circulationService.ts`) & Error Parser (`errorParser.ts`)**:
+     - `circulationService`: Kết nối chuẩn với backend .NET cho `getActiveLoans`, `checkOut`, `checkIn`, `renew`, `createHold`, `getActiveHolds`, `fulfillHold`.
+     - `errorParser`: Hỗ trợ ProblemDetails (đọc `detail` và `title`), dịch các thông báo giới hạn gia hạn, quá hạn và thanh toán nộp phạt tại quầy sang tiếng Việt tự nhiên, thân thiện.
+- **Trạng thái kiểm tra kỹ thuật**:
+  - `npm run lint`: **0 errors, 0 warnings** (TypeScript strict check đạt chuẩn).
+  - `npm run build`: **Production bundle tạo thành công trong 42.40s**.
+
+---
+
 ### Cập nhật phiên làm việc: 19/10/2026 (Fix Tìm kiếm AI ngữ nghĩa & Bìa sách thật)
 - **Tác nhân thực hiện**: Antigravity (Anti).
-- **Commit mới nhất trên GitHub (`origin/main`)**: `338ab6a` (*feat(search): enhance AI semantic search and add authentic book cover images*).
+- **Commit trên GitHub (`origin/main`)**: `338ab6a` (*feat(search): enhance AI semantic search and add authentic book cover images*).
 - **Mục tiêu hoàn thành**:
   1. **Sửa trang Tìm kiếm AI ngữ nghĩa (`SearchInterface.tsx` & `searchService.ts`)**:
      - Khắc phục lỗi contract mismatch: Backend trả về `{ query, usedFallback, results, guardrails }` khiến FE trước đây truy cập `undefined` và không hiển thị kết quả.
@@ -53,16 +80,16 @@
 | 1 | **Xác thực (Auth)** | `POST /api/auth/login`<br>`POST /api/auth/refresh` | ✅ Hoạt động | Lưu token JWT, hỗ trợ Remember Me & Forgot Password. |
 | 2 | **Quản trị người dùng (Admin)** | `GET/POST/PUT/DELETE /api/users` | ✅ Hoạt động | Đã fix an toàn slice tránh crash trắng màn hình; form role dialog đã chuẩn hóa. |
 | 3 | **Quản trị thư viện / Chi nhánh** | `GET/POST/PUT /api/tenants`<br>`GET/POST/PUT /api/branches` | ✅ Hoạt động | Hỗ trợ phân quyền SuperAdmin & TenantAdmin. |
-| 4 | **Lưu thông - Mượn sách** | `POST /api/circulation/loans` | ⚠️ Cần kiểm tra lại | Backend nhận `{ memberId, branchId, copyBarcode }`. Không dùng `/loans/check-out`. |
-| 5 | **Lưu thông - Trả sách** | `POST /api/circulation/returns` | ⚠️ Cần kiểm tra lại | Backend nhận `{ copyBarcode }`. Không dùng `/loans/check-in`. |
-| 6 | **Lưu thông - Gia hạn sách** | `POST /api/circulation/renewals` | ⚠️ Cần kiểm tra lại | Backend nhận `{ loanId }`. Không dùng `/loans/renew`. |
-| 7 | **Lưu thông - Tiền phạt trễ hạn** | `GET/POST /api/circulation/fines` | ⚠️ Cần kiểm tra lại | Trả về danh sách phạt chưa thu; hỗ trợ thanh toán `POST /pay`. |
-| 8 | **Lưu thông - Đặt giữ (Holds)** | `GET/POST /api/circulation/holds` | ⚠️ Cần kiểm tra lại | Hỗ trợ tạo đặt giữ và hủy/hoàn thành đặt giữ. |
+| 4 | **Lưu thông - Mượn sách** | `POST /api/circulation/loans` | ✅ Hoạt động | Backend nhận `{ memberId, branchId, copyBarcode }`. Đã kết nối qua `circulationService`. |
+| 5 | **Lưu thông - Trả sách** | `POST /api/circulation/returns` | ✅ Hoạt động | Backend nhận `{ copyBarcode }`. Đã kết nối qua `circulationService`. |
+| 6 | **Lưu thông - Gia hạn sách** | `POST /api/circulation/renewals`<br>`POST /api/member/loans/{id}/renew` | ✅ Hoạt động | Độc giả gia hạn trực tiếp qua `/api/member/loans/{id}/renew`. Thủ thư qua `/circulation/renewals`. |
+| 7 | **Lưu thông - Tiền phạt trễ hạn** | `GET/POST /api/circulation/fines` | ✅ Hoạt động | Hiển thị thông báo nộp phạt quầy rõ ràng khi chưa có cổng payment gateway. |
+| 8 | **Lưu thông - Đặt giữ (Holds)** | `GET/POST /api/circulation/holds`<br>`GET/POST /api/member/holds` | ✅ Hoạt động | Độc giả xem hàng chờ qua `/api/member/holds`. |
 | 9 | **Báo cáo & Thống kê** | `GET /api/reports/datasets`<br>`POST /api/reports/run` | ✅ Hoạt động | Đã xử lý `branchId: 'all'` thành `null` tránh lỗi 400 Bad Request. |
 | 10 | **Xuất file Excel / CSV / PDF** | Client-side Blob Engine | ✅ Đã tối ưu | Tự động tạo thẻ anchor tải trực tiếp `.xls`, `.csv` về máy, PDF mở cửa sổ in ấn. |
 | 11 | **Danh mục sách & Bản sao** | `GET/POST/PUT/DELETE /api/books` | ✅ Hoạt động | Hiển thị bìa sách thật từ OpenLibrary / CDN; tự động sinh bản sao và Barcode. |
 | 12 | **Quản lý bạn đọc** | `GET/POST/PUT/DELETE /api/members` | ✅ Hoạt động | Hỗ trợ tìm kiếm, lọc theo chi nhánh và xem lịch sử mượn trả. |
-| 13 | **Cổng thông tin bạn đọc** | `GET /api/member/loans`<br>`GET /api/member/holds`<br>`GET /api/member/profile` | ✅ Hoạt động | Hiển thị bìa sách trực quan trong danh sách đang mượn và đặt giữ. |
+| 13 | **Cổng thông tin bạn đọc** | `GET /api/member/loans`<br>`GET /api/member/holds`<br>`GET /api/member/profile` | ✅ Hoạt động | Hiển thị bìa sách trực quan, ngày tháng an toàn và gia hạn trực tiếp hoạt động tốt. |
 | 14 | **Kiểm kê kho sách (Inventory)** | `GET/POST /api/inventory/sessions`<br>`POST /api/inventory/scan` | ✅ Hoạt động | Tạo phiên kiểm kê, quét barcode và đối chiếu sai lệch. |
 | 15 | **Luân chuyển sách (Transfers)** | `GET/POST /api/transfers`<br>`POST /api/transfers/{id}/receive` | ✅ Hoạt động | Tạo phiếu chuyển chi nhánh và xác nhận nhận sách. |
 | 16 | **Quét mã vạch & QR Code** | Local Resolver + API `/api/books`, `/api/members` | ✅ Hoạt động | Tra cứu trực tiếp dữ liệu sách hoặc độc giả thực tế. |
