@@ -27,6 +27,7 @@
 
 ### Cập nhật phiên làm việc: 19/10/2026 (Fix Trang Sách đang mượn & Lịch sử lưu hành)
 - **Tác nhân thực hiện**: Antigravity (Anti).
+- **Commit trên GitHub (`origin/main`)**: `564691f` (*fix(member): fix loan renewal endpoint, date formatting, and book metadata*).
 - **Mục tiêu hoàn thành**:
   1. **Sửa lỗi nút "Gia hạn trực tiếp" (Loan Renewal)**:
      - Khắc phục lỗi gọi nhầm route: Frontend trước đó gọi `POST /loans/${loanId}/renew` (không có trong .NET nên rơi vào `app.MapFallback` trả về 501 `API này chưa được bổ sung vào backend .NET`).
