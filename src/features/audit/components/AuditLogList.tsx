@@ -44,19 +44,23 @@ export const AuditLogList: React.FC = () => {
     refetchInterval: 30000 
   });
 
-  const { data: logDetail, isLoading: logDetailLoading } = useQuery({
+  const { data: logDetail, isLoading: logDetailLoading, isError: logDetailError } = useQuery({
     queryKey: ['auditLogDetail', selectedLogId],
     queryFn: () => auditService.getLogDetail(selectedLogId!),
     enabled: !!selectedLogId
   });
 
   const exportMutation = useMutation({
-    mutationFn: () => auditService.exportLogs(),
+    mutationFn: () => auditService.exportLogs({ search, entity: entityFilter, action: actionFilter }),
     onSuccess: (data) => {
-      toast.success('Xuất log thành công. Đang tải xuống...');
-      if (data?.url) {
-        window.open(data.url, '_blank');
-      }
+      const link = document.createElement('a');
+      link.href = data.url;
+      link.download = data.fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(data.url), 1000);
+      toast.success('Đã tải nhật ký CSV.');
     },
     onError: () => {
       toast.error('Không thể xuất nhật ký kiểm toán. Vui lòng thử lại sau.');
@@ -98,6 +102,7 @@ export const AuditLogList: React.FC = () => {
 
   const formatTimestamp = (ts: string) => {
     try {
+      if (!ts) return 'Không ghi nhận';
       const d = new Date(ts);
       if (isNaN(d.getTime())) return ts;
       return format(d, 'dd/MM/yyyy HH:mm:ss');
@@ -612,6 +617,8 @@ export const AuditLogList: React.FC = () => {
               <Skeleton className="h-36 w-full rounded-xl" />
               <Skeleton className="h-36 w-full rounded-xl" />
             </div>
+          ) : logDetailError ? (
+            <div className="text-center p-8 text-rose-600 text-xs">Không thể tải chi tiết nhật ký. Vui lòng đóng và thử lại.</div>
           ) : logDetail ? (
             <div className="space-y-5 pb-8">
               {/* Anomalous Alert Banner if applicable */}
