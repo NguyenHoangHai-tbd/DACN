@@ -27,6 +27,7 @@
 
 ### Cập nhật phiên làm việc: 19/10/2026 (Fix Tìm kiếm AI ngữ nghĩa & Bìa sách thật)
 - **Tác nhân thực hiện**: Antigravity (Anti).
+- **Commit mới nhất trên GitHub (`origin/main`)**: `338ab6a` (*feat(search): enhance AI semantic search and add authentic book cover images*).
 - **Mục tiêu hoàn thành**:
   1. **Sửa trang Tìm kiếm AI ngữ nghĩa (`SearchInterface.tsx` & `searchService.ts`)**:
      - Khắc phục lỗi contract mismatch: Backend trả về `{ query, usedFallback, results, guardrails }` khiến FE trước đây truy cập `undefined` và không hiển thị kết quả.
