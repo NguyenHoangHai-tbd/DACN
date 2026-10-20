@@ -32,6 +32,7 @@
 - FE xuất Excel được nâng từ văn bản TSV gắn đuôi `.xls` thành tệp `.xlsx` thật bằng ExcelJS (nạp thư viện khi bấm xuất). CSV vẫn là tệp riêng; PDF hiện mở cửa sổ in để người dùng chọn **Save as PDF** (chưa phải tải PDF trực tiếp).
 - Backend local `backend-dotnet/QLyThuVien.Application/Features/Reports/ReportContract.cs` đã xử lý nhóm theo ngày/chi nhánh/danh mục và các kỳ tháng trước/quý này. Thư mục `backend-dotnet/` ở workspace chính hiện chưa được Git theo dõi, nên thay đổi backend này **không nằm trong Pull changes trên AI Studio**; cần chạy backend từ `C:\Baitap\DACN\backend-dotnet` và khởi động lại F5 nếu đang chạy bản cũ.
 - Các thay đổi tái cấu trúc vai trò Admin/Thủ thư do Anti thực hiện trong workspace chính vẫn đang là thay đổi chưa commit; Codex không tự ý đưa các file đó vào commit báo cáo.
+- `npm run lint` trên worktree xuất bản (đã push) đạt. Riêng workspace chính hiện còn lỗi TypeScript **không thuộc báo cáo**: `ActiveLoans.tsx` và `ReturnedUnpaidFines.tsx` gọi `circulationService.payFine`, nhưng service hiện chưa khai báo hàm này. Không nên đánh dấu toàn bộ workspace chính là build sạch cho đến khi sửa lỗi này.
 
 
 ### Cập nhật phiên làm việc: 19/10/2026 (Fix Trang Sách đang mượn & Lịch sử lưu hành)
