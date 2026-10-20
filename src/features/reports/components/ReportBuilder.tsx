@@ -33,6 +33,7 @@ import axios from 'axios';
 
 const reportError = (error: unknown) => {
   if (axios.isAxiosError(error)) {
+    if (error.response?.status && error.response.status >= 500) return 'Máy chủ chưa tạo được báo cáo. Vui lòng thử lại hoặc kiểm tra backend.';
     const message = error.response?.data?.message;
     if (typeof message === 'string' && message.trim()) return message;
     if (error.response?.status === 401) return 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';

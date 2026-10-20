@@ -25,6 +25,15 @@
 
 ## 2. Nhật ký đồng bộ phiên làm việc (Session Handoff Log)
 
+### Cập nhật 20/10/2026 — kiểm chứng và hoàn thiện trang Báo cáo (Codex)
+- Đã kiểm tra API bằng tài khoản Admin trên backend local: `POST /api/reports/run` trả 200 cho nhóm theo ngày, chi nhánh, danh mục. Kỳ `this_month` hiện có **0** dòng lưu thông; kỳ `this_year` có 3 dòng, kho sách 5, độc giả 2, tiền phạt 1. Không coi kết quả rỗng là lỗi.
+- Tunnel ngrok từng trả `404 ERR_NGROK_3200` vì tiến trình ngrok không chạy. Codex đã bật lại `ngrok.exe http 5084` nền và xác nhận `https://galore-harpist-borough.ngrok-free.dev/api/health` trả 200, Admin chạy báo cáo kho sách qua ngrok trả 5 dòng. Nếu khởi động lại máy, cần chạy lại ngrok; FE không thể tự khởi động tunnel.
+- Nguyên nhân lỗi 400 trong ảnh cũ: FE gửi `branchId: "all"` thay vì `null`. Mã FE hiện đã chuẩn hóa giá trị này; cần Pull changes mới nhất trong AI Studio.
+- FE xuất Excel được nâng từ văn bản TSV gắn đuôi `.xls` thành tệp `.xlsx` thật bằng ExcelJS (nạp thư viện khi bấm xuất). CSV vẫn là tệp riêng; PDF hiện mở cửa sổ in để người dùng chọn **Save as PDF** (chưa phải tải PDF trực tiếp).
+- Backend local `backend-dotnet/QLyThuVien.Application/Features/Reports/ReportContract.cs` đã xử lý nhóm theo ngày/chi nhánh/danh mục và các kỳ tháng trước/quý này. Thư mục `backend-dotnet/` ở workspace chính hiện chưa được Git theo dõi, nên thay đổi backend này **không nằm trong Pull changes trên AI Studio**; cần chạy backend từ `C:\Baitap\DACN\backend-dotnet` và khởi động lại F5 nếu đang chạy bản cũ.
+- Các thay đổi tái cấu trúc vai trò Admin/Thủ thư do Anti thực hiện trong workspace chính vẫn đang là thay đổi chưa commit; Codex không tự ý đưa các file đó vào commit báo cáo.
+
+
 ### Cập nhật phiên làm việc: 19/10/2026 (Fix Trang Sách đang mượn & Lịch sử lưu hành)
 - **Tác nhân thực hiện**: Antigravity (Anti).
 - **Commit trên GitHub (`origin/main`)**: `564691f` (*fix(member): fix loan renewal endpoint, date formatting, and book metadata*).
